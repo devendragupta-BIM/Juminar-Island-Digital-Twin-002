@@ -1,0 +1,187 @@
+/**
+ * JUMEIRAH ISLANDS DIGITAL TWIN - CAMERA REGISTRY & TELEMETRY DATABASE
+ * Accurate 3D Spatial Position, Yaw/Pitch, FOV, and Source Site Image Mapping
+ */
+
+const SITE_DATA = {
+  project: {
+    id: "JI-VILLA-003",
+    name: "Jumeirah Islands Luxury Villa 003",
+    location: "Cluster 3, Jumeirah Islands, Dubai, United Arab Emirates",
+    coordinates: { lat: 25.0617, lng: 55.1528 },
+    developer: "Private Client",
+    consultant: "ONIX Engineering Consultancy",
+    contractor: "VH Contracting LLC",
+    asBuiltDate: "October 2026",
+    status: "Superstructure & Exterior Finishing (82% Complete)",
+    siteArea: "12,450 sq.ft",
+    builtUpArea: "9,800 sq.ft",
+    floors: "G + 1 + Roof Terrace"
+  },
+  
+  cameras: [
+    {
+      id: "CAM-01",
+      code: "EXT-FRONT-MAIN",
+      title: "Exterior Front Main Entrance",
+      category: "exterior-front",
+      filename: "Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg",
+      date: "08 Oct 2026 • 13:00 (1:00 PM)",
+      timeFormatted: "13:00 UTC+4",
+      height: "1.65 m (Eye Level)",
+      azimuth: "180° South Facade",
+      fov: 75,
+      description: "Direct head-on view of the main double-height glass portal entrance, front cantilever slab, wooden louvers, driveway staging, and scaffolding.",
+      // 3D position in the twin model coordinates (X, Y, Z)
+      position: { x: -2.0, y: 3.5, z: 32.0 },
+      target: { x: -1.0, y: 7.0, z: 0.0 },
+      coneRotation: { x: 0.1, y: Math.PI, z: 0 }
+    },
+    {
+      id: "CAM-02",
+      code: "EXT-FRONT-SIDE",
+      title: "Exterior Front Side (Wide Angle)",
+      category: "exterior-front",
+      filename: "Exterior Front Side - Jumeirah Islands 003 - 20261008130000.jpg.jpeg",
+      date: "08 Oct 2026 • 13:00 (1:00 PM)",
+      timeFormatted: "13:00 UTC+4",
+      height: "2.80 m (Elevated Corner)",
+      azimuth: "215° SW Perspective",
+      fov: 82,
+      description: "Wide angle perspective from the southwest corner showing front cantilevered upper suites, carport canopy wing, and neighboring villa construction.",
+      position: { x: -26.0, y: 6.5, z: 28.0 },
+      target: { x: 4.0, y: 6.0, z: -2.0 },
+      coneRotation: { x: 0.15, y: Math.PI * 0.75, z: 0 }
+    },
+    {
+      id: "CAM-03",
+      code: "EXT-FRONT-YARD",
+      title: "Exterior Front Yard (Aerial Top-Down)",
+      category: "exterior-front",
+      filename: "Exterior Front Yard - Jumeirah Islands 003 - 20261008130000.jpg.jpeg",
+      date: "08 Oct 2026 • 13:00 (1:00 PM)",
+      timeFormatted: "13:00 UTC+4",
+      height: "8.50 m (Upper Terrace Overhead)",
+      azimuth: "175° Looking Down",
+      fov: 88,
+      description: "Elevated vantage point looking down upon the front yard sand staging, perimeter palm trees along the boundary wall, and entry driveway pergola.",
+      position: { x: 0.0, y: 16.0, z: 12.0 },
+      target: { x: 0.0, y: 0.5, z: 24.0 },
+      coneRotation: { x: -Math.PI * 0.35, y: 0, z: 0 }
+    },
+    {
+      id: "CAM-04",
+      code: "EXT-PARKING",
+      title: "Exterior Parking & Carport (Dusk View)",
+      category: "exterior-front",
+      filename: "Exterior Parking - Jumeirah Islands 003 - 20261007180000.jpg.jpeg",
+      date: "07 Oct 2026 • 18:00 (6:00 PM)",
+      timeFormatted: "18:00 UTC+4",
+      height: "3.20 m (Front Perimeter)",
+      azimuth: "145° SE Perspective",
+      fov: 78,
+      description: "Evening light capture facing the extended cantilevered parking garage, carport pergola canopy, wrapped date palms, and boundary fence.",
+      position: { x: 22.0, y: 6.0, z: 26.0 },
+      target: { x: -4.0, y: 5.5, z: 0.0 },
+      coneRotation: { x: 0.12, y: -Math.PI * 0.75, z: 0 }
+    },
+    {
+      id: "CAM-05",
+      code: "EXT-REAR-ELEV",
+      title: "Exterior Rear Elevation (Pool Deck)",
+      category: "exterior-rear",
+      filename: "Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg",
+      date: "08 Oct 2026 • 13:00 (1:00 PM)",
+      timeFormatted: "13:00 UTC+4",
+      height: "1.80 m (Garden Level)",
+      azimuth: "0° North Rear Facade",
+      fov: 76,
+      description: "Direct view of the 3-level rear facade, glass balcony balustrades, luxury infinity pool with organic channel, ground lounge, and neighboring villas.",
+      position: { x: -0.5, y: 4.0, z: -34.0 },
+      target: { x: 0.0, y: 7.5, z: 0.0 },
+      coneRotation: { x: 0.08, y: 0, z: 0 }
+    },
+    {
+      id: "CAM-06",
+      code: "EXT-REAR-SHORING",
+      title: "Exterior Rear Elevation & Waterfront",
+      category: "exterior-rear",
+      filename: "Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg",
+      date: "08 Oct 2026 • 13:00 (1:00 PM)",
+      timeFormatted: "13:00 UTC+4",
+      height: "4.50 m (Waterfront Boundary)",
+      azimuth: "35° NE Perspective",
+      fov: 84,
+      description: "Elevated wide angle showing the luxury swimming pool, rear lawn, lake frontage with reed bank, side facade vertical louvers, and adjacent villas.",
+      position: { x: -28.0, y: 9.0, z: -32.0 },
+      target: { x: 4.0, y: 6.5, z: -2.0 },
+      coneRotation: { x: 0.15, y: Math.PI * 0.25, z: 0 }
+    },
+    {
+      id: "CAM-07",
+      code: "EXT-REAR-RAMP",
+      title: "Exterior Rear Elevation Ramp (Morning)",
+      category: "exterior-rear",
+      filename: "Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg",
+      date: "04 Oct 2026 • 08:30 (8:30 AM)",
+      timeFormatted: "08:30 UTC+4",
+      height: "3.20 m (Ramp Pathway)",
+      azimuth: "330° NW Perspective",
+      fov: 80,
+      description: "Morning sun capture overlooking the side ramp pathway, 3-tier rear glass terraces, swimming pool basin, and eastern perimeter wall.",
+      position: { x: -24.0, y: 6.5, z: -26.0 },
+      target: { x: 2.0, y: 7.0, z: -4.0 },
+      coneRotation: { x: 0.12, y: Math.PI * 0.35, z: 0 }
+    },
+    {
+      id: "CAM-08",
+      code: "BIM-FRONT-DUSK",
+      title: "BIM Architectural Design: Front Dusk View",
+      category: "bim-render",
+      filename: "20840-1711956940472.jpg",
+      date: "Target As-Built Design (ONIX)",
+      timeFormatted: "Architectural BIM",
+      height: "2.20 m (Front Landscape)",
+      azimuth: "210° SW Isometric",
+      fov: 70,
+      description: "Consultant ONIX target architectural render at dusk featuring linear LED warm facade lighting, vertical living green trellis walls, luxury cars, and manicured landscaping.",
+      position: { x: -22.0, y: 5.5, z: 25.0 },
+      target: { x: 2.0, y: 6.5, z: 0.0 },
+      coneRotation: { x: 0.1, y: Math.PI * 0.7, z: 0 }
+    },
+    {
+      id: "CAM-09",
+      code: "BIM-FRONT-DAY",
+      title: "BIM Architectural Design: Front Daylight",
+      category: "bim-render",
+      filename: "20840-1748865490206.jpeg",
+      date: "Target As-Built Design (ONIX)",
+      timeFormatted: "Architectural BIM",
+      height: "2.40 m (Front Landscape)",
+      azimuth: "210° SW Daylight",
+      fov: 72,
+      description: "ONIX Architectural Consultancy front elevation daylight design rendering showing crisp white ultra-high performance concrete, floor-to-ceiling tinted glazing, and carport integration.",
+      position: { x: -22.0, y: 5.5, z: 25.0 },
+      target: { x: 2.0, y: 6.5, z: 0.0 },
+      coneRotation: { x: 0.1, y: Math.PI * 0.7, z: 0 }
+    },
+    {
+      id: "CAM-10",
+      code: "BIM-REAR-WATER",
+      title: "BIM Architectural Design: Rear Pool Waterfall",
+      category: "bim-render",
+      filename: "20840-1748865493553.jpeg",
+      date: "Target As-Built Design (ONIX)",
+      timeFormatted: "Architectural BIM",
+      height: "1.80 m (Rear Pool Edge)",
+      azimuth: "0° North Rear Facade",
+      fov: 74,
+      description: "ONIX Consultancy target rear elevation featuring custom sheet waterfall cascading into the infinity swimming pool, glass terrace balustrades, and lush boundary greenery.",
+      position: { x: 0.0, y: 4.5, z: -32.0 },
+      target: { x: 0.0, y: 7.5, z: 0.0 },
+      coneRotation: { x: 0.06, y: 0, z: 0 }
+    }
+  ]
+};
+
+window.SITE_DATA = SITE_DATA;
