@@ -6,8 +6,8 @@
   <title>Jumeirah Islands Villa 003 — 3D Interactive Digital Twin & Site Telemetry</title>
   
   <!-- SEO & Social Meta -->
-  <meta name="description" content="Interactive 3D Digital Twin of Jumeirah Islands Villa 003 (Dubai, UAE) with synchronized multi-angle site camera mapping, BIM layer inspection, solar shadow simulation, and construction telemetry." />
-  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, ONIX Engineering Consultancy, 3D Camera Mapping" />
+  <meta name="description" content="Next-Gen 3D BIM Digital Twin of Jumeirah Islands Villa 003 (Dubai, UAE) featuring 16 synchronized timelapse site camera stations with 460+ captures, interactive solar study, floor isolation, laser measurement, and live telemetry." />
+  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, ONIX Engineering Consultancy, Three.js Digital Twin, Construction Telemetry" />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>" />
@@ -44,10 +44,24 @@
               <span class="brand-name">JUMEIRAH ISLANDS</span>
               <span class="brand-divider">/</span>
               <span class="brand-tag">DIGITAL TWIN</span>
-              <span class="live-pill"><span class="dot"></span> LIVE</span>
+              <span class="live-pill"><span class="dot"></span> LIVE TELEMETRY</span>
             </div>
-            <div class="brand-sub">Villa Plot 003 • Dubai, UAE • ONIX Engineering</div>
+            <div class="brand-sub">Villa Plot 003 • Cluster 3, Dubai UAE • ONIX Engineering</div>
           </div>
+        </div>
+      </div>
+
+      <!-- Dual 3D State Switcher: Site (Oct 2026) vs Design (Render) -->
+      <div class="header-state-switch">
+        <div class="state-toggle-group">
+          <button class="state-btn active" data-state="site" id="btn-state-site" title="Oct 2026 As-Built Construction Site">
+            <i class="fa-solid fa-person-digging"></i>
+            <span>Site (Oct 2026)</span>
+          </button>
+          <button class="state-btn" data-state="render" id="btn-state-render" title="ONIX Target Architectural Render">
+            <i class="fa-solid fa-gem"></i>
+            <span>Design (Render)</span>
+          </button>
         </div>
       </div>
 
@@ -74,9 +88,9 @@
             <i class="fa-solid fa-water"></i>
             <span>Lake</span>
           </button>
-          <button class="preset-btn" data-view="orbit" id="auto-orbit-toggle" title="Auto Orbit Mode">
+          <button class="preset-btn" data-view="orbit" id="auto-orbit-toggle" title="Auto Orbit Cinematic Tour">
             <i class="fa-solid fa-rotate"></i>
-            <span>Tour</span>
+            <span>Cinematic Tour</span>
           </button>
         </nav>
       </div>
@@ -100,10 +114,23 @@
 
         <div class="divider-v"></div>
 
-        <!-- Tool Toggles -->
-        <button id="btn-measure" class="action-btn" title="3D Point-to-Point Laser Measure">
+        <!-- Pro Tools -->
+        <button id="btn-measure" class="action-btn" title="3D Point-to-Point Laser Ruler">
           <i class="fa-solid fa-ruler-combined"></i>
           <span>Measure</span>
+        </button>
+
+        <button id="btn-explode-bim" class="action-btn" title="Exploded BIM Axonometric View">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Explode BIM</span>
+        </button>
+
+        <button id="btn-screenshot" class="action-btn icon-only" title="Capture High-Res Viewport Screenshot">
+          <i class="fa-solid fa-camera"></i>
+        </button>
+
+        <button id="btn-shortcuts" class="action-btn icon-only" title="Keyboard Shortcuts Guide">
+          <i class="fa-solid fa-keyboard"></i>
         </button>
 
         <button id="btn-toggle-ui" class="action-btn icon-only" title="Toggle Clean HUD Mode">
@@ -127,11 +154,29 @@
         </div>
       </div>
 
+      <!-- Tactical 2D Minimap Radar Widget -->
+      <div id="minimap-widget" class="glass-card">
+        <div class="minimap-header">
+          <div class="minimap-title">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span>SITE RADAR</span>
+          </div>
+          <span class="minimap-hint">Click to Teleport</span>
+        </div>
+        <canvas id="minimap-canvas"></canvas>
+        <div class="minimap-legend">
+          <span class="leg-item"><span class="leg-dot c-front"></span> Front</span>
+          <span class="leg-item"><span class="leg-dot c-rear"></span> Rear</span>
+          <span class="leg-item"><span class="leg-dot c-gf"></span> GF</span>
+          <span class="leg-item"><span class="leg-dot c-ff"></span> FF</span>
+        </div>
+      </div>
+
       <!-- Laser Measure Floating HUD -->
       <div id="measure-hud" class="glass-card hidden">
         <div class="measure-hud-header">
           <i class="fa-solid fa-ruler-combined"></i>
-          <span>Laser Ruler Mode</span>
+          <span>3D Laser Dimension Mode</span>
           <button id="measure-close-btn" class="close-btn">&times;</button>
         </div>
         <div class="measure-hud-body">
@@ -145,8 +190,8 @@
       <div id="cam-hover-tooltip" class="cam-tooltip glass-card hidden">
         <div class="tooltip-badge"><i class="fa-solid fa-camera"></i> <span id="tooltip-cam-id">CAM-01</span></div>
         <div class="tooltip-title" id="tooltip-cam-title">Exterior Front Main Entrance</div>
-        <div class="tooltip-meta"><span id="tooltip-cam-time">08 Oct 2026 • 13:00</span></div>
-        <div class="tooltip-hint"><i class="fa-solid fa-hand-pointer"></i> Click to Match View & Inspect Photo</div>
+        <div class="tooltip-meta"><span id="tooltip-cam-time">08 Oct 2026 • 26 frames</span></div>
+        <div class="tooltip-hint"><i class="fa-solid fa-hand-pointer"></i> Click to Match View & Inspect Timelapse</div>
       </div>
     </div>
 
@@ -154,25 +199,25 @@
     <aside id="sidebar-left" class="glass-panel sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">
-          <i class="fa-solid fa-video"></i> Site Cameras & Views
+          <i class="fa-solid fa-video"></i> Site Cameras & Timelapses
         </div>
-        <span class="badge-count" id="camera-count-badge">10 Feeds</span>
+        <span class="badge-count" id="camera-count-badge">19 Stations</span>
       </div>
 
       <div class="sidebar-scrollable">
         <!-- Site Overview Card -->
         <div class="dashboard-widget glass-card">
           <div class="widget-row-header">
-            <span class="widget-label">Project Status</span>
-            <span class="status-indicator live">Phase: Superstructure / Finishing</span>
+            <span class="widget-label">Executive Milestone Status</span>
+            <span class="status-indicator live">Phase: Superstructure / Fitout</span>
           </div>
           <div class="progress-bar-container">
             <div class="progress-labels">
               <span>Overall Site Progress</span>
-              <span class="progress-pct">82%</span>
+              <span class="progress-pct">84%</span>
             </div>
             <div class="progress-track">
-              <div class="progress-fill" style="width: 82%;"></div>
+              <div class="progress-fill" style="width: 84%;"></div>
             </div>
           </div>
           <div class="mini-stats-grid">
@@ -181,31 +226,42 @@
               <span class="stat-name">Shoring & Pilings</span>
             </div>
             <div class="mini-stat">
-              <span class="stat-num">95%</span>
-              <span class="stat-name">RCC Structure</span>
+              <span class="stat-num">96%</span>
+              <span class="stat-name">RCC Superstructure</span>
             </div>
             <div class="mini-stat">
-              <span class="stat-num">85%</span>
+              <span class="stat-num">90%</span>
+              <span class="stat-name">Khutoot Wall Framing</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-num">86%</span>
               <span class="stat-name">Facade Glazing</span>
             </div>
             <div class="mini-stat">
-              <span class="stat-num">70%</span>
-              <span class="stat-name">Pool & Deck</span>
+              <span class="stat-num">75%</span>
+              <span class="stat-name">Marble Flooring</span>
+            </div>
+            <div class="mini-stat">
+              <span class="stat-num">72%</span>
+              <span class="stat-name">Pool & Lake Edge</span>
             </div>
           </div>
         </div>
 
         <!-- Filter Tags for Cameras -->
         <div class="cam-filter-bar">
-          <button class="filter-chip active" data-filter="all">All (10)</button>
+          <button class="filter-chip active" data-filter="all">All (19)</button>
           <button class="filter-chip" data-filter="exterior-front">Front (4)</button>
-          <button class="filter-chip" data-filter="exterior-rear">Rear & Pool (3)</button>
+          <button class="filter-chip" data-filter="exterior-rear">Rear & Pool (4)</button>
+          <button class="filter-chip" data-filter="interior-gf">GF Interior (3)</button>
+          <button class="filter-chip" data-filter="interior-ff">FF Bedrooms (4)</button>
+          <button class="filter-chip" data-filter="interior-lg">LG Lobby (1)</button>
           <button class="filter-chip" data-filter="bim-render">BIM Design (3)</button>
         </div>
 
         <!-- Camera List Items -->
         <div class="camera-list" id="camera-list-container">
-          <!-- Dynamically populated by app.js -->
+          <!-- Dynamically populated by app.js from SITE_DATA -->
         </div>
       </div>
     </aside>
@@ -214,7 +270,7 @@
     <aside id="sidebar-right" class="glass-panel sidebar">
       <div class="sidebar-header">
         <div class="sidebar-title">
-          <i class="fa-solid fa-layer-group"></i> Twin Controls & Layers
+          <i class="fa-solid fa-layer-group"></i> Twin Controls & Analytics
         </div>
         <button id="collapse-right-btn" class="sidebar-toggle-btn" title="Toggle Panel">
           <i class="fa-solid fa-chevron-right"></i>
@@ -222,16 +278,41 @@
       </div>
 
       <div class="sidebar-scrollable">
+        <!-- 3D Villa State: Render vs Site -->
+        <div class="dashboard-widget glass-card">
+          <div class="widget-row-header">
+            <span class="widget-label"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Villa State Mode</span>
+            <span class="widget-val" id="current-state-badge">Oct 2026 Site</span>
+          </div>
+          <div class="state-card-grid">
+            <button class="state-card-btn active" id="widget-state-site">
+              <i class="fa-solid fa-person-digging"></i>
+              <div class="state-card-text">
+                <span class="state-card-title">Site (Oct 2026)</span>
+                <span class="state-card-desc">As-built raw concrete, shoring, scaffolding</span>
+              </div>
+            </button>
+            <button class="state-card-btn" id="widget-state-render">
+              <i class="fa-solid fa-gem"></i>
+              <div class="state-card-text">
+                <span class="state-card-title">Design (Render)</span>
+                <span class="state-card-desc">Finished ONIX luxury villa, pool & lawns</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         <!-- Floor Level Isolation -->
         <div class="dashboard-widget glass-card">
           <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-cubes"></i> Floor Level Isolation</span>
+            <span class="widget-label"><i class="fa-solid fa-cubes"></i> BIM Floor Level Isolation</span>
           </div>
           <div class="floor-grid-group">
             <button class="floor-btn active" data-floor="all">All Floors</button>
             <button class="floor-btn" data-floor="roof">Roof Suite</button>
-            <button class="floor-btn" data-floor="first">First Floor</button>
-            <button class="floor-btn" data-floor="ground">Ground Floor</button>
+            <button class="floor-btn" data-floor="first">First Floor (FF)</button>
+            <button class="floor-btn" data-floor="ground">Ground Floor (GF)</button>
+            <button class="floor-btn" data-floor="basement">Lower Ground (LG)</button>
           </div>
         </div>
 
@@ -271,28 +352,28 @@
           </div>
           <div class="layer-item">
             <label class="switch-label">
-              <span><i class="fa-solid fa-water"></i> Swimming Pool & Water Feature</span>
+              <span><i class="fa-solid fa-water"></i> Swimming Pool, Water Feature & Spa</span>
               <input type="checkbox" id="layer-pool" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
           <div class="layer-item">
             <label class="switch-label">
-              <span><i class="fa-solid fa-tree"></i> Palms, Landscaping & Boundary</span>
+              <span><i class="fa-solid fa-tree"></i> Palms, Landscaping & Shoreline</span>
               <input type="checkbox" id="layer-landscape" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
           <div class="layer-item">
             <label class="switch-label">
-              <span><i class="fa-solid fa-camera-rotate"></i> 3D Camera Pins & Frustums</span>
+              <span><i class="fa-solid fa-camera-rotate"></i> 3D Camera Pins & Frustum Cones</span>
               <input type="checkbox" id="layer-cameras" checked />
               <span class="toggle-slider"></span>
             </label>
           </div>
           <div class="layer-item">
             <label class="switch-label">
-              <span><i class="fa-solid fa-cubes-stacked"></i> Scaffolding & Construction Assets</span>
+              <span><i class="fa-solid fa-cubes-stacked"></i> Scaffolding, Survey Theodolite & Assets</span>
               <input type="checkbox" id="layer-construction" checked />
               <span class="toggle-slider"></span>
             </label>
@@ -363,7 +444,7 @@
             </div>
             <div class="spec-row">
               <span class="spec-key">Typology</span>
-              <span class="spec-val">Ultra-Luxury Custom Villa (G+1+R)</span>
+              <span class="spec-val">Ultra-Luxury Custom Villa (LG+G+1+R)</span>
             </div>
             <div class="spec-row">
               <span class="spec-key">Plot Area</span>
@@ -378,8 +459,12 @@
               <span class="spec-val">ONIX Engineering Consultancy</span>
             </div>
             <div class="spec-row">
+              <span class="spec-key">Contractor</span>
+              <span class="spec-val">VH Contracting LLC</span>
+            </div>
+            <div class="spec-row">
               <span class="spec-key">Structure</span>
-              <span class="spec-val">Reinforced Concrete + Post-Tensioned</span>
+              <span class="spec-val">RCC Post-Tensioned Slabs</span>
             </div>
             <div class="spec-row">
               <span class="spec-key">Waterfront</span>
@@ -396,8 +481,8 @@
       <div class="bottom-bar-header">
         <div class="bottom-bar-title">
           <i class="fa-solid fa-camera-retro"></i>
-          <span>Interactive Camera Array</span>
-          <span class="cam-hint">— Click any camera thumbnail to sync 3D viewport & inspect real site capture</span>
+          <span>Interactive Camera Array & Timelapse Vault</span>
+          <span class="cam-hint">— 16 Real-Time On-Site Cameras (460+ Captures) + 3 Architectural Design Concepts</span>
         </div>
         <div class="bottom-bar-actions">
           <button id="btn-prev-cam" class="nav-arrow-btn" title="Previous Camera"><i class="fa-solid fa-chevron-left"></i></button>
@@ -409,7 +494,7 @@
       </div>
     </div>
 
-    <!-- Active Camera View Modal / Split View Overlay Hub -->
+    <!-- Active Camera View Modal / Timelapse Inspector Hub -->
     <div id="camera-modal" class="camera-modal-overlay hidden">
       <div class="camera-modal-card glass-card">
         <div class="modal-header">
@@ -417,7 +502,7 @@
             <div class="cam-modal-badge" id="modal-cam-badge">CAM-01</div>
             <div>
               <h3 class="modal-cam-title" id="modal-cam-title">Exterior Front Main Entrance</h3>
-              <div class="modal-cam-subtitle" id="modal-cam-subtitle">Jumeirah Islands 003 • Captured: 08 Oct 2026 13:00</div>
+              <div class="modal-cam-subtitle" id="modal-cam-subtitle">Jumeirah Islands 003 • Construction Site Capture</div>
             </div>
           </div>
           <div class="modal-header-controls">
@@ -434,8 +519,8 @@
               </button>
             </div>
             
-            <button class="modal-action-btn" id="btn-fullscreen-photo" title="Maximize Image View">
-              <i class="fa-solid fa-maximize"></i>
+            <button class="modal-action-btn" id="btn-fly-in-twin" title="Fly 3D Viewport to this Angle">
+              <i class="fa-solid fa-paper-plane"></i> <span>Fly in 3D</span>
             </button>
             
             <button class="modal-close-btn" id="modal-close-btn" title="Return to 3D Viewport">
@@ -487,6 +572,34 @@
             </div>
           </div>
 
+          <!-- Interactive Timelapse Timeline Player Bar -->
+          <div class="timelapse-player-bar glass-card">
+            <div class="tl-left-controls">
+              <button id="btn-timelapse-play" class="tl-play-btn" title="Play / Pause Timelapse">
+                <i class="fa-solid fa-play"></i>
+                <span>Play Timelapse</span>
+              </button>
+              <button id="btn-timelapse-speed" class="tl-speed-btn" title="Toggle Speed">1x Speed</button>
+              <button id="btn-sync-sun" class="tl-sync-btn" title="Sync 3D Sun Position with Photo Capture Time">
+                <i class="fa-solid fa-sun"></i>
+                <span>Sync 3D Sun</span>
+              </button>
+            </div>
+
+            <div class="tl-center-scrubber">
+              <div class="tl-time-indicator">
+                <span id="timelapse-time-label">14 Oct 2026 • 13:30 (1:30 PM)</span>
+                <span id="timelapse-counter" class="tl-count">Capture 12 of 26</span>
+              </div>
+              <input type="range" id="timelapse-scrubber" min="0" max="25" value="12" class="custom-range" />
+            </div>
+          </div>
+
+          <!-- Quick Thumbnails Strip for All Captures of this Station -->
+          <div class="timelapse-thumbs-strip" id="timelapse-thumbs-strip">
+            <!-- Dynamically populated frames -->
+          </div>
+
           <!-- Bottom Metadata Telemetry Strip for Active Camera -->
           <div class="camera-meta-panel">
             <div class="cam-data-chip">
@@ -506,15 +619,34 @@
               <span class="chip-val font-mono" id="cam-meta-filename">Exterior Front Main Entrance...</span>
             </div>
             <div class="cam-data-chip">
-              <span class="chip-label">Capture Date</span>
-              <span class="chip-val" id="cam-meta-date">2026-10-08 13:00:00</span>
-            </div>
-            <div class="modal-footer-nav">
-              <button class="btn-primary" id="btn-fly-in-twin">
-                <i class="fa-solid fa-paper-plane"></i> Fly 3D Viewport to this Angle
-              </button>
+              <span class="chip-label">Capture Timestamp</span>
+              <span class="chip-val" id="cam-meta-date">14 Oct 2026 13:30</span>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pro Keyboard Shortcuts Reference Modal -->
+    <div id="shortcuts-modal" class="shortcuts-modal-overlay hidden">
+      <div class="shortcuts-card glass-card">
+        <div class="shortcuts-header">
+          <div class="shortcuts-title">
+            <i class="fa-solid fa-keyboard"></i>
+            <span>Executive Keyboard Shortcuts & Navigation Guide</span>
+          </div>
+          <button id="shortcuts-close-btn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="shortcuts-grid">
+          <div class="sc-row"><kbd>1</kbd> - <kbd>5</kbd><span>Preset Camera Views (Front, Rear, Aerial, Entrance, Lake)</span></div>
+          <div class="sc-row"><kbd>Space</kbd><span>Toggle 360° Cinematic Orbital Flythrough</span></div>
+          <div class="sc-row"><kbd>C</kbd><span>Toggle 3D Camera Pins & Frustum Cones</span></div>
+          <div class="sc-row"><kbd>M</kbd><span>Toggle 3D Laser Dimension / Measurement Tool</span></div>
+          <div class="sc-row"><kbd>E</kbd><span>Toggle Exploded BIM Axonometric View</span></div>
+          <div class="sc-row"><kbd>L</kbd><span>Cycle Lighting (Daylight, Sunset, Night Mode, Wireframe)</span></div>
+          <div class="sc-row"><kbd>H</kbd><span>Toggle Minimalist Clean HUD Mode</span></div>
+          <div class="sc-row"><kbd>P</kbd><span>Capture High-Res Viewport Screenshot</span></div>
+          <div class="sc-row"><kbd>Esc</kbd><span>Close Photo Inspector / Return to 3D Viewport</span></div>
         </div>
       </div>
     </div>
@@ -527,8 +659,8 @@
         <div class="toast-desc">
           • <strong>Orbit / Rotate:</strong> Left Click + Drag<br>
           • <strong>Pan:</strong> Right Click + Drag<br>
-          • <strong>Zoom:</strong> Scroll Wheel<br>
-          • <strong>Inspect Cameras:</strong> Click any floating camera pin / cone
+          • <strong>Zoom:</strong> Mouse Scroll Wheel<br>
+          • <strong>Inspect Cameras:</strong> Click any floating camera pin in 3D or on the Site Radar
         </div>
       </div>
       <button class="toast-close" id="toast-close-btn">&times;</button>
@@ -542,6 +674,7 @@
   <script src="lightingManager.js"></script>
   <script src="cameraManager.js"></script>
   <script src="measurementTool.js"></script>
+  <script src="minimap.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
