@@ -1,671 +1,504 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jumeirah Islands Villa 003 — 3D Interactive Digital Twin & Site Telemetry</title>
+  <title>Jumeirah Islands 003 — Ultra-Photorealistic 3D Digital Twin & Site Telemetry | ONIX Engineering</title>
   
-  <!-- SEO & Social Meta -->
-  <meta name="description" content="Next-Gen 3D BIM Digital Twin of Jumeirah Islands Villa 003 (Dubai, UAE) featuring 16 synchronized timelapse site camera stations with 460+ captures, interactive solar study, floor isolation, laser measurement, and live telemetry." />
-  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, ONIX Engineering Consultancy, Three.js Digital Twin, Construction Telemetry" />
+  <!-- SEO & Engineering Metadata -->
+  <meta name="description" content="Next-Gen Architectural 3D BIM Digital Twin of Jumeirah Islands Villa 003 (Dubai, UAE). Features natural transformation view transitions, adjoint navigation depth, live BIM section cuts, 16 synchronized timelapse cameras with 460+ captures, and verified IoT telemetry." />
+  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, ONIX Engineering Consultancy, VH Contracting, Three.js Digital Twin, Construction Telemetry" />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>" />
 
-  <!-- Google Fonts: Inter & Outfit & JetBrains Mono -->
+  <!-- Google Fonts: Inter, Outfit & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- FontAwesome 6 for Icons -->
+  <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <!-- Three.js + Addons via CDN -->
+  <!-- Tailwind CSS CDN for Utility Classes -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            onix: {
+              cyan: '#00d2ff',
+              blue: '#0088cc',
+              gold: '#d4af37',
+              emerald: '#10b981'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Three.js + Tween.js via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
   
-  <!-- Custom Styles -->
+  <!-- Master Design System Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="theme-dark">
-  <!-- Main App Layout Container -->
-  <div id="app-container">
+<body class="font-sans antialiased text-slate-100 bg-[#060912] selection:bg-sky-500 selection:text-white overflow-hidden">
+
+  <!-- ==================== 3D CANVAS VIEWPORT ==================== -->
+  <div id="viewport-3d-wrapper" class="fixed inset-0 w-full h-full z-0">
+    <canvas id="twin-canvas" class="w-full h-full block"></canvas>
+  </div>
+
+  <!-- Toast Notification Pill -->
+  <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-3 transition-all duration-300 spatial-glass px-5 py-2.5 rounded-full flex items-center gap-3 text-xs font-medium text-sky-200 border border-sky-400/50 shadow-2xl">
+    <i class="fa-solid fa-sparkles text-sky-400"></i>
+    <span id="toast-text">Jumeirah Islands 003 Digital Twin Ready</span>
+  </div>
+
+  <!-- First-Person Walk Mode Crosshair & Instructions HUD -->
+  <div id="walk-hud" class="fixed top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none hidden flex-col items-center gap-2">
+    <div class="spatial-glass px-5 py-2.5 rounded-full text-xs font-mono text-sky-300 border border-sky-400/40 flex items-center gap-3 shadow-2xl">
+      <span><strong class="text-white">WASD:</strong> Walk</span>
+      <span>•</span>
+      <span><strong class="text-white">Q / E:</strong> Elevation</span>
+      <span>•</span>
+      <span><strong class="text-white">Mouse Drag:</strong> Look Around</span>
+    </div>
+  </div>
+
+  <!-- ==================== TOP COMMAND BAR ==================== -->
+  <header id="top-header" class="fixed top-3 left-3 right-3 h-14 spatial-glass rounded-2xl z-30 px-4 flex items-center justify-between">
+    <!-- Left: ONIX Engineering Identity & Left Dock Toggle -->
+    <div class="flex items-center gap-3">
+      <button id="btn-toggle-left" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition" title="Toggle BIM & Lighting Dock">
+        <i class="fa-solid fa-bars-staggered"></i>
+      </button>
+      <div class="relative flex items-center justify-center w-9 h-9 rounded-xl bg-slate-950/90 border border-white/15 shadow-inner">
+        <div class="w-6 h-6 rounded-full border-[2.5px] border-sky-400 border-r-amber-500 animate-spin" style="animation-duration: 14s;"></div>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-display font-extrabold tracking-wider text-sm text-white">JUMEIRAH ISLANDS • VILLA 003</span>
+          <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30 font-semibold">PBR TWIN v4.2</span>
+        </div>
+        <div class="text-[11px] text-slate-400 flex items-center gap-2 font-sans">
+          <span><strong class="text-amber-400 font-bold">ONIX</strong> Engineering Consultancy</span>
+          <span class="text-slate-600">•</span>
+          <span class="font-mono text-[10px] text-slate-300">Plot JI-003 • Dubai, UAE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center: Live Engine Diagnostics, Site Progress & Dubai Weather -->
+    <div class="hidden xl:flex items-center gap-5 bg-slate-950/75 px-4 py-1.5 rounded-xl border border-white/10">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="text-[11px] font-mono text-slate-300">SYNC: <strong class="text-emerald-400 font-bold">LIVE</strong></span>
+      </div>
+      <div class="h-3.5 w-[1px] bg-white/10"></div>
+      <div class="flex items-center gap-3 text-[11px] font-mono">
+        <span class="text-slate-400">CLARITY: <strong class="text-emerald-400">ULTRA HD</strong></span>
+        <span class="text-slate-400">FPS: <strong id="stat-fps" class="text-sky-400">60</strong></span>
+        <span class="text-slate-400">TRIS: <strong class="text-indigo-300">42.8K</strong></span>
+      </div>
+      <div class="h-3.5 w-[1px] bg-white/10"></div>
+      <div class="flex items-center gap-2.5">
+        <span class="text-[11px] text-slate-400">Site Progress:</span>
+        <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden p-[1px]">
+          <div id="top-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-500" style="width: 100%"></div>
+        </div>
+        <span id="top-progress-text" class="text-[11px] font-mono font-bold text-emerald-400">100%</span>
+      </div>
+      <div class="h-3.5 w-[1px] bg-white/10"></div>
+      <div class="flex items-center gap-1.5 text-[11px] text-amber-300 font-mono">
+        <i class="fa-solid fa-sun"></i>
+        <span>31°C DXB • Clear</span>
+      </div>
+    </div>
+
+    <!-- Right: Interactive Viewport Actions & Controls -->
+    <div class="flex items-center gap-2">
+      <button id="btn-crystal-clear" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-400/50 transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10" title="Maximize Building Clarity & Reset Cuts">
+        <i class="fa-solid fa-wand-sparkles text-emerald-300"></i>
+        <span class="hidden sm:inline">Crystal Clear</span>
+      </button>
+      <button id="btn-toggle-edges" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-sky-500/25 text-sky-200 border border-sky-400/50 hover:bg-sky-500/35 transition flex items-center gap-1.5" title="Toggle Architectural CAD Edge Outlines">
+        <i class="fa-solid fa-vector-square text-sky-300"></i>
+        <span class="hidden md:inline">CAD Edges: ON</span>
+      </button>
+      <button id="btn-walk-mode" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition flex items-center gap-1.5" title="First-Person Walk Mode (WASD)">
+        <i class="fa-solid fa-person-walking text-emerald-400"></i>
+        <span class="hidden md:inline">Walk Mode</span>
+      </button>
+      <button id="btn-cinema-tour" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition flex items-center gap-1.5" title="Automated Cinematic Drone Tour">
+        <i class="fa-solid fa-film text-amber-400"></i>
+        <span class="hidden md:inline">Cinema Tour</span>
+      </button>
+      <button id="btn-toggle-pins" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-slate-300 border border-white/10 hover:bg-white/15 transition flex items-center gap-1.5" title="Toggle 3D Pins">
+        <i class="fa-solid fa-location-crosshairs"></i>
+        <span class="hidden sm:inline">Pins</span>
+      </button>
+      <button id="btn-ide-sdk" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500/30 to-sky-500/30 text-sky-200 border border-sky-400/40 hover:border-sky-300 transition flex items-center gap-1.5 shadow-lg shadow-sky-500/10" title="Antigravity IDE Bi-Directional SDK">
+        <i class="fa-solid fa-code text-sky-400"></i>
+        <span class="hidden lg:inline">SDK</span>
+      </button>
+      <button id="btn-clean-ui" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10 transition flex items-center justify-center" title="Toggle Clean HUD Viewport">
+        <i class="fa-solid fa-eye"></i>
+      </button>
+      <button id="btn-toggle-right" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition" title="Toggle Telemetry Dock">
+        <i class="fa-solid fa-chart-pie"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==================== LEFT DOCK: BIM SECTION CUTS, SHADERS & LIGHTING ==================== -->
+  <aside id="left-dock" class="fixed top-20 left-3 bottom-20 w-80 spatial-glass rounded-2xl z-20 flex flex-col overflow-hidden transition-transform duration-300">
+    <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 font-display">
+        <i class="fa-solid fa-cubes-stacked"></i>
+        <span>BIM Section & Shaders</span>
+      </div>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold">ACES Filmic</span>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-3.5 space-y-4">
+      <!-- 1. LIVE BIM SECTION CUT / CLIPPING PLANES -->
+      <div class="spatial-card p-3 rounded-xl space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 font-display">
+            <i class="fa-solid fa-scissors text-rose-400"></i> Live BIM Section Cut
+          </span>
+          <button id="btn-reset-clip" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/10 transition">
+            Reset
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 leading-relaxed font-sans">
+          Slice floor slabs & curtain walls in real time to inspect interior dining, double-height atrium & structural columns.
+        </p>
+        <div class="space-y-2 pt-1">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Horizontal Level Cut (Y-Axis)</span>
+              <span id="val-clip-y" class="font-mono text-sky-400">Full (12.0m)</span>
+            </div>
+            <input type="range" id="slider-clip-y" min="-3.2" max="12.0" step="0.1" value="12.0" class="w-full" />
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="text-slate-300">Longitudinal Cross-Cut (X-Axis)</span>
+              <span id="val-clip-x" class="font-mono text-sky-400">Full (16.0m)</span>
+            </div>
+            <input type="range" id="slider-clip-x" min="-9.5" max="16.0" step="0.1" value="16.0" class="w-full" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. LIGHTING & ATMOSPHERE STUDIO -->
+      <div class="spatial-card p-3 rounded-xl space-y-3">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-sun text-amber-400 mr-1"></i> Atmosphere & Lighting</span>
+          <span id="env-mode-badge" class="text-[10px] font-mono text-emerald-300">DAYLIGHT</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-1.5">
+          <button data-env="day" class="env-btn active bg-sky-500/25 border-sky-400 text-white py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-sun text-amber-300"></i> Crisp Day
+          </button>
+          <button data-env="dusk" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-cloud-moon text-sky-300"></i> Blue Hour
+          </button>
+          <button data-env="golden" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-mountain-sun text-orange-400"></i> Sunset
+          </button>
+          <button data-env="night" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
+            <i class="fa-solid fa-star text-indigo-300"></i> Night LED
+          </button>
+        </div>
+
+        <div class="space-y-2 pt-1 font-sans">
+          <div class="flex justify-between text-[11px]">
+            <span class="text-slate-400">Sun Azimuth Angle</span>
+            <span id="val-azimuth" class="font-mono text-sky-400">212°</span>
+          </div>
+          <input type="range" id="slider-azimuth" min="0" max="360" value="212" class="w-full" />
+
+          <div class="flex justify-between text-[11px]">
+            <span class="text-slate-400">Solar Elevation</span>
+            <span id="val-elevation" class="font-mono text-sky-400">42°</span>
+          </div>
+          <input type="range" id="slider-elevation" min="1" max="85" value="42" class="w-full" />
+
+          <div class="flex justify-between text-[11px]">
+            <span class="text-slate-400">Tone Mapping Exposure</span>
+            <span id="val-bloom" class="font-mono text-amber-300">0.85</span>
+          </div>
+          <input type="range" id="slider-bloom" min="0.45" max="1.25" step="0.02" value="0.85" class="w-full" />
+        </div>
+      </div>
+
+      <!-- 3. FLOOR LEVEL ISOLATION -->
+      <div class="spatial-card p-3 rounded-xl space-y-2">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 font-display">
+          <i class="fa-solid fa-layer-group text-sky-400"></i> Floor Level Isolation
+        </span>
+        <div class="grid grid-cols-2 gap-1.5 text-xs">
+          <button class="floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white col-span-2" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== RIGHT DOCK: 2D RADAR, IOT INSPECTOR & QA/QC ==================== -->
+  <aside id="right-dock" class="fixed top-20 right-3 bottom-20 w-84 spatial-glass rounded-2xl z-20 flex flex-col overflow-hidden transition-transform duration-300" style="width: 340px;">
+    <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-display">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <span>Spatial Radar & Telemetry</span>
+      </div>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">QA/QC PASSED</span>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-3.5 space-y-4">
+      <!-- 1. LIVE 2D ARCHITECTURAL RADAR -->
+      <div class="spatial-card p-3 rounded-xl space-y-2">
+        <div class="flex items-center justify-between text-[11px] font-display">
+          <span class="font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
+            <i class="fa-solid fa-compass text-sky-400"></i> Interactive Site Radar
+          </span>
+          <span class="font-mono text-[10px] text-slate-400">Click to Teleport</span>
+        </div>
+        <div class="relative w-full h-36 rounded-lg overflow-hidden bg-slate-950 border border-white/10 cursor-crosshair">
+          <canvas id="radar-canvas" width="300" height="144" class="w-full h-full block"></canvas>
+          <div class="absolute bottom-1.5 left-2 text-[9px] font-mono text-slate-400 pointer-events-none">
+            N ↑ • LAKE (-Z) TOP • STREET (+Z) BOTTOM
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. ACTIVE SPATIAL IOT NODE INSPECTOR -->
+      <div class="bg-gradient-to-br from-slate-900/95 to-slate-950/95 p-3.5 rounded-xl border border-sky-400/40 shadow-xl space-y-2.5">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span id="insp-code" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">MEP-004</span>
+              <span id="insp-photo-ref" class="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">Photos #001, #005, #010</span>
+            </div>
+            <h3 id="insp-title" class="text-sm font-bold text-white mt-1.5 font-display">Waterfall Cantilever & Cyan Pool</h3>
+          </div>
+          <span id="insp-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">VERIFIED</span>
+        </div>
+        <p id="insp-desc" class="text-[11px] text-slate-300 leading-relaxed font-sans">
+          Post-tensioned C50 white architectural concrete slab projecting over the rear pool with sheer descent waterfall weir and glowing cyan river-vein mosaic floor.
+        </p>
+        <div id="insp-metrics" class="grid grid-cols-2 gap-1.5 pt-1">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- 3. SPATIAL IOT TELEMETRY NODES LIST -->
+      <div>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-location-dot text-sky-400 mr-1"></i> Verified Sensor Nodes</span>
+          <span class="text-[10px] font-mono text-slate-500">5 Active Stations</span>
+        </div>
+        <div id="pins-list-container" class="space-y-1.5">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 4. REAL-TIME OCT 2026 INSPECTION LOG -->
+      <div class="spatial-card p-3 rounded-xl space-y-2">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-clipboard-check text-emerald-400 mr-1"></i> Oct 2026 Milestone Log</span>
+          <span class="text-[10px] font-mono text-sky-400">86.4% Site</span>
+        </div>
+        <div class="space-y-2 text-[11px]">
+          <div>
+            <div class="flex justify-between mb-0.5"><span class="text-slate-300">White Micro-Cement Stucco & C-Frame</span><span class="font-mono text-emerald-400">100%</span></div>
+            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-emerald-400 rounded-full" style="width:100%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Curtain Glazing & Balustrades</span><span class="font-mono text-emerald-400">98%</span></div>
+            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-emerald-400 rounded-full" style="width:98%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Pool Shell & Cyan River-Vein Mosaic</span><span class="font-mono text-sky-400">95%</span></div>
+            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-sky-400 rounded-full" style="width:95%"></div></div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Soft Landscaping & Carport Living Wall</span><span id="log-landscape-pct" class="font-mono text-emerald-400">100% (Render)</span></div>
+            <div class="h-1.5 bg-slate-800 rounded-full"><div id="log-landscape-bar" class="h-full bg-emerald-400 rounded-full transition-all duration-500" style="width:100%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== BOTTOM CHRONOLOGICAL DOCK & PHOTO-MATCH BOOKMARKS ==================== -->
+  <div id="bottom-dock" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 spatial-glass rounded-2xl px-4 py-2.5 flex flex-col md:flex-row items-center gap-4 transition-transform duration-300 max-w-[96vw]">
     
-    <!-- Top Global Header Bar -->
-    <header id="top-header" class="glass-panel">
-      <div class="header-left">
-        <div class="brand-badge">
-          <div class="brand-icon-pulse">
-            <i class="fa-solid fa-cube"></i>
-          </div>
-          <div class="brand-meta">
-            <div class="brand-title-row">
-              <span class="brand-name">JUMEIRAH ISLANDS</span>
-              <span class="brand-divider">/</span>
-              <span class="brand-tag">DIGITAL TWIN</span>
-              <span class="live-pill"><span class="dot"></span> LIVE TELEMETRY</span>
-            </div>
-            <div class="brand-sub">Villa Plot 003 • Cluster 3, Dubai UAE • ONIX Engineering</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Dual 3D State Switcher: Site (Oct 2026) vs Design (Render) -->
-      <div class="header-state-switch">
-        <div class="state-toggle-group">
-          <button class="state-btn active" data-state="site" id="btn-state-site" title="Oct 2026 As-Built Construction Site">
-            <i class="fa-solid fa-person-digging"></i>
-            <span>Site (Oct 2026)</span>
-          </button>
-          <button class="state-btn" data-state="render" id="btn-state-render" title="ONIX Target Architectural Render">
-            <i class="fa-solid fa-gem"></i>
-            <span>Design (Render)</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="header-center">
-        <!-- Quick Preset Camera Views -->
-        <nav class="view-preset-group">
-          <button class="preset-btn active" data-view="front" title="Front Elevation View">
-            <i class="fa-solid fa-house"></i>
-            <span>Front</span>
-          </button>
-          <button class="preset-btn" data-view="rear" title="Rear Pool Elevation View">
-            <i class="fa-solid fa-water-ladder"></i>
-            <span>Rear Pool</span>
-          </button>
-          <button class="preset-btn" data-view="aerial" title="Drone Aerial Site View">
-            <i class="fa-solid fa-plane-up"></i>
-            <span>Aerial</span>
-          </button>
-          <button class="preset-btn" data-view="entry" title="Main Entry Portal">
-            <i class="fa-solid fa-door-open"></i>
-            <span>Entrance</span>
-          </button>
-          <button class="preset-btn" data-view="lake" title="Waterfront Lake View">
-            <i class="fa-solid fa-water"></i>
-            <span>Lake</span>
-          </button>
-          <button class="preset-btn" data-view="orbit" id="auto-orbit-toggle" title="Auto Orbit Cinematic Tour">
-            <i class="fa-solid fa-rotate"></i>
-            <span>Cinematic Tour</span>
-          </button>
-        </nav>
-      </div>
-
-      <div class="header-right">
-        <!-- Digital Twin Environment Modes -->
-        <div class="env-toggle-group">
-          <button class="env-btn active" data-env="day" title="Dubai Architectural Daylight">
-            <i class="fa-solid fa-sun"></i>
-          </button>
-          <button class="env-btn" data-env="sunset" title="Golden Hour Sunset">
-            <i class="fa-solid fa-mountain-sun"></i>
-          </button>
-          <button class="env-btn" data-env="night" title="Luxury Night Mode">
-            <i class="fa-solid fa-moon"></i>
-          </button>
-          <button class="env-btn" data-env="wireframe" title="X-Ray BIM Wireframe Mode">
-            <i class="fa-solid fa-draw-polygon"></i>
-          </button>
-        </div>
-
-        <div class="divider-v"></div>
-
-        <!-- Pro Tools -->
-        <button id="btn-measure" class="action-btn" title="3D Point-to-Point Laser Ruler">
-          <i class="fa-solid fa-ruler-combined"></i>
-          <span>Measure</span>
-        </button>
-
-        <button id="btn-explode-bim" class="action-btn" title="Exploded BIM Axonometric View">
-          <i class="fa-solid fa-layer-group"></i>
-          <span>Explode BIM</span>
-        </button>
-
-        <button id="btn-screenshot" class="action-btn icon-only" title="Capture High-Res Viewport Screenshot">
-          <i class="fa-solid fa-camera"></i>
-        </button>
-
-        <button id="btn-shortcuts" class="action-btn icon-only" title="Keyboard Shortcuts Guide">
-          <i class="fa-solid fa-keyboard"></i>
-        </button>
-
-        <button id="btn-toggle-ui" class="action-btn icon-only" title="Toggle Clean HUD Mode">
-          <i class="fa-solid fa-expand"></i>
-        </button>
-      </div>
-    </header>
-
-    <!-- 3D Canvas Viewport -->
-    <div id="viewport-3d-wrapper">
-      <canvas id="twin-canvas"></canvas>
-      
-      <!-- 3D Viewport Floating Compass / Viewcube -->
-      <div id="viewcube-widget" class="glass-card">
-        <div class="compass-ring">
-          <span class="compass-n">N</span>
-          <span class="compass-e">E</span>
-          <span class="compass-s">S</span>
-          <span class="compass-w">W</span>
-          <div class="compass-needle" id="compass-needle"></div>
-        </div>
-      </div>
-
-      <!-- Tactical 2D Minimap Radar Widget -->
-      <div id="minimap-widget" class="glass-card">
-        <div class="minimap-header">
-          <div class="minimap-title">
-            <i class="fa-solid fa-satellite-dish"></i>
-            <span>SITE RADAR</span>
-          </div>
-          <span class="minimap-hint">Click to Teleport</span>
-        </div>
-        <canvas id="minimap-canvas"></canvas>
-        <div class="minimap-legend">
-          <span class="leg-item"><span class="leg-dot c-front"></span> Front</span>
-          <span class="leg-item"><span class="leg-dot c-rear"></span> Rear</span>
-          <span class="leg-item"><span class="leg-dot c-gf"></span> GF</span>
-          <span class="leg-item"><span class="leg-dot c-ff"></span> FF</span>
-        </div>
-      </div>
-
-      <!-- Laser Measure Floating HUD -->
-      <div id="measure-hud" class="glass-card hidden">
-        <div class="measure-hud-header">
-          <i class="fa-solid fa-ruler-combined"></i>
-          <span>3D Laser Dimension Mode</span>
-          <button id="measure-close-btn" class="close-btn">&times;</button>
-        </div>
-        <div class="measure-hud-body">
-          <div class="measure-step" id="measure-step-text">Click Point 1 on 3D Model</div>
-          <div class="measure-value" id="measure-result">-- m</div>
-          <button id="measure-reset-btn" class="btn-secondary btn-sm">Reset Points</button>
-        </div>
-      </div>
-
-      <!-- Hover Camera Tooltip (Follows Cursor) -->
-      <div id="cam-hover-tooltip" class="cam-tooltip glass-card hidden">
-        <div class="tooltip-badge"><i class="fa-solid fa-camera"></i> <span id="tooltip-cam-id">CAM-01</span></div>
-        <div class="tooltip-title" id="tooltip-cam-title">Exterior Front Main Entrance</div>
-        <div class="tooltip-meta"><span id="tooltip-cam-time">08 Oct 2026 • 26 frames</span></div>
-        <div class="tooltip-hint"><i class="fa-solid fa-hand-pointer"></i> Click to Match View & Inspect Timelapse</div>
-      </div>
+    <!-- Chronological Phase Scrubber -->
+    <div class="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10">
+      <button data-phase="shoring" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-trowel-bricks text-slate-400"></i>
+        <span>1. Superstructure & Shoring</span>
+      </button>
+      <button data-phase="site" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5">
+        <i class="fa-solid fa-helmet-safety text-amber-400"></i>
+        <span>2. 08 Oct 2026 Site State</span>
+      </button>
+      <button data-phase="render" class="phase-btn bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>3. ONIX Handover Render</span>
+      </button>
     </div>
 
-    <!-- Left Sidebar: Project Telemetry & Cameras Hub -->
-    <aside id="sidebar-left" class="glass-panel sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-title">
-          <i class="fa-solid fa-video"></i> Site Cameras & Timelapses
+    <div class="hidden md:block h-6 w-[1px] bg-white/10"></div>
+
+    <!-- Photo-Match Camera Bookmarks -->
+    <div class="flex items-center gap-1.5 overflow-x-auto max-w-full py-0.5">
+      <button data-cam="frontHero" class="cam-pill bg-sky-500/25 border-sky-400 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-camera-retro text-sky-400"></i> Front Elevation (#2,3,4)
+      </button>
+      <button data-cam="rearOrtho" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-water text-cyan-400"></i> Rear Pool (#5,10)
+      </button>
+      <button data-cam="rearShoring" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-person-digging text-amber-400"></i> Rear Shoring (#1)
+      </button>
+      <button data-cam="frontEntrance" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-door-open text-emerald-400"></i> Main Portal (#6,7)
+      </button>
+      <button data-cam="topYard" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-down-up-across-line text-purple-400"></i> Top Yard Drone (#8)
+      </button>
+      <button data-cam="parkingSide" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-car-rear text-indigo-400"></i> Carport & Palms (#9)
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== PHOTO INSPECTION & TIMELAPSE MODAL ==================== -->
+  <div id="camera-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="spatial-glass max-w-5xl w-full rounded-2xl border border-white/20 overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <!-- Header -->
+      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
+        <div class="flex items-center gap-3">
+          <div id="modal-cam-badge" class="px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 font-mono text-xs font-bold border border-sky-400/30">CAM-01</div>
+          <div>
+            <h3 id="modal-cam-title" class="text-sm font-bold text-white font-display">Exterior Front Main Entrance</h3>
+            <div id="modal-cam-subtitle" class="text-[11px] text-slate-400">Jumeirah Islands 003 • Station Capture</div>
+          </div>
         </div>
-        <span class="badge-count" id="camera-count-badge">19 Stations</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-fly-in-twin" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
+            <i class="fa-solid fa-paper-plane"></i> <span>Fly in 3D</span>
+          </button>
+          <button id="modal-close-btn" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
 
-      <div class="sidebar-scrollable">
-        <!-- Site Overview Card -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label">Executive Milestone Status</span>
-            <span class="status-indicator live">Phase: Superstructure / Fitout</span>
-          </div>
-          <div class="progress-bar-container">
-            <div class="progress-labels">
-              <span>Overall Site Progress</span>
-              <span class="progress-pct">84%</span>
+      <!-- Body / Image Container -->
+      <div class="flex-1 overflow-hidden p-4 flex flex-col items-center justify-center bg-slate-950/50">
+        <div class="relative w-full h-[52vh] rounded-xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
+          <img id="modal-site-image" src="" alt="Station Capture" class="max-w-full max-h-full object-contain" />
+        </div>
+
+        <!-- Scrubber Bar -->
+        <div class="w-full mt-3 p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-4">
+          <button id="btn-timelapse-play" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-2" onclick="cameraManager.toggleTimelapse()">
+            <i class="fa-solid fa-play"></i> <span>Play Timelapse</span>
+          </button>
+          <div class="flex-1 px-2">
+            <div class="flex justify-between text-[11px] text-slate-300 font-mono mb-1">
+              <span id="timelapse-time-label">14 Oct 2026 • 13:30</span>
+              <span id="timelapse-counter" class="text-sky-400 font-bold">Capture 1 of 26</span>
             </div>
-            <div class="progress-track">
-              <div class="progress-fill" style="width: 84%;"></div>
-            </div>
-          </div>
-          <div class="mini-stats-grid">
-            <div class="mini-stat">
-              <span class="stat-num">100%</span>
-              <span class="stat-name">Shoring & Pilings</span>
-            </div>
-            <div class="mini-stat">
-              <span class="stat-num">96%</span>
-              <span class="stat-name">RCC Superstructure</span>
-            </div>
-            <div class="mini-stat">
-              <span class="stat-num">90%</span>
-              <span class="stat-name">Khutoot Wall Framing</span>
-            </div>
-            <div class="mini-stat">
-              <span class="stat-num">86%</span>
-              <span class="stat-name">Facade Glazing</span>
-            </div>
-            <div class="mini-stat">
-              <span class="stat-num">75%</span>
-              <span class="stat-name">Marble Flooring</span>
-            </div>
-            <div class="mini-stat">
-              <span class="stat-num">72%</span>
-              <span class="stat-name">Pool & Lake Edge</span>
-            </div>
+            <input type="range" id="timelapse-scrubber" min="0" max="25" value="0" class="w-full" oninput="cameraManager.updateModalFrame(cameraManager.activeCamData, parseInt(this.value))" />
           </div>
         </div>
 
-        <!-- Filter Tags for Cameras -->
-        <div class="cam-filter-bar">
-          <button class="filter-chip active" data-filter="all">All (19)</button>
-          <button class="filter-chip" data-filter="exterior-front">Front (4)</button>
-          <button class="filter-chip" data-filter="exterior-rear">Rear & Pool (4)</button>
-          <button class="filter-chip" data-filter="interior-gf">GF Interior (3)</button>
-          <button class="filter-chip" data-filter="interior-ff">FF Bedrooms (4)</button>
-          <button class="filter-chip" data-filter="interior-lg">LG Lobby (1)</button>
-          <button class="filter-chip" data-filter="bim-render">BIM Design (3)</button>
-        </div>
-
-        <!-- Camera List Items -->
-        <div class="camera-list" id="camera-list-container">
-          <!-- Dynamically populated by app.js from SITE_DATA -->
-        </div>
-      </div>
-    </aside>
-
-    <!-- Right Sidebar: BIM Digital Twin Controls & Analytics -->
-    <aside id="sidebar-right" class="glass-panel sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-title">
-          <i class="fa-solid fa-layer-group"></i> Twin Controls & Analytics
-        </div>
-        <button id="collapse-right-btn" class="sidebar-toggle-btn" title="Toggle Panel">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
-      </div>
-
-      <div class="sidebar-scrollable">
-        <!-- 3D Villa State: Render vs Site -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-wand-magic-sparkles"></i> 3D Villa State Mode</span>
-            <span class="widget-val" id="current-state-badge">Oct 2026 Site</span>
-          </div>
-          <div class="state-card-grid">
-            <button class="state-card-btn active" id="widget-state-site">
-              <i class="fa-solid fa-person-digging"></i>
-              <div class="state-card-text">
-                <span class="state-card-title">Site (Oct 2026)</span>
-                <span class="state-card-desc">As-built raw concrete, shoring, scaffolding</span>
-              </div>
-            </button>
-            <button class="state-card-btn" id="widget-state-render">
-              <i class="fa-solid fa-gem"></i>
-              <div class="state-card-text">
-                <span class="state-card-title">Design (Render)</span>
-                <span class="state-card-desc">Finished ONIX luxury villa, pool & lawns</span>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        <!-- Floor Level Isolation -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-cubes"></i> BIM Floor Level Isolation</span>
-          </div>
-          <div class="floor-grid-group">
-            <button class="floor-btn active" data-floor="all">All Floors</button>
-            <button class="floor-btn" data-floor="roof">Roof Suite</button>
-            <button class="floor-btn" data-floor="first">First Floor (FF)</button>
-            <button class="floor-btn" data-floor="ground">Ground Floor (GF)</button>
-            <button class="floor-btn" data-floor="basement">Lower Ground (LG)</button>
-          </div>
-        </div>
-
-        <!-- Sun & Solar Study Simulator -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-sun-plant-wilt"></i> Dubai Solar Study</span>
-            <span class="widget-val" id="sun-time-display">13:00 (1:00 PM)</span>
-          </div>
-          <div class="slider-wrapper">
-            <input type="range" id="solar-slider" min="6" max="20" step="0.25" value="13" class="custom-range" />
-            <div class="slider-ticks">
-              <span>06:00</span>
-              <span>10:00</span>
-              <span>13:00</span>
-              <span>17:00</span>
-              <span>20:00</span>
-            </div>
-          </div>
-          <div class="solar-stats">
-            <div><i class="fa-solid fa-location-dot"></i> Lat 25.06° N, Long 55.15° E</div>
-            <div id="solar-azimuth">Azimuth: 195° • Altitude: 58°</div>
-          </div>
-        </div>
-
-        <!-- BIM Layer Visibility Toggles -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-sliders"></i> BIM Model Layers</span>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-building"></i> Architectural Superstructure</span>
-              <input type="checkbox" id="layer-arch" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-water"></i> Swimming Pool, Water Feature & Spa</span>
-              <input type="checkbox" id="layer-pool" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-tree"></i> Palms, Landscaping & Shoreline</span>
-              <input type="checkbox" id="layer-landscape" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-camera-rotate"></i> 3D Camera Pins & Frustum Cones</span>
-              <input type="checkbox" id="layer-cameras" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-cubes-stacked"></i> Scaffolding, Survey Theodolite & Assets</span>
-              <input type="checkbox" id="layer-construction" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-car"></i> Vehicles & Carport Lighting</span>
-              <input type="checkbox" id="layer-vehicles" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-          <div class="layer-item">
-            <label class="switch-label">
-              <span><i class="fa-solid fa-border-all"></i> Spatial Grid & Coordinates</span>
-              <input type="checkbox" id="layer-grid" checked />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Site Environment Telemetry Widget -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-cloud-sun"></i> Site Climate Telemetry</span>
-            <span class="status-indicator live">Dubai Live</span>
-          </div>
-          <div class="telemetry-grid">
-            <div class="telem-box">
-              <i class="fa-solid fa-temperature-high telem-icon"></i>
-              <div class="telem-data">
-                <span class="telem-val">34°C</span>
-                <span class="telem-sub">Ambient Temp</span>
-              </div>
-            </div>
-            <div class="telem-box">
-              <i class="fa-solid fa-droplet telem-icon"></i>
-              <div class="telem-data">
-                <span class="telem-val">48%</span>
-                <span class="telem-sub">Humidity</span>
-              </div>
-            </div>
-            <div class="telem-box">
-              <i class="fa-solid fa-wind telem-icon"></i>
-              <div class="telem-data">
-                <span class="telem-val">14 km/h</span>
-                <span class="telem-sub">Wind NW</span>
-              </div>
-            </div>
-            <div class="telem-box">
-              <i class="fa-solid fa-sun telem-icon"></i>
-              <div class="telem-data">
-                <span class="telem-val">UV 8.5</span>
-                <span class="telem-sub">Solar Index</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Building Spec Sheet -->
-        <div class="dashboard-widget glass-card">
-          <div class="widget-row-header">
-            <span class="widget-label"><i class="fa-solid fa-file-contract"></i> Project Specifications</span>
-          </div>
-          <div class="spec-table">
-            <div class="spec-row">
-              <span class="spec-key">Development</span>
-              <span class="spec-val">Jumeirah Islands, Cluster 3</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Typology</span>
-              <span class="spec-val">Ultra-Luxury Custom Villa (LG+G+1+R)</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Plot Area</span>
-              <span class="spec-val">12,450 sq.ft</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Built Up Area</span>
-              <span class="spec-val">9,800 sq.ft</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Consultant</span>
-              <span class="spec-val">ONIX Engineering Consultancy</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Contractor</span>
-              <span class="spec-val">VH Contracting LLC</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Structure</span>
-              <span class="spec-val">RCC Post-Tensioned Slabs</span>
-            </div>
-            <div class="spec-row">
-              <span class="spec-key">Waterfront</span>
-              <span class="spec-val">Private Lake Frontage & Infinity Pool</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </aside>
-
-    <!-- Bottom Camera Navigation Drawer / Carousel -->
-    <div id="bottom-camera-bar" class="glass-panel">
-      <div class="bottom-bar-header">
-        <div class="bottom-bar-title">
-          <i class="fa-solid fa-camera-retro"></i>
-          <span>Interactive Camera Array & Timelapse Vault</span>
-          <span class="cam-hint">— 16 Real-Time On-Site Cameras (460+ Captures) + 3 Architectural Design Concepts</span>
-        </div>
-        <div class="bottom-bar-actions">
-          <button id="btn-prev-cam" class="nav-arrow-btn" title="Previous Camera"><i class="fa-solid fa-chevron-left"></i></button>
-          <button id="btn-next-cam" class="nav-arrow-btn" title="Next Camera"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-      </div>
-      <div class="cam-carousel-track" id="cam-carousel-track">
-        <!-- Dynamically populated thumbnails -->
+        <!-- Thumbnails Strip -->
+        <div id="timelapse-thumbs-strip" class="w-full mt-2 flex gap-1.5 overflow-x-auto py-1"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Active Camera View Modal / Timelapse Inspector Hub -->
-    <div id="camera-modal" class="camera-modal-overlay hidden">
-      <div class="camera-modal-card glass-card">
-        <div class="modal-header">
-          <div class="modal-header-left">
-            <div class="cam-modal-badge" id="modal-cam-badge">CAM-01</div>
-            <div>
-              <h3 class="modal-cam-title" id="modal-cam-title">Exterior Front Main Entrance</h3>
-              <div class="modal-cam-subtitle" id="modal-cam-subtitle">Jumeirah Islands 003 • Construction Site Capture</div>
-            </div>
-          </div>
-          <div class="modal-header-controls">
-            <!-- View Mode Switcher -->
-            <div class="mode-pill-group">
-              <button class="mode-pill active" id="btn-mode-photo" title="High-Res Site Capture Photo">
-                <i class="fa-solid fa-image"></i> <span>Site Capture</span>
-              </button>
-              <button class="mode-pill" id="btn-mode-split" title="Split Compare 3D vs Site Capture">
-                <i class="fa-solid fa-columns"></i> <span>Side-by-Side</span>
-              </button>
-              <button class="mode-pill" id="btn-mode-overlay" title="Interactive Transparency Overlay">
-                <i class="fa-solid fa-clone"></i> <span>Twin Overlay</span>
-              </button>
-            </div>
-            
-            <button class="modal-action-btn" id="btn-fly-in-twin" title="Fly 3D Viewport to this Angle">
-              <i class="fa-solid fa-paper-plane"></i> <span>Fly in 3D</span>
-            </button>
-            
-            <button class="modal-close-btn" id="modal-close-btn" title="Return to 3D Viewport">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
+  <!-- ==================== ANTIGRAVITY IDE SDK MODAL ==================== -->
+  <div id="ide-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="spatial-glass max-w-3xl w-full rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
+      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
+        <div class="flex items-center gap-2.5 font-display">
+          <i class="fa-solid fa-terminal text-sky-400"></i>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-white">Antigravity IDE • Digital Twin SDK & Event Stream</h2>
         </div>
+        <button id="btn-close-ide" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-5 space-y-4 text-xs text-slate-300 max-h-[78vh] overflow-y-auto">
+        <p class="leading-relaxed">
+          Control this Digital Twin programmatically from the Antigravity IDE, external dashboards, or parent iframes using <code class="text-sky-300 font-mono">window.JumeirahTwinAPI</code> or <code class="text-sky-300 font-mono">window.postMessage</code>.
+        </p>
 
-        <div class="modal-body">
-          <!-- Main Photo / Split Screen Viewer Area -->
-          <div class="photo-viewer-container" id="photo-viewer-container">
-            <!-- Normal Photo View -->
-            <div class="single-photo-view" id="single-photo-view">
-              <img id="modal-site-image" src="" alt="Site View" />
-              <!-- Zoom Pan Controls -->
-              <div class="photo-zoom-hud">
-                <button id="zoom-in-btn" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
-                <button id="zoom-out-btn" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
-                <button id="zoom-reset-btn" title="Reset View"><i class="fa-solid fa-arrows-rotate"></i></button>
-              </div>
-            </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="space-y-1.5">
+            <div class="font-semibold text-white">SDK Method Calls:</div>
+            <pre id="sdk-code-block" class="bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[11px] text-sky-300 overflow-x-auto leading-relaxed">// 1. Set Phase: 'shoring' | 'site' | 'render'
+window.JumeirahTwinAPI.setPhase('site');
 
-            <!-- Side-by-Side Split View Container -->
-            <div class="split-photo-view hidden" id="split-photo-view">
-              <div class="split-pane split-pane-3d">
-                <div class="split-pane-label"><i class="fa-solid fa-cube"></i> 3D Digital Twin View</div>
-                <img id="modal-split-3d" src="20840-1748865490206.jpeg" alt="3D Twin View" />
-              </div>
-              <div class="split-divider-line"></div>
-              <div class="split-pane split-pane-site">
-                <div class="split-pane-label"><i class="fa-solid fa-camera"></i> Actual Site Photo Capture</div>
-                <img id="modal-split-image" src="" alt="Actual Site Capture" />
-              </div>
-            </div>
+// 2. Fly to Photo-Matched Camera:
+window.JumeirahTwinAPI.setCamera('rearOrtho');
 
-            <!-- Overlay Comparison View -->
-            <div class="overlay-photo-view hidden" id="overlay-photo-view">
-              <div class="overlay-3d-bg">
-                <img src="20840-1748865490206.jpeg" style="width:100%;height:100%;object-fit:contain;" alt="3D Model" />
-              </div>
-              <div class="overlay-img-layer" id="overlay-img-layer">
-                <img id="modal-overlay-image" src="" alt="Overlay Capture" />
-              </div>
-              <div class="overlay-control-slider-box glass-card">
-                <span>3D Twin</span>
-                <input type="range" id="overlay-opacity-slider" min="0" max="100" value="65" />
-                <span>Site Photo</span>
-              </div>
-            </div>
+// 3. Slice BIM Model at Y = 3.6m (First Floor Slab):
+window.JumeirahTwinAPI.setSectionCut({ y: 3.6, x: 16.0 });
+
+// 4. Set Atmosphere: 'day' | 'dusk' | 'golden' | 'night'
+window.JumeirahTwinAPI.setAtmosphere('dusk');</pre>
           </div>
 
-          <!-- Interactive Timelapse Timeline Player Bar -->
-          <div class="timelapse-player-bar glass-card">
-            <div class="tl-left-controls">
-              <button id="btn-timelapse-play" class="tl-play-btn" title="Play / Pause Timelapse">
-                <i class="fa-solid fa-play"></i>
-                <span>Play Timelapse</span>
+          <div class="space-y-1.5 flex flex-col">
+            <div class="font-semibold text-white flex items-center justify-between">
+              <span>Live SDK Event Stream:</span>
+              <span class="text-[10px] font-mono text-emerald-400">● LISTENING</span>
+            </div>
+            <div id="sdk-console" class="flex-1 bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[10px] text-emerald-400 overflow-y-auto space-y-1 max-h-44">
+              <div>[SYS] JumeirahTwinAPI v4.2 initialized</div>
+              <div>[PMREM] Procedural PBR materials & textures compiled</div>
+              <div>[BIM] 5 spatial telemetry nodes online</div>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button id="btn-test-sdk" class="flex-1 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium transition">
+                Trigger Test SDK
               </button>
-              <button id="btn-timelapse-speed" class="tl-speed-btn" title="Toggle Speed">1x Speed</button>
-              <button id="btn-sync-sun" class="tl-sync-btn" title="Sync 3D Sun Position with Photo Capture Time">
-                <i class="fa-solid fa-sun"></i>
-                <span>Sync 3D Sun</span>
+              <button id="btn-copy-sdk" class="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold transition flex items-center justify-center gap-1.5">
+                <i class="fa-regular fa-copy"></i> Copy SDK
               </button>
-            </div>
-
-            <div class="tl-center-scrubber">
-              <div class="tl-time-indicator">
-                <span id="timelapse-time-label">14 Oct 2026 • 13:30 (1:30 PM)</span>
-                <span id="timelapse-counter" class="tl-count">Capture 12 of 26</span>
-              </div>
-              <input type="range" id="timelapse-scrubber" min="0" max="25" value="12" class="custom-range" />
-            </div>
-          </div>
-
-          <!-- Quick Thumbnails Strip for All Captures of this Station -->
-          <div class="timelapse-thumbs-strip" id="timelapse-thumbs-strip">
-            <!-- Dynamically populated frames -->
-          </div>
-
-          <!-- Bottom Metadata Telemetry Strip for Active Camera -->
-          <div class="camera-meta-panel">
-            <div class="cam-data-chip">
-              <span class="chip-label">Camera Height</span>
-              <span class="chip-val" id="cam-meta-height">1.65 m (Eye Level)</span>
-            </div>
-            <div class="cam-data-chip">
-              <span class="chip-label">Viewing Angle (Azimuth)</span>
-              <span class="chip-val" id="cam-meta-azimuth">180° (South Facade)</span>
-            </div>
-            <div class="cam-data-chip">
-              <span class="chip-label">Field of View</span>
-              <span class="chip-val" id="cam-meta-fov">78° Wide Angle</span>
-            </div>
-            <div class="cam-data-chip">
-              <span class="chip-label">Source File</span>
-              <span class="chip-val font-mono" id="cam-meta-filename">Exterior Front Main Entrance...</span>
-            </div>
-            <div class="cam-data-chip">
-              <span class="chip-label">Capture Timestamp</span>
-              <span class="chip-val" id="cam-meta-date">14 Oct 2026 13:30</span>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Pro Keyboard Shortcuts Reference Modal -->
-    <div id="shortcuts-modal" class="shortcuts-modal-overlay hidden">
-      <div class="shortcuts-card glass-card">
-        <div class="shortcuts-header">
-          <div class="shortcuts-title">
-            <i class="fa-solid fa-keyboard"></i>
-            <span>Executive Keyboard Shortcuts & Navigation Guide</span>
-          </div>
-          <button id="shortcuts-close-btn" class="modal-close-btn">&times;</button>
-        </div>
-        <div class="shortcuts-grid">
-          <div class="sc-row"><kbd>1</kbd> - <kbd>5</kbd><span>Preset Camera Views (Front, Rear, Aerial, Entrance, Lake)</span></div>
-          <div class="sc-row"><kbd>Space</kbd><span>Toggle 360° Cinematic Orbital Flythrough</span></div>
-          <div class="sc-row"><kbd>C</kbd><span>Toggle 3D Camera Pins & Frustum Cones</span></div>
-          <div class="sc-row"><kbd>M</kbd><span>Toggle 3D Laser Dimension / Measurement Tool</span></div>
-          <div class="sc-row"><kbd>E</kbd><span>Toggle Exploded BIM Axonometric View</span></div>
-          <div class="sc-row"><kbd>L</kbd><span>Cycle Lighting (Daylight, Sunset, Night Mode, Wireframe)</span></div>
-          <div class="sc-row"><kbd>H</kbd><span>Toggle Minimalist Clean HUD Mode</span></div>
-          <div class="sc-row"><kbd>P</kbd><span>Capture High-Res Viewport Screenshot</span></div>
-          <div class="sc-row"><kbd>Esc</kbd><span>Close Photo Inspector / Return to 3D Viewport</span></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Onboarding Guide Overlay for First-time Viewers -->
-    <div id="welcome-toast" class="toast-card glass-card">
-      <div class="toast-icon"><i class="fa-solid fa-hand-sparkles"></i></div>
-      <div class="toast-content">
-        <div class="toast-title">Interactive Digital Twin Loaded</div>
-        <div class="toast-desc">
-          • <strong>Orbit / Rotate:</strong> Left Click + Drag<br>
-          • <strong>Pan:</strong> Right Click + Drag<br>
-          • <strong>Zoom:</strong> Mouse Scroll Wheel<br>
-          • <strong>Inspect Cameras:</strong> Click any floating camera pin in 3D or on the Site Radar
-        </div>
-      </div>
-      <button class="toast-close" id="toast-close-btn">&times;</button>
-    </div>
-
   </div>
 
   <!-- Application Logic Modules -->

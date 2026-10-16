@@ -1,68 +1,439 @@
 /**
- * JUMEIRAH ISLANDS DIGITAL TWIN - MAIN APPLICATION CONTROLLER
- * Integrates 3D Viewport, Camera Raycaster, Solar Simulator, BIM Layers,
- * Tactical 2D Site Minimap Radar, Exploded BIM Views, and Screenshot Capture.
- * Exposes window.JumeirahTwinAPI and handles iframe postMessage communication.
+ * JUMEIRAH ISLANDS DIGITAL TWIN - MASTER APPLICATION CONTROLLER
+ * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * 
+ * Mathematical Architecture:
+ * 1. NATURAL TRANSFORMATION: View transitions operate functorially along structure-preserving geodesics.
+ * 2. ADJUNCTION (F -| G): Macro overview context is adjoint to micro telemetry inspection.
+ * 3. ENDOMORPHISM (End(S)): All user interactions compose monoidally over an immutable state space.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Setup Three.js Scene, Camera & WebGL Renderer
+  // ----------------------------------------------------
+  // 1. THREE.JS VIEWPORT, CAMERA & RENDERER SETUP
+  // ----------------------------------------------------
   const canvas = document.getElementById('twin-canvas');
   const container = document.getElementById('viewport-3d-wrapper');
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x05070c);
-  scene.fog = new THREE.FogExp2(0x05070c, 0.0055);
+  scene.background = new THREE.Color(0x060912);
 
   const camera = new THREE.PerspectiveCamera(
     60,
     container.clientWidth / container.clientHeight,
-    0.5,
+    0.4,
     1000
   );
-  // Initial starting vantage point (Elevated Front Isometric View)
-  camera.position.set(-26, 20, 42);
+  // Default executive starting vantage point
+  camera.position.set(-11.8, 3.8, 18.8);
 
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
-    preserveDrawingBuffer: true, // Needed for high-res screenshot capture
+    preserveDrawingBuffer: true,
     powerPreference: 'high-performance'
   });
   renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
 
-  // 2. Setup OrbitControls
+  // OrbitControls setup with smooth damping
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.05;
-  controls.maxPolarAngle = Math.PI / 2 - 0.02; // Prevent going below ground
-  controls.minDistance = 3.0;
-  controls.maxDistance = 190.0;
-  controls.target.set(0, 5, 0);
+  controls.maxPolarAngle = Math.PI / 2 + 0.08;
+  controls.minDistance = 2.0;
+  controls.maxDistance = 180.0;
+  controls.target.set(1.2, 2.9, 1.2);
   controls.update();
 
-  // 3. Initialize Model, Lighting, Camera, Minimap and Measurement Managers
-  const modelBuilder = new VillaModelBuilder(scene);
+  // ----------------------------------------------------
+  // 2. SUBSYSTEM ENGINES INITIALIZATION
+  // ----------------------------------------------------
+  const modelBuilder = new VillaModelBuilder(scene, renderer);
   modelBuilder.buildAll();
 
   const lightingManager = new LightingManager(scene, renderer);
   const cameraManager = new CameraManager(scene, camera, controls, renderer.domElement, lightingManager, modelBuilder);
   const measurementTool = new MeasurementTool(scene, camera, renderer.domElement);
-  const minimap = new SiteMinimap('minimap-canvas', camera, controls, cameraManager);
+  const minimap = new SiteMinimap('radar-canvas', camera, controls, cameraManager);
 
-  // 4. Expose window.JumeirahTwinAPI for External Control & iframe PostMessage
-  initJumeirahTwinAPI(modelBuilder, cameraManager, lightingManager);
+  // ----------------------------------------------------
+  // 3. ENDOMORPHISM STATE MACHINE (End(S), o, id)
+  // ----------------------------------------------------
+  let AppState = {
+    phase: 'render',           // 'shoring' | 'site' | 'render'
+    atmosphere: 'day',         // 'day' | 'dusk' | 'golden' | 'night'
+    cadEdges: true,            // boolean
+    sectionCut: { y: 12.0, x: 16.0 },
+    activeFloor: 'all',        // 'all' | 'roof' | 'first' | 'ground' | 'basement'
+    pinsVisible: true,
+    cleanUI: false,
+    docks: {
+      left: true,
+      right: true,
+      bottom: true
+    }
+  };
 
-  // 5. Populate Sidebar and Bottom Carousel UI from SITE_DATA
-  populateCameraUI(cameraManager);
+  // Monoidal action dispatcher
+  function mutateState(endomorphism, logMessage = null) {
+    AppState = endomorphism(AppState);
+    renderAppState();
+    if (logMessage) logSDK(logMessage);
+  }
 
-  // 6. Setup UI Event Listeners
-  setupDashboardControls(lightingManager, modelBuilder, cameraManager, measurementTool, renderer, scene, camera);
+  function renderAppState() {
+    // 1. Sync Phase
+    modelBuilder.setSiteState(AppState.phase);
+    document.querySelectorAll('.phase-btn').forEach(btn => {
+      const match = btn.getAttribute('data-phase') === AppState.phase;
+      btn.className = match
+        ? 'phase-btn bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5'
+        : 'phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5';
+    });
 
-  // 7. Handle Window Resize
+    const topBar = document.getElementById('top-progress-bar');
+    const topTxt = document.getElementById('top-progress-text');
+    const landTxt = document.getElementById('log-landscape-pct');
+    const landBar = document.getElementById('log-landscape-bar');
+
+    if (AppState.phase === 'shoring') {
+      if (topBar) topBar.style.width = '62%';
+      if (topTxt) topTxt.textContent = '62% (Shoring)';
+      if (landTxt) landTxt.textContent = '10% (Excavation)';
+      if (landBar) landBar.style.width = '10%';
+    } else if (AppState.phase === 'site') {
+      if (topBar) topBar.style.width = '86.4%';
+      if (topTxt) topTxt.textContent = '86.4% (Oct 2026)';
+      if (landTxt) landTxt.textContent = '35% (Sand Staging)';
+      if (landBar) landBar.style.width = '35%';
+    } else {
+      if (topBar) topBar.style.width = '100%';
+      if (topTxt) topTxt.textContent = '100% (Render)';
+      if (landTxt) landTxt.textContent = '100% (Render)';
+      if (landBar) landBar.style.width = '100%';
+    }
+
+    // 2. Sync Atmosphere
+    lightingManager.setAtmosphere(AppState.atmosphere);
+    document.querySelectorAll('.env-btn').forEach(btn => {
+      const match = btn.getAttribute('data-env') === AppState.atmosphere;
+      btn.classList.toggle('active', match);
+    });
+    const envBadge = document.getElementById('env-mode-badge');
+    if (envBadge) {
+      envBadge.textContent = AppState.atmosphere.toUpperCase();
+    }
+
+    // 3. Sync CAD Edges
+    modelBuilder.toggleCADEdges(AppState.cadEdges);
+    const edgeBtn = document.getElementById('btn-toggle-edges');
+    if (edgeBtn) {
+      edgeBtn.innerHTML = `<i class="fa-solid fa-vector-square text-sky-300"></i> <span class="hidden md:inline">CAD Edges: ${AppState.cadEdges ? 'ON' : 'OFF'}</span>`;
+      edgeBtn.classList.toggle('active', AppState.cadEdges);
+    }
+
+    // 4. Sync Section Cut
+    modelBuilder.setSectionCut(AppState.sectionCut);
+    const yVal = document.getElementById('val-clip-y');
+    const xVal = document.getElementById('val-clip-x');
+    if (yVal) yVal.textContent = AppState.sectionCut.y >= 11.8 ? 'Full (12.0m)' : `${AppState.sectionCut.y.toFixed(1)}m`;
+    if (xVal) xVal.textContent = AppState.sectionCut.x >= 15.8 ? 'Full (16.0m)' : `${AppState.sectionCut.x.toFixed(1)}m`;
+
+    // 5. Sync Clean HUD UI
+    const leftDock = document.getElementById('left-dock');
+    const rightDock = document.getElementById('right-dock');
+    const bottomDock = document.getElementById('bottom-dock');
+    if (leftDock) leftDock.classList.toggle('dock-left-collapsed', !AppState.docks.left || AppState.cleanUI);
+    if (rightDock) rightDock.classList.toggle('dock-right-collapsed', !AppState.docks.right || AppState.cleanUI);
+    if (bottomDock) bottomDock.classList.toggle('dock-bottom-collapsed', !AppState.docks.bottom || AppState.cleanUI);
+  }
+
+  // ----------------------------------------------------
+  // 4. PUBLIC API: window.JumeirahTwinAPI & POSTMESSAGE
+  // ----------------------------------------------------
+  window.JumeirahTwinAPI = {
+    setPhase: (phaseKey) => {
+      mutateState(s => ({ ...s, phase: phaseKey }), `Phase updated -> ${phaseKey.toUpperCase()}`);
+    },
+    setCamera: (bookmarkOrId) => {
+      if (cameraManager.photoBookmarks[bookmarkOrId]) {
+        cameraManager.setPresetView(bookmarkOrId);
+        logSDK(`Camera View -> ${bookmarkOrId}`);
+      } else {
+        cameraManager.enterInspection(bookmarkOrId, false);
+      }
+    },
+    setSectionCut: (cutConfig) => {
+      mutateState(s => ({
+        ...s,
+        sectionCut: {
+          y: cutConfig.y !== undefined ? cutConfig.y : s.sectionCut.y,
+          x: cutConfig.x !== undefined ? cutConfig.x : s.sectionCut.x
+        }
+      }), `BIM Section Cut: Y=${cutConfig.y ?? 'same'}m, X=${cutConfig.x ?? 'same'}m`);
+    },
+    resetSectionCut: () => {
+      mutateState(s => ({ ...s, sectionCut: { y: 12.0, x: 16.0 } }), 'BIM Section Cut Reset');
+    },
+    setAtmosphere: (modeKey) => {
+      mutateState(s => ({ ...s, atmosphere: modeKey }), `Atmosphere -> ${modeKey.toUpperCase()}`);
+    },
+    toggleCAD: (force) => {
+      mutateState(s => ({ ...s, cadEdges: force !== undefined ? force : !s.cadEdges }), 'Toggled CAD Edges');
+    },
+    togglePins: (force) => {
+      const v = cameraManager.togglePins(force);
+      mutateState(s => ({ ...s, pinsVisible: v }), `Toggled Pins -> ${v ? 'ON' : 'OFF'}`);
+    },
+    isolateFloor: (floorName) => {
+      modelBuilder.isolateFloor(floorName);
+      mutateState(s => ({ ...s, activeFloor: floorName }), `Floor Isolation -> ${floorName.toUpperCase()}`);
+    },
+    getState: () => ({ ...AppState })
+  };
+
+  window.addEventListener('message', (event) => {
+    if (!event.data || typeof event.data !== 'object') return;
+    const { action, payload } = event.data;
+    if (window.JumeirahTwinAPI[action]) {
+      window.JumeirahTwinAPI[action](payload);
+    }
+  });
+
+  // ----------------------------------------------------
+  // 5. UI EVENT LISTENERS & BINDINGS
+  // ----------------------------------------------------
+  // Phase scrubber buttons
+  document.querySelectorAll('.phase-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.getAttribute('data-phase');
+      window.JumeirahTwinAPI.setPhase(p);
+      showToast(`Phase: ${p === 'render' ? 'ONIX Final Render' : p === 'site' ? '08 Oct 2026 Site State' : 'Superstructure & Shoring'}`);
+    });
+  });
+
+  // Camera Bookmark buttons
+  document.querySelectorAll('.cam-pill, .preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const camKey = btn.getAttribute('data-cam') || btn.getAttribute('data-view');
+      if (camKey) {
+        window.JumeirahTwinAPI.setCamera(camKey);
+        showToast(`Camera: ${camKey}`);
+      }
+    });
+  });
+
+  // Atmosphere Buttons
+  document.querySelectorAll('.env-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const env = btn.getAttribute('data-env');
+      if (env) {
+        window.JumeirahTwinAPI.setAtmosphere(env);
+        showToast(`Atmosphere: ${env.toUpperCase()}`);
+      }
+    });
+  });
+
+  // BIM Section Cut Sliders
+  const sliderClipY = document.getElementById('slider-clip-y');
+  const sliderClipX = document.getElementById('slider-clip-x');
+  const btnResetClip = document.getElementById('btn-reset-clip');
+
+  if (sliderClipY) {
+    sliderClipY.addEventListener('input', (e) => {
+      const y = parseFloat(e.target.value);
+      window.JumeirahTwinAPI.setSectionCut({ y });
+    });
+  }
+  if (sliderClipX) {
+    sliderClipX.addEventListener('input', (e) => {
+      const x = parseFloat(e.target.value);
+      window.JumeirahTwinAPI.setSectionCut({ x });
+    });
+  }
+  if (btnResetClip) {
+    btnResetClip.addEventListener('click', () => {
+      window.JumeirahTwinAPI.resetSectionCut();
+      if (sliderClipY) sliderClipY.value = 12.0;
+      if (sliderClipX) sliderClipX.value = 16.0;
+      showToast('BIM Section Cut Reset');
+    });
+  }
+
+  // CAD Edges Toggle
+  const btnToggleEdges = document.getElementById('btn-toggle-edges');
+  if (btnToggleEdges) {
+    btnToggleEdges.addEventListener('click', () => {
+      window.JumeirahTwinAPI.toggleCAD();
+      showToast(`CAD Edge Lines: ${AppState.cadEdges ? 'ON' : 'OFF'}`);
+    });
+  }
+
+  // 3D Pins Toggle
+  const btnTogglePins = document.getElementById('btn-toggle-pins');
+  if (btnTogglePins) {
+    btnTogglePins.addEventListener('click', () => {
+      window.JumeirahTwinAPI.togglePins();
+      showToast(`Spatial Pins: ${AppState.pinsVisible ? 'ON' : 'OFF'}`);
+    });
+  }
+
+  // Walk Mode Toggle
+  const btnWalkMode = document.getElementById('btn-walk-mode');
+  if (btnWalkMode) {
+    btnWalkMode.addEventListener('click', () => {
+      cameraManager.toggleWalkMode();
+      showToast(`Walk Mode: ${cameraManager.walkModeActive ? 'Active (WASD to walk)' : 'Disabled'}`);
+    });
+  }
+
+  // Cinema Drone Tour
+  const btnCinemaTour = document.getElementById('btn-cinema-tour');
+  if (btnCinemaTour) {
+    btnCinemaTour.addEventListener('click', () => {
+      cameraManager.toggleCinemaTour();
+      showToast(`Cinematic Tour: ${cameraManager.cinemaTourActive ? 'Active' : 'Stopped'}`);
+    });
+  }
+
+  // Crystal Clear Building Preset (Resets section cuts and maximizes building contrast)
+  const btnCrystalClear = document.getElementById('btn-crystal-clear');
+  if (btnCrystalClear) {
+    btnCrystalClear.addEventListener('click', () => {
+      window.JumeirahTwinAPI.resetSectionCut();
+      window.JumeirahTwinAPI.setPhase('render');
+      window.JumeirahTwinAPI.setAtmosphere('day');
+      window.JumeirahTwinAPI.setCamera('frontHero');
+      showToast('Crystal Clear Building Handover View');
+    });
+  }
+
+  // Dock Collapse Toggles
+  const btnToggleLeft = document.getElementById('btn-toggle-left');
+  const btnToggleRight = document.getElementById('btn-toggle-right');
+  const btnCleanUI = document.getElementById('btn-clean-ui');
+
+  if (btnToggleLeft) {
+    btnToggleLeft.addEventListener('click', () => {
+      mutateState(s => ({ ...s, docks: { ...s.docks, left: !s.docks.left } }));
+    });
+  }
+  if (btnToggleRight) {
+    btnToggleRight.addEventListener('click', () => {
+      mutateState(s => ({ ...s, docks: { ...s.docks, right: !s.docks.right } }));
+    });
+  }
+  if (btnCleanUI) {
+    btnCleanUI.addEventListener('click', () => {
+      mutateState(s => ({ ...s, cleanUI: !s.cleanUI }));
+      showToast(`Clean HUD Mode: ${AppState.cleanUI ? 'ON' : 'OFF'}`);
+    });
+  }
+
+  // Antigravity IDE SDK Modal
+  const btnIdeSdk = document.getElementById('btn-ide-sdk');
+  const ideModal = document.getElementById('ide-modal');
+  const btnCloseIde = document.getElementById('btn-close-ide');
+  const btnTestSdk = document.getElementById('btn-test-sdk');
+  const btnCopySdk = document.getElementById('btn-copy-sdk');
+
+  if (btnIdeSdk && ideModal) {
+    btnIdeSdk.addEventListener('click', () => ideModal.classList.remove('hidden'));
+  }
+  if (btnCloseIde && ideModal) {
+    btnCloseIde.addEventListener('click', () => ideModal.classList.add('hidden'));
+  }
+  if (btnTestSdk) {
+    btnTestSdk.addEventListener('click', () => {
+      window.JumeirahTwinAPI.setCamera('rearOrtho');
+      window.JumeirahTwinAPI.setAtmosphere('dusk');
+      showToast('SDK Test Triggered: Rear View + Blue Hour');
+    });
+  }
+  if (btnCopySdk) {
+    btnCopySdk.addEventListener('click', () => {
+      const code = document.getElementById('sdk-code-block')?.textContent || '';
+      navigator.clipboard.writeText(code);
+      showToast('SDK code copied to clipboard');
+    });
+  }
+
+  // Populate Spatial IoT Node List in Right Dock
+  populateSpatialNodesList(cameraManager);
+
+  // Populate Bottom Camera Carousel
+  populateCameraCarousel(cameraManager);
+
+  // Modal Close & Adjunction return
+  const modalCloseBtn = document.getElementById('modal-close-btn');
+  if (modalCloseBtn) {
+    modalCloseBtn.addEventListener('click', () => {
+      cameraManager.exitInspection();
+    });
+  }
+
+  // Modal Fly-in button (functorial return to 3D)
+  const btnFlyInTwin = document.getElementById('btn-fly-in-twin');
+  if (btnFlyInTwin) {
+    btnFlyInTwin.addEventListener('click', () => {
+      cameraManager.closePhotoModal();
+      showToast('Aligned 3D Viewport with Physical Camera Station');
+    });
+  }
+
+  // Solar Study Sliders in Left Dock
+  const sliderAzimuth = document.getElementById('slider-azimuth');
+  const sliderElevation = document.getElementById('slider-elevation');
+  const sliderExposure = document.getElementById('slider-bloom');
+
+  if (sliderAzimuth) {
+    sliderAzimuth.addEventListener('input', (e) => {
+      const az = parseFloat(e.target.value);
+      lightingManager.updateSunPosition(az, lightingManager.elevation);
+      document.getElementById('val-azimuth').textContent = `${Math.round(az)}°`;
+    });
+  }
+  if (sliderElevation) {
+    sliderElevation.addEventListener('input', (e) => {
+      const el = parseFloat(e.target.value);
+      lightingManager.updateSunPosition(lightingManager.azimuth, el);
+      document.getElementById('val-elevation').textContent = `${Math.round(el)}°`;
+    });
+  }
+  if (sliderExposure) {
+    sliderExposure.addEventListener('input', (e) => {
+      const ex = parseFloat(e.target.value);
+      lightingManager.setExposure(ex);
+      document.getElementById('val-bloom').textContent = ex.toFixed(2);
+    });
+  }
+
+  // Keyboard Shortcuts (1-5 views, WASD walk, C pins, M measure, E explode, L light, H hud)
+  window.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    const k = e.key.toLowerCase();
+    if (k === '1') window.JumeirahTwinAPI.setCamera('frontHero');
+    if (k === '2') window.JumeirahTwinAPI.setCamera('rearOrtho');
+    if (k === '3') window.JumeirahTwinAPI.setCamera('frontEntrance');
+    if (k === '4') window.JumeirahTwinAPI.setCamera('topYard');
+    if (k === '5') window.JumeirahTwinAPI.setCamera('parkingSide');
+    if (k === 'c') window.JumeirahTwinAPI.togglePins();
+    if (k === 'm') measurementTool.toggleMode();
+    if (k === 'h') window.JumeirahTwinAPI.toggleCleanUI?.();
+    if (k === 'l') {
+      const modes = ['day', 'dusk', 'golden', 'night'];
+      const next = modes[(modes.indexOf(AppState.atmosphere) + 1) % modes.length];
+      window.JumeirahTwinAPI.setAtmosphere(next);
+      showToast(`Atmosphere: ${next.toUpperCase()}`);
+    }
+    if (k === 'escape') {
+      cameraManager.exitInspection();
+      ideModal?.classList.add('hidden');
+    }
+  });
+
+  // Handle Window Resize
   window.addEventListener('resize', () => {
     const w = container.clientWidth;
     const h = container.clientHeight;
@@ -71,33 +442,41 @@ document.addEventListener('DOMContentLoaded', () => {
     renderer.setSize(w, h);
   });
 
-  // 8. Render Animation Loop
-  const compassNeedle = document.getElementById('compass-needle');
+  // Initial State Rendering
+  renderAppState();
+  cameraManager.selectSpatialNode(cameraManager.spatialNodes[0], false);
+
+  // ----------------------------------------------------
+  // 6. ANIMATION & TELEMETRY DIAGNOSTICS LOOP
+  // ----------------------------------------------------
+  let lastTime = performance.now();
+  let frameCount = 0;
+  const fpsEl = document.getElementById('stat-fps');
 
   function animate(time) {
     requestAnimationFrame(animate);
 
-    // Update Tween animations
+    // Update Tween interpolations
     if (typeof TWEEN !== 'undefined') {
       TWEEN.update();
     }
 
-    // Update camera controls
     controls.update();
-
-    // Update pulsing camera markers & water ripple offsets
     cameraManager.update(time);
     modelBuilder.update(time);
 
-    // Draw real-time 2D Minimap Radar
+    // Redraw 2D Radar Minimap
     if (minimap) {
       minimap.draw();
     }
 
-    // Update Compass needle based on camera azimuth
-    if (compassNeedle) {
-      const angle = controls.getAzimuthalAngle();
-      compassNeedle.style.transform = `rotate(${-angle * (180 / Math.PI)}deg)`;
+    // Diagnostics FPS computation
+    frameCount++;
+    const now = performance.now();
+    if (now - lastTime >= 1000) {
+      if (fpsEl) fpsEl.textContent = Math.round((frameCount * 1000) / (now - lastTime));
+      frameCount = 0;
+      lastTime = now;
     }
 
     renderer.render(scene, camera);
@@ -107,444 +486,77 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ----------------------------------------------------
-// PUBLIC API: window.JumeirahTwinAPI & POSTMESSAGE
+// UI POPULATION & UTILITY HELPERS
 // ----------------------------------------------------
-function initJumeirahTwinAPI(modelBuilder, cameraManager, lightingManager) {
-  window.JumeirahTwinAPI = {
-    // 1. Switch between 'render' (Finished ONIX) and 'site' (Oct 2026 Construction)
-    setSiteState: (state) => {
-      const s = state === 'render' ? 'render' : 'site';
-      modelBuilder.setSiteState(s);
+function populateSpatialNodesList(cameraManager) {
+  const container = document.getElementById('pins-list-container');
+  if (!container) return;
+  container.innerHTML = '';
 
-      // Sync Header Toggle Buttons
-      document.getElementById('btn-state-site')?.classList.toggle('active', s === 'site');
-      document.getElementById('btn-state-render')?.classList.toggle('active', s === 'render');
-
-      // Sync Sidebar Widget Buttons
-      document.getElementById('widget-state-site')?.classList.toggle('active', s === 'site');
-      document.getElementById('widget-state-render')?.classList.toggle('active', s === 'render');
-
-      // Sync Sidebar Text Badge
-      const badge = document.getElementById('current-state-badge');
-      if (badge) {
-        badge.innerText = s === 'render' ? 'Finished Design' : 'Oct 2026 Site';
-      }
-
-      // Notify parent frame if embedded
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({
-          type: 'TWIN_STATE_CHANGED',
-          state: s
-        }, '*');
-      }
-    },
-
-    // 2. Smoothly fly camera: 'frontRender' | 'rearPool' | 'rearShoring' | 'frontYardTop' | 'carport'
-    setCameraView: (view) => {
-      switch (view) {
-        case 'frontRender':
-          cameraManager.flyTo({ x: -22.0, y: 5.5, z: 25.0 }, { x: 2.0, y: 6.5, z: 0.0 }, 70, 1200);
-          break;
-        case 'rearPool':
-          cameraManager.flyTo({ x: 0.0, y: 4.0, z: -34.0 }, { x: 0.0, y: 7.5, z: 0.0 }, 75, 1200);
-          break;
-        case 'rearShoring':
-          cameraManager.flyTo({ x: -28.0, y: 8.5, z: -34.0 }, { x: 4.0, y: 6.5, z: -2.0 }, 80, 1200);
-          break;
-        case 'frontYardTop':
-          cameraManager.flyTo({ x: 0.0, y: 15.0, z: 14.0 }, { x: 0.0, y: 0.5, z: 26.0 }, 85, 1200);
-          break;
-        case 'carport':
-          cameraManager.flyTo({ x: 22.0, y: 6.0, z: 26.0 }, { x: -4.0, y: 5.5, z: 0.0 }, 78, 1200);
-          break;
-        case 'front':
-        case 'rear':
-        case 'aerial':
-        case 'entry':
-        case 'lake':
-        case 'orbit':
-          cameraManager.setPresetView(view);
-          break;
-        default:
-          console.warn(`[JumeirahTwinAPI] Unknown camera view preset: '${view}'`);
-          break;
-      }
-
-      // Sync active state on preset buttons if matching
-      document.querySelectorAll('.preset-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-view') === view);
-      });
-    },
-
-    // 3. Set Lighting Mode: 'day' | 'dusk' | 'night' | 'wireframe'
-    setEnvironment: (env) => {
-      const envKey = env === 'dusk' ? 'sunset' : env;
-      if (envKey === 'wireframe') {
-        modelBuilder.setWireframeMode(true);
-        lightingManager.setEnvironmentPreset('wireframe');
-      } else {
-        modelBuilder.setWireframeMode(false);
-        lightingManager.setEnvironmentPreset(envKey);
-      }
-
-      // Sync active UI buttons
-      document.querySelectorAll('.env-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-env') === envKey);
-      });
-    },
-
-    // 4. Exploded Axonometric BIM Toggle
-    explodeBIM: (enable) => {
-      modelBuilder.setExplodeBIM(enable);
-      document.getElementById('btn-explode-bim')?.classList.toggle('active', enable);
-    },
-
-    // 5. Select Camera Station by ID
-    selectCamera: (camId) => {
-      cameraManager.selectCamera(camId, true);
-    },
-
-    // 6. Query Current State
-    getState: () => ({
-      siteState: modelBuilder.siteState,
-      environment: lightingManager.currentEnv,
-      activeCamera: cameraManager.activeCameraId,
-      isExploded: modelBuilder.isExploded
-    })
-  };
-
-  // Listen for iframe postMessage from parent dashboard (React / Next.js / Vue)
-  window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'TWIN_COMMAND') {
-      const { action, payload } = event.data;
-      if (action === 'SET_STATE') {
-        window.JumeirahTwinAPI.setSiteState(payload);
-      } else if (action === 'SET_VIEW' || action === 'SET_CAMERA') {
-        window.JumeirahTwinAPI.setCameraView(payload);
-      } else if (action === 'SET_ENVIRONMENT') {
-        window.JumeirahTwinAPI.setEnvironment(payload);
-      } else if (action === 'EXPLODE_BIM') {
-        window.JumeirahTwinAPI.explodeBIM(payload);
-      } else if (action === 'SELECT_CAMERA') {
-        window.JumeirahTwinAPI.selectCamera(payload);
-      }
-    }
+  cameraManager.spatialNodes.forEach((node, idx) => {
+    const btn = document.createElement('button');
+    btn.className = `spatial-node-item w-full text-left px-3 py-2 rounded-xl text-xs border transition flex items-center justify-between ${
+      idx === 0 ? 'active bg-sky-500/20 border-sky-400 text-white' : 'bg-slate-950/50 hover:bg-slate-900 border-white/5 text-slate-300'
+    }`;
+    btn.setAttribute('data-node-code', node.code);
+    btn.innerHTML = `
+      <div class="flex items-center gap-2 truncate">
+        <span class="px-1.5 py-0.5 rounded bg-sky-500/20 border border-sky-400/30 text-sky-300 font-mono text-[10px] font-bold">${node.code}</span>
+        <span class="truncate font-medium">${node.title}</span>
+      </div>
+      <span class="text-[10px] font-mono text-emerald-400 ml-2 font-semibold">${node.badge}</span>
+    `;
+    btn.addEventListener('click', () => {
+      cameraManager.selectSpatialNode(node, true);
+    });
+    container.appendChild(btn);
   });
-
-  console.log('[JumeirahTwinAPI] Loaded and ready for programmatic & iframe postMessage commands.');
 }
 
-// ----------------------------------------------------
-// UI POPULATION: CAMERA LIST & BOTTOM CAROUSEL
-// ----------------------------------------------------
-function populateCameraUI(cameraManager) {
-  const cameras = window.SITE_DATA.cameras;
-  const listContainer = document.getElementById('camera-list-container');
-  const carouselTrack = document.getElementById('cam-carousel-track');
-  const badgeCount = document.getElementById('camera-count-badge');
+function populateCameraCarousel(cameraManager) {
+  const container = document.getElementById('cam-carousel-track');
+  if (!container) return;
+  container.innerHTML = '';
 
-  if (!listContainer || !carouselTrack) return;
-
-  listContainer.innerHTML = '';
-  carouselTrack.innerHTML = '';
-  if (badgeCount) badgeCount.innerText = `${cameras.length} Stations`;
-
-  cameras.forEach((cam, idx) => {
-    let pillClass = 'cat-pill-front';
-
-    if (cam.category === 'bim-render') {
-      pillClass = 'cat-pill-bim';
-    } else if (cam.category === 'exterior-front') {
-      pillClass = 'cat-pill-front';
-    } else if (cam.category === 'exterior-rear') {
-      pillClass = 'cat-pill-rear';
-    } else if (cam.category === 'interior-gf') {
-      pillClass = 'cat-pill-gf';
-    } else if (cam.category === 'interior-ff') {
-      pillClass = 'cat-pill-ff';
-    } else if (cam.category === 'interior-lg') {
-      pillClass = 'cat-pill-lg';
-    }
-
-    const frameCount = cam.timelapseFrames?.length || 1;
-    const imgSrc = encodeURI(cam.filename);
-
-    // 1. Sidebar Card Item
+  const cameras = cameraManager.camerasData || [];
+  cameras.forEach((cam) => {
     const card = document.createElement('div');
-    card.className = `camera-card-item ${idx === 0 ? 'active' : ''}`;
+    card.className = 'carousel-card spatial-card p-2 rounded-xl border border-white/10 hover:border-sky-400/50 transition cursor-pointer flex-shrink-0';
+    card.style.width = '165px';
     card.setAttribute('data-cam-id', cam.id);
-    card.setAttribute('data-category', cam.category);
-
     card.innerHTML = `
-      <div class="cam-thumb-wrapper">
-        <img class="cam-thumb-img" src="${imgSrc}" alt="${cam.title}" loading="lazy" />
-        <span class="cam-pill-tag ${pillClass}">${cam.id}</span>
+      <div class="relative w-full h-20 rounded-lg overflow-hidden bg-slate-950 mb-1.5">
+        <img src="${cam.filename}" alt="${cam.title}" class="w-full h-full object-cover" loading="lazy" />
+        <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-slate-950/80 font-mono text-[9px] text-sky-300 font-bold border border-white/10">${cam.id}</span>
       </div>
-      <div class="cam-card-info">
-        <div class="cam-card-title">${cam.title}</div>
-        <div class="cam-card-meta">
-          <span><i class="fa-solid fa-compass"></i> ${cam.azimuth.split(' ')[0]}</span>
-          <span><i class="fa-solid fa-arrows-up-down"></i> ${cam.height.split(' ')[0]}</span>
-          <span><i class="fa-solid fa-images"></i> ${frameCount} frames</span>
-        </div>
-        <div class="cam-card-date">${cam.date.split('•')[0]}</div>
-      </div>
+      <div class="text-[11px] font-bold text-white truncate">${cam.title}</div>
+      <div class="text-[10px] text-slate-400 font-mono truncate">${cam.date || 'Oct 2026 Site'}</div>
     `;
-
     card.addEventListener('click', () => {
-      cameraManager.selectCamera(cam.id, true);
+      cameraManager.enterInspection(cam.id, true);
     });
-
-    listContainer.appendChild(card);
-
-    // 2. Bottom Carousel Thumbnail Item
-    const thumb = document.createElement('div');
-    thumb.className = `carousel-thumb-item ${idx === 0 ? 'active' : ''}`;
-    thumb.setAttribute('data-cam-id', cam.id);
-    thumb.setAttribute('data-category', cam.category);
-
-    thumb.innerHTML = `
-      <span class="carousel-cam-tag ${pillClass}">${cam.id}</span>
-      <img src="${imgSrc}" alt="${cam.title}" loading="lazy" />
-      <div class="carousel-thumb-label">${cam.title}</div>
-      <div class="carousel-thumb-badge">${frameCount} frames</div>
-    `;
-
-    thumb.addEventListener('click', () => {
-      cameraManager.selectCamera(cam.id, true);
-    });
-
-    carouselTrack.appendChild(thumb);
-  });
-
-  // Carousel Arrow buttons
-  document.getElementById('btn-prev-cam')?.addEventListener('click', () => {
-    carouselTrack.scrollBy({ left: -280, behavior: 'smooth' });
-  });
-
-  document.getElementById('btn-next-cam')?.addEventListener('click', () => {
-    carouselTrack.scrollBy({ left: 280, behavior: 'smooth' });
+    container.appendChild(card);
   });
 }
 
-// ----------------------------------------------------
-// UI DASHBOARD CONTROLS & EVENT BINDINGS
-// ----------------------------------------------------
-function setupDashboardControls(lightingManager, modelBuilder, cameraManager, measurementTool, renderer, scene, camera) {
-  // 1. Dual-State Switcher Buttons (Top Header & Sidebar Widget)
-  const btnSiteHeader = document.getElementById('btn-state-site');
-  const btnRenderHeader = document.getElementById('btn-state-render');
-  const widgetSite = document.getElementById('widget-state-site');
-  const widgetRender = document.getElementById('widget-state-render');
+function logSDK(msg) {
+  const box = document.getElementById('sdk-console');
+  if (!box) return;
+  const line = document.createElement('div');
+  const time = new Date().toLocaleTimeString();
+  line.textContent = `[${time}] ${msg}`;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
 
-  btnSiteHeader?.addEventListener('click', () => window.JumeirahTwinAPI.setSiteState('site'));
-  btnRenderHeader?.addEventListener('click', () => window.JumeirahTwinAPI.setSiteState('render'));
-  widgetSite?.addEventListener('click', () => window.JumeirahTwinAPI.setSiteState('site'));
-  widgetRender?.addEventListener('click', () => window.JumeirahTwinAPI.setSiteState('render'));
-
-  // 2. Environment Mode Buttons (Day / Sunset / Night / Wireframe)
-  const envButtons = document.querySelectorAll('.env-btn[data-env]');
-  envButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const env = btn.getAttribute('data-env');
-      window.JumeirahTwinAPI.setEnvironment(env);
-    });
-  });
-
-  // 3. Solar Study Slider
-  const solarSlider = document.getElementById('solar-slider');
-  const sunTimeDisplay = document.getElementById('sun-time-display');
-
-  solarSlider?.addEventListener('input', (e) => {
-    const val = parseFloat(e.target.value);
-    const hour = Math.floor(val);
-    const min = Math.round((val - hour) * 60);
-    const minStr = min < 10 ? `0${min}` : min;
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
-
-    if (sunTimeDisplay) {
-      sunTimeDisplay.innerText = `${hour < 10 ? '0' : ''}${hour}:${minStr} (${displayHour}:${minStr} ${ampm})`;
-    }
-
-    lightingManager.setTimeOfDay(val);
-  });
-
-  // 4. BIM Layer Toggles
-  const layers = [
-    { id: 'layer-arch', name: 'arch' },
-    { id: 'layer-pool', name: 'pool' },
-    { id: 'layer-landscape', name: 'landscape' },
-    { id: 'layer-cameras', name: 'cameras' },
-    { id: 'layer-construction', name: 'construction' },
-    { id: 'layer-vehicles', name: 'vehicles' },
-    { id: 'layer-grid', name: 'grid' }
-  ];
-
-  layers.forEach(l => {
-    const chk = document.getElementById(l.id);
-    chk?.addEventListener('change', (e) => {
-      if (l.name === 'cameras') {
-        cameraManager.cameraGroup.visible = e.target.checked;
-      } else {
-        modelBuilder.setLayerVisibility(l.name, e.target.checked);
-      }
-    });
-  });
-
-  // 5. Floor Level Isolation Buttons
-  document.querySelectorAll('button[data-floor]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const floor = btn.getAttribute('data-floor');
-      document.querySelectorAll('button[data-floor]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      modelBuilder.isolateFloor(floor);
-    });
-  });
-
-  // 6. Exploded BIM Toggle Button
-  const btnExplode = document.getElementById('btn-explode-bim');
-  btnExplode?.addEventListener('click', () => {
-    const nextState = !modelBuilder.isExploded;
-    window.JumeirahTwinAPI.explodeBIM(nextState);
-    if (nextState) {
-      btnExplode.innerHTML = '<i class="fa-solid fa-compress"></i> <span>Collapse BIM</span>';
-    } else {
-      btnExplode.innerHTML = '<i class="fa-solid fa-layer-group"></i> <span>Explode BIM</span>';
-    }
-  });
-
-  // 7. Camera Category Filter Chips
-  document.querySelectorAll('.filter-chip[data-filter]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const filter = chip.getAttribute('data-filter');
-      document.querySelectorAll('.filter-chip[data-filter]').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-
-      document.querySelectorAll('.camera-card-item, .carousel-thumb-item').forEach(item => {
-        const cat = item.getAttribute('data-category');
-        if (filter === 'all' || cat === filter) {
-          item.style.display = 'flex';
-        } else {
-          item.style.display = 'none';
-        }
-      });
-    });
-  });
-
-  // 8. Viewport High-Res Screenshot Capture
-  const btnScreenshot = document.getElementById('btn-screenshot');
-  btnScreenshot?.addEventListener('click', () => {
-    renderer.render(scene, camera);
-    const dataURL = renderer.domElement.toDataURL('image/png');
-    const a = document.createElement('a');
-    a.href = dataURL;
-    a.download = `Jumeirah-Islands-Villa-003-Digital-Twin-${new Date().toISOString().slice(0, 10)}.png`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  });
-
-  // 9. Keyboard Shortcuts Modal Toggle
-  const shortcutsModal = document.getElementById('shortcuts-modal');
-  const btnShortcuts = document.getElementById('btn-shortcuts');
-  const btnCloseShortcuts = document.getElementById('shortcuts-close-btn');
-
-  btnShortcuts?.addEventListener('click', () => {
-    shortcutsModal?.classList.remove('hidden');
-  });
-
-  btnCloseShortcuts?.addEventListener('click', () => {
-    shortcutsModal?.classList.add('hidden');
-  });
-
-  // 10. Global Keyboard Shortcuts
-  window.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
-    switch (e.key) {
-      case '1':
-        cameraManager.setPresetView('front');
-        break;
-      case '2':
-        cameraManager.setPresetView('rear');
-        break;
-      case '3':
-        cameraManager.setPresetView('aerial');
-        break;
-      case '4':
-        cameraManager.setPresetView('entry');
-        break;
-      case '5':
-        cameraManager.setPresetView('lake');
-        break;
-      case ' ':
-        e.preventDefault();
-        cameraManager.setPresetView('orbit');
-        break;
-      case 'c':
-      case 'C':
-        const chkCam = document.getElementById('layer-cameras');
-        if (chkCam) {
-          chkCam.checked = !chkCam.checked;
-          cameraManager.cameraGroup.visible = chkCam.checked;
-        }
-        break;
-      case 'm':
-      case 'M':
-        measurementTool.toggleMode();
-        break;
-      case 'e':
-      case 'E':
-        btnExplode?.click();
-        break;
-      case 'h':
-      case 'H':
-        document.getElementById('btn-toggle-ui')?.click();
-        break;
-      case 'p':
-      case 'P':
-        btnScreenshot?.click();
-        break;
-      case '?':
-        shortcutsModal?.classList.toggle('hidden');
-        break;
-      case 'Escape':
-        document.getElementById('camera-modal')?.classList.add('hidden');
-        shortcutsModal?.classList.add('hidden');
-        measurementTool.toggleMode(false);
-        break;
-    }
-  });
-
-  // 11. Right Sidebar Collapse Toggle
-  const rightSidebar = document.getElementById('sidebar-right');
-  const collapseBtn = document.getElementById('collapse-right-btn');
-  collapseBtn?.addEventListener('click', () => {
-    rightSidebar.classList.toggle('collapsed');
-    const icon = collapseBtn.querySelector('i');
-    if (rightSidebar.classList.contains('collapsed')) {
-      icon.className = 'fa-solid fa-chevron-left';
-    } else {
-      icon.className = 'fa-solid fa-chevron-right';
-    }
-  });
-
-  // 12. Clean HUD Toggle (Fullscreen)
-  const toggleUiBtn = document.getElementById('btn-toggle-ui');
-  toggleUiBtn?.addEventListener('click', () => {
-    const sidebars = document.querySelectorAll('.sidebar, #bottom-camera-bar, #viewcube-widget, #minimap-widget');
-    sidebars.forEach(s => s.classList.toggle('hidden'));
-  });
-
-  // 13. Welcome Toast Dismiss
-  const toastClose = document.getElementById('toast-close-btn');
-  const toast = document.getElementById('welcome-toast');
-  toastClose?.addEventListener('click', () => {
-    toast?.classList.add('hidden');
-  });
-
-  setTimeout(() => {
-    toast?.classList.add('hidden');
-  }, 10000);
+function showToast(msg) {
+  const banner = document.getElementById('toast-banner');
+  const txt = document.getElementById('toast-text');
+  if (!banner || !txt) return;
+  txt.textContent = msg;
+  banner.classList.remove('opacity-0', '-translate-y-3');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    banner.classList.add('opacity-0', '-translate-y-3');
+  }, 2600);
 }

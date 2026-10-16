@@ -2,12 +2,18 @@
 
 [![Three.js](https://img.shields.io/badge/Three.js-r128-black?style=for-the-badge&logo=three.js)](https://threejs.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![Architecture](https://img.shields.io/badge/Architecture-Category%20Theory%20UI-indigo?style=for-the-badge)](#mathematical-categorical-architecture)
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![Dubai UAE](https://img.shields.io/badge/Location-Dubai%2C%20UAE-00732f?style=for-the-badge)](https://en.wikipedia.org/wiki/Jumeirah_Islands)
-[![Status](https://img.shields.io/badge/Construction%20Status-84%25%20Superstructure-blue?style=for-the-badge)](#project-telemetry)
+[![Status](https://img.shields.io/badge/Construction%20Status-86.4%25%20Site%20State-blue?style=for-the-badge)](#project-telemetry)
 
-An enterprise-grade, browser-based **3D BIM Digital Twin** and site telemetry platform for **Jumeirah Islands Luxury Villa Plot 003** in Dubai, UAE. This platform pairs a real-time WebGL architectural engine with 16 on-site timelapse camera stations (460+ high-resolution site captures), a dual-state 3D engine (*Finished ONIX Design* vs *Oct 2026 As-Built Construction*), spatial camera frustums, interactive 2D tactical radar minimap, solar study simulator, 3D laser dimensioning, and an external API for React/Next.js/Vue embedding.
+An enterprise-grade, browser-based **3D BIM Digital Twin** and site telemetry platform for **Jumeirah Islands Luxury Villa Plot 003** in Dubai, UAE, engineered for **ONIX Engineering Consultancy** and **VH Contracting LLC**.
+
+Built on rigorous **Category Theory UI/UX Principles**:
+1. **Natural Transformation for View Transitions**: View state functors $V: \mathbf{Domain} \to \mathbf{ViewportState}$ with structure-preserving geodesic cubic Bezier morphs between representation systems (3D viewport $\leftrightarrow$ 2D tactical radar $\leftrightarrow$ camera stations $\leftrightarrow$ BIM cuts).
+2. **Adjunction for Navigation Depth ($F \dashv G$)**: Dual-category depth pairing between **Macro Overview Context $\mathcal{C}$** and **Deep Telemetry Inspection $\mathcal{D}$**, guaranteeing lossless state recall, persistent breadcrumb anchors, and bijective return ($G \circ F \cong \text{id}$).
+3. **Endomorphism Monoid for Interaction ($\operatorname{End}(S), \circ, \operatorname{id}$)**: Every user interaction (phase scrubbing, BIM section clipping, atmosphere switching, CAD edges, floor isolation, laser measurement) is a pure, composable endomorphic state transformation.
 
 ---
 
@@ -24,36 +30,33 @@ Host this digital twin directly on **GitHub Pages** with zero build configuratio
 
 ## 🚀 Key Features
 
-### 🏛️ 1. Dual-State 3D Architectural Engine ('render' vs 'site')
-Seamlessly toggle the entire 3D building between two distinct project phases:
-- **`'site'` Mode (October 2026 As-Built Construction)**:
-  - Raw cured concrete slabs and columns with formwork tie holes and wood grain textures.
-  - Multi-tier scaffolding towers on east and west facades with safety planks and safety rails.
-  - Interlocking corrugated steel sheet piling and shoring along the rear lake boundary.
-  - Raw sand staging ground with access ramps, construction rebar piles, and pipe staging.
-  - Date palms wrapped in protective burlap bagging matching actual October 2026 site conditions.
-  - Survey theodolite total station on tripod with a red alignment laser beam.
-  - Contractor supply flatbed truck and safety cones.
-- **`'render'` Mode (Finished ONIX Architectural Luxury Villa)**:
-  - Pristine white ultra-high performance concrete and warm walnut vertical louvers.
-  - Floor-to-ceiling tinted bronze glazing with physical specular reflections.
-  - Filled infinity swimming pool with dynamic animated water ripples, underwater LEDs, and cascading waterfall.
-  - Sunken fire pit outdoor lounge with circular seating and glowing amber embers.
-  - Manicured green lawns, clean travertine pavers, and mature tropical date palms.
-  - Luxury metallic SUV parked in the cantilevered carport.
+### 🏛️ 1. Ultra-Photorealistic Procedural BIM Architecture
+- **Procedural PBR Textures**:
+  - Micro-cement troweled stucco with calibrated bump maps and zero washout under ACES Filmic tone mapping.
+  - Fluted American walnut panels with 3D bump shadow grooves.
+  - Signature ONIX etched wave decals across double-glazed curtain walls.
+  - Custom cyan river-vein mosaic pool texture matching real site captures (Photos #001 & #010).
+  - Refractive animated pool water with normal maps and sheer descent waterfall weir with mist particle system.
+- **Architectural Elements across 3 Levels + Roof**:
+  - Lower pool deck with travertine dining table, bronze framing, fluted wood chairs, and poolside lounge sofa.
+  - Double-height entrance atrium (Y=0 to 7.2) with floating travertine staircase and 3-ring cascading chandelier.
+  - 13.2m cantilevered carport pergola with coffer beams, recessed linear LEDs, metallic garage wall, and 3 living vertical green-wall columns.
+  - First-floor master bedroom suite with ceiling LED cove, wrap-around curtain glass, and frameless glass balustrades.
+  - Overhanging C-frame roof canopy with continuous perimeter linear LEDs and pinhole downlights.
+- **Three Chronological Construction Phases**:
+  - **Phase 1: Structure & Shoring (62%)**: Raw concrete superstructure, rear lakeside shoring piles, and excavation ramp.
+  - **Phase 2: 08 Oct 2026 Site State (86.4%)**: Terracotta sand staging beds, 6 concrete planter foundation pits, stacked scaffolding steel pipes, timber boards, portable solar site lamp post, contractor supply pickup truck, burlap-wrapped palms, and neighboring villa scaffolding.
+  - **Phase 3: ONIX Final Handover Render (100%)**: Manicured lawns, sculpted multi-tier bonsai tree, circular stone feature planter, glowing garden orbs, luxury vehicles (G-Wagon, Audi, Porsche), and mature tropical date palms.
 
-### 🎥 2. 16 Site Camera Stations with 460+ Frame Timelapse Player
-- Mapped to exact 3D spatial coordinates, azimuth angles, eye-level heights, and FOVs across the site:
-  - **Exterior**: Front Main Entrance, Front Side Wide Angle, Front Yard Top-Down, Parking & Carport, Rear Elevation, Rear Waterfront Shoring, Rear Ramp, Rear Lake Perspective.
-  - **Interior Ground Floor (GF)**: Grand Foyer with Arabic **Khutoot Calligraphy Feature Wall**, Living Room Lake Panoramic, Living & Central Corridor.
-  - **Interior First Floor (FF)**: Master Bedroom Suite, Ayat & Dua's Bedroom Suite, Nur & Jannah Bedroom Suite, Central Gallery & Flooring Works.
-  - **Interior Lower Ground (LG)**: Subterranean Wellness Lobby & Sunken Courtyard Lightwell.
-  - **BIM Design Concepts**: 3 high-resolution ONIX architectural reference renders.
-- **Interactive Timelapse Scrubber**:
-  - Drag through 21 to 46 daily snapshots taken every 30 minutes from morning to evening.
-  - **▶ Play / ⏸ Pause** timelapse animation with adjustable speed (1x, 2x, 4x).
-  - **Sync 3D Sun**: One-click button that matches Three.js solar simulation time with the photo's timestamp!
-  - Side-by-side split screen and opacity overlay slider.
+### 📐 2. Real-Time BIM Section Cut Clipping Planes
+- Interactive Y-Axis horizontal level cut slider (-3.2m to 12.0m) to slice through floor slabs and inspect interior structural framing.
+- Interactive X-Axis longitudinal cross-cut slider (-9.5m to 16.0m) to inspect structural core columns and lightwells.
+- Crisp Architectural CAD edge definition outlines (`cadEdgeLight` and `cadEdgeDark`) with one-click vector toggle.
+
+### 🎥 3. 16 Site Camera Stations with 460+ Frame Timelapse Player
+- Mapped to exact 3D spatial coordinates, azimuth angles, eye-level heights, and FOVs across the site.
+- Interactive timelapse scrubber with Play/Pause animation and speed toggling.
+- Side-by-side split screen and opacity overlay comparison with physical site captures.
 
 ### 🧭 3. Tactical 2D Site Minimap Radar
 - Top-down tactical radar in the viewport displaying the villa footprint, swimming pool, boundary fence, and lake shore.

@@ -1,0 +1,5 @@
+# Local raw media cache (1.9GB raw captures stored in cloud/catalog)
+site-pictures/
+*.tmp
+.DS_Store
+Thumbs.db

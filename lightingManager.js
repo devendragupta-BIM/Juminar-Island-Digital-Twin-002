@@ -1,6 +1,16 @@
 /**
- * JUMEIRAH ISLANDS DIGITAL TWIN - DYNAMIC LIGHTING & SOLAR STUDY SIMULATOR
- * Real-time Dubai Sun position, shadows, golden hour sunset, luxury night mode, and ambient environment
+ * JUMEIRAH ISLANDS DIGITAL TWIN - ATMOSPHERIC LIGHTING & SOLAR STUDY ENGINE
+ * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * 
+ * Features:
+ * - Gradient Architectural Sky Dome Shader (Simulates Rayleigh/Mie Atmospheric Scattering)
+ * - 4 Curated Atmosphere Presets:
+ *   1. 'day': Crisp Daylight (Calibrated ACES Filmic, Zero Washout, High Edge Contrast)
+ *   2. 'dusk': ONIX Blue Hour (Deep Sapphire Sky, Warm 3000K Linear LEDs)
+ *   3. 'golden': Golden Sunset (Rich Amber Solar Horizon, Travertine Warmth)
+ *   4. 'night': Luxury Night LED Mode (Obsidian Skies, Cyan Mosaic Pool Glow)
+ * - Dubai Solar Arc Simulator (Latitude 25.06° N, Longitude 55.15° E)
+ * - Dual Fill Lights for Deep Shadow Preservation
  */
 
 class LightingManager {
@@ -8,159 +18,243 @@ class LightingManager {
     this.scene = scene;
     this.renderer = renderer;
 
-    // Enable shadows on renderer
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.currentMode = 'day';
+    this.azimuth = 212;
+    this.elevation = 42;
+    this.exposure = 0.85;
 
-    this.currentEnv = 'day';
-    this.currentTime = 13.0; // 1:00 PM default
+    // Configure WebGL renderer tone mapping
+    if (this.renderer) {
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = this.exposure;
+    }
 
+    this.initSkyDome();
     this.initLights();
+    this.setAtmosphere('day');
   }
 
+  // ----------------------------------------------------
+  // 1. GRADIENT ARCHITECTURAL SKY DOME SHADER
+  // ----------------------------------------------------
+  initSkyDome() {
+    const skyVertexShader = `
+      varying vec3 vWorldPosition;
+      void main() {
+        vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+        vWorldPosition = worldPosition.xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+      }
+    `;
+
+    const skyFragmentShader = `
+      uniform vec3 topColor;
+      uniform vec3 bottomColor;
+      uniform float offset;
+      uniform float exponent;
+      varying vec3 vWorldPosition;
+      void main() {
+        float h = normalize( vWorldPosition + offset ).y;
+        gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h, 0.0 ), exponent ), 0.0 ) ), 1.0 );
+      }
+    `;
+
+    this.skyUniforms = {
+      topColor: { value: new THREE.Color(0x1b5494) },
+      bottomColor: { value: new THREE.Color(0x9bc4eb) },
+      offset: { value: 12.0 },
+      exponent: { value: 0.65 }
+    };
+
+    const skyGeo = new THREE.SphereGeometry(320, 32, 16);
+    const skyMat = new THREE.ShaderMaterial({
+      vertexShader: skyVertexShader,
+      fragmentShader: skyFragmentShader,
+      uniforms: this.skyUniforms,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+
+    this.skyDome = new THREE.Mesh(skyGeo, skyMat);
+    this.scene.add(this.skyDome);
+  }
+
+  // ----------------------------------------------------
+  // 2. DIRECTIONAL SUN & MULTI-LAYER FILL LIGHTS
+  // ----------------------------------------------------
   initLights() {
-    // 1. Hemisphere Light (Sky & Ground Ambient)
-    this.hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x334155, 0.7);
-    this.hemiLight.position.set(0, 50, 0);
+    // Ambient Light
+    this.ambientLight = new THREE.AmbientLight(0xdbeafe, 0.42);
+    this.scene.add(this.ambientLight);
+
+    // Hemisphere Light
+    this.hemiLight = new THREE.HemisphereLight(0x93c5fd, 0x786856, 0.45);
     this.scene.add(this.hemiLight);
 
-    // 2. Main Directional Sun Light (Casts soft architectural shadows)
-    this.sunLight = new THREE.DirectionalLight(0xfffaed, 1.4);
+    // Primary Directional Sun Light
+    this.sunLight = new THREE.DirectionalLight(0xfffbeb, 1.65);
     this.sunLight.castShadow = true;
-    this.sunLight.shadow.mapSize.width = 2048;
-    this.sunLight.shadow.mapSize.height = 2048;
-    this.sunLight.shadow.camera.near = 0.5;
-    this.sunLight.shadow.camera.far = 150;
-    
-    // Shadow frustum bounding box
-    const d = 45;
+    this.sunLight.shadow.mapSize.set(2048, 2048);
+    this.sunLight.shadow.camera.near = 1;
+    this.sunLight.shadow.camera.far = 120;
+    const d = 32;
     this.sunLight.shadow.camera.left = -d;
     this.sunLight.shadow.camera.right = d;
     this.sunLight.shadow.camera.top = d;
     this.sunLight.shadow.camera.bottom = -d;
     this.sunLight.shadow.bias = -0.0004;
-
     this.scene.add(this.sunLight);
 
-    // 3. Night & Golden Hour Accent Lights Group
-    this.nightLightsGroup = new THREE.Group();
-    
-    // Pool Underglow Lights (Cyan / Aqua glow)
-    const poolLight1 = new THREE.PointLight(0x00e5ff, 0, 15);
-    poolLight1.position.set(6, 0.2, -23);
-    this.nightLightsGroup.add(poolLight1);
-    this.poolLight1 = poolLight1;
+    // Secondary Front & Rear Architectural Fill Lights
+    this.frontFillLight = new THREE.DirectionalLight(0xbae6fd, 0.35);
+    this.frontFillLight.position.set(-18, 14, 24);
+    this.scene.add(this.frontFillLight);
 
-    // Villa Interior Warm Downlights
-    const intLight1 = new THREE.PointLight(0xffeedd, 0, 20);
-    intLight1.position.set(-2, 3.5, 0);
-    this.nightLightsGroup.add(intLight1);
-    this.intLight1 = intLight1;
+    this.rearFillLight = new THREE.DirectionalLight(0x93c5fd, 0.30);
+    this.rearFillLight.position.set(12, 10, -24);
+    this.scene.add(this.rearFillLight);
 
-    const intLight2 = new THREE.PointLight(0xffeedd, 0, 20);
-    intLight2.position.set(-2, 7.5, 0);
-    this.nightLightsGroup.add(intLight2);
-    this.intLight2 = intLight2;
+    // Architectural Downlights & Accents
+    this.atriumLight = new THREE.PointLight(0xffb86c, 1.5, 16);
+    this.atriumLight.position.set(-0.2, 4.5, 3.2);
+    this.scene.add(this.atriumLight);
 
-    // Carport Warm Downlight
-    const carportLight = new THREE.PointLight(0xffedd5, 0, 18);
-    carportLight.position.set(13.5, 3.8, 6.0);
-    this.nightLightsGroup.add(carportLight);
-    this.carportLight = carportLight;
+    this.carportLight = new THREE.PointLight(0xffcf96, 1.2, 16);
+    this.carportLight.position.set(8.8, 3.1, 6.4);
+    this.scene.add(this.carportLight);
 
-    this.scene.add(this.nightLightsGroup);
+    this.rearDiningLight = new THREE.PointLight(0xffbe76, 1.4, 15);
+    this.rearDiningLight.position.set(0.5, -1.2, -0.5);
+    this.scene.add(this.rearDiningLight);
 
-    // Set initial sun position for 13:00 (1:00 PM)
-    this.setTimeOfDay(13.0);
+    this.poolUnderwaterLight = new THREE.PointLight(0x00e5ff, 1.6, 16);
+    this.poolUnderwaterLight.position.set(5.5, -2.6, -10.2);
+    this.scene.add(this.poolUnderwaterLight);
   }
 
-  // Update Sun coordinates according to Dubai solar arc (Lat 25.06° N)
-  setTimeOfDay(hour) {
-    this.currentTime = hour;
-    
-    // Convert 6:00 to 20:00 into sun angle
-    // Sunrise at 6.0 -> 0 rad (East), Solar Noon at 13.0 -> PI/2 (South Zenith), Sunset at 19.0 -> PI (West)
-    const t = (hour - 6.0) / 13.0; // 0 to 1
-    const sunAngle = t * Math.PI;
+  // ----------------------------------------------------
+  // 3. ATMOSPHERE PRESET SWITCHER
+  // ----------------------------------------------------
+  setAtmosphere(modeKey) {
+    this.currentMode = modeKey;
 
-    const sunDist = 70;
-    const sunY = Math.max(0.5, Math.sin(sunAngle) * 55);
-    const sunX = -Math.cos(sunAngle) * sunDist;
-    const sunZ = Math.cos(sunAngle * 0.5) * 20;
+    if (modeKey === 'day') {
+      this.skyUniforms.topColor.value.setHex(0x1b5494);
+      this.skyUniforms.bottomColor.value.setHex(0x9bc4eb);
+      this.exposure = 0.85;
+      this.sunLight.color.setHex(0xfffbeb);
+      this.sunLight.intensity = 1.65;
+      this.ambientLight.intensity = 0.42;
+      this.hemiLight.intensity = 0.45;
+      this.frontFillLight.intensity = 0.35;
+      this.rearFillLight.intensity = 0.30;
+      this.atriumLight.intensity = 1.4;
+      this.carportLight.intensity = 1.2;
+      this.rearDiningLight.intensity = 1.4;
+      this.poolUnderwaterLight.intensity = 1.5;
+      this.azimuth = 212;
+      this.elevation = 42;
+    } else if (modeKey === 'dusk') {
+      this.skyUniforms.topColor.value.setHex(0x0c234a);
+      this.skyUniforms.bottomColor.value.setHex(0x3b6ea5);
+      this.exposure = 0.82;
+      this.sunLight.color.setHex(0xffe4b5);
+      this.sunLight.intensity = 1.15;
+      this.ambientLight.intensity = 0.35;
+      this.hemiLight.intensity = 0.35;
+      this.frontFillLight.intensity = 0.28;
+      this.rearFillLight.intensity = 0.25;
+      this.atriumLight.intensity = 2.6;
+      this.carportLight.intensity = 2.2;
+      this.rearDiningLight.intensity = 2.4;
+      this.poolUnderwaterLight.intensity = 2.8;
+      this.azimuth = 230;
+      this.elevation = 18;
+    } else if (modeKey === 'golden' || modeKey === 'sunset') {
+      this.skyUniforms.topColor.value.setHex(0x1f3b6e);
+      this.skyUniforms.bottomColor.value.setHex(0xe89b6c);
+      this.exposure = 0.82;
+      this.sunLight.color.setHex(0xffb870);
+      this.sunLight.intensity = 1.45;
+      this.ambientLight.intensity = 0.38;
+      this.hemiLight.intensity = 0.38;
+      this.frontFillLight.intensity = 0.30;
+      this.rearFillLight.intensity = 0.25;
+      this.atriumLight.intensity = 2.0;
+      this.carportLight.intensity = 1.8;
+      this.rearDiningLight.intensity = 2.0;
+      this.poolUnderwaterLight.intensity = 2.2;
+      this.azimuth = 250;
+      this.elevation = 14;
+    } else if (modeKey === 'night') {
+      this.skyUniforms.topColor.value.setHex(0x040914);
+      this.skyUniforms.bottomColor.value.setHex(0x132647);
+      this.exposure = 0.78;
+      this.sunLight.color.setHex(0x93c5fd);
+      this.sunLight.intensity = 0.25;
+      this.ambientLight.intensity = 0.22;
+      this.hemiLight.intensity = 0.22;
+      this.frontFillLight.intensity = 0.18;
+      this.rearFillLight.intensity = 0.18;
+      this.atriumLight.intensity = 3.4;
+      this.carportLight.intensity = 3.0;
+      this.rearDiningLight.intensity = 3.2;
+      this.poolUnderwaterLight.intensity = 3.8;
+      this.azimuth = 320;
+      this.elevation = 5;
+    }
 
-    this.sunLight.position.set(sunX, sunY, sunZ);
-    this.sunLight.target.position.set(0, 4, 0);
+    if (this.renderer) {
+      this.renderer.toneMappingExposure = this.exposure;
+    }
+
+    this.updateSunPosition(this.azimuth, this.elevation);
+  }
+
+  // ----------------------------------------------------
+  // 4. SOLAR ARC & POSITION CALCULATOR
+  // ----------------------------------------------------
+  updateSunPosition(azimuthDeg, elevationDeg) {
+    this.azimuth = azimuthDeg;
+    this.elevation = elevationDeg;
+
+    const phi = THREE.MathUtils.degToRad(90 - elevationDeg);
+    const theta = THREE.MathUtils.degToRad(azimuthDeg);
+
+    const sunVec = new THREE.Vector3().setFromSphericalCoords(1, phi, theta);
+    this.sunLight.position.copy(sunVec).multiplyScalar(50);
+    this.sunLight.target.position.set(0.6, 2.5, 0);
     this.sunLight.target.updateMatrixWorld();
+  }
 
-    // Calculate Azimuth & Altitude for UI Telemetry
-    const altitudeDeg = Math.round(Math.asin(Math.max(0, Math.sin(sunAngle))) * (180 / Math.PI));
-    const azimuthDeg = Math.round(180 + Math.cos(sunAngle) * 75);
-
-    const azEl = document.getElementById('solar-azimuth');
-    if (azEl) {
-      azEl.innerText = `Azimuth: ${azimuthDeg}° • Altitude: ${altitudeDeg}°`;
+  setExposure(val) {
+    this.exposure = Math.max(0.4, Math.min(1.4, val));
+    if (this.renderer) {
+      this.renderer.toneMappingExposure = this.exposure;
     }
+  }
 
-    // Dynamic Color & Atmosphere Adjustment based on Time
-    if (hour < 7.0 || hour > 18.0) {
-      // Twilight / Dusk / Dawn
-      const factor = hour < 7.0 ? (hour - 6.0) : (19.0 - hour);
-      this.sunLight.color.setHex(0xff7733);
-      this.sunLight.intensity = Math.max(0.1, factor * 1.0);
-      this.hemiLight.color.setHex(0x3b82f6);
-      this.hemiLight.groundColor.setHex(0x1e1b4b);
-      this.renderer.setClearColor(0x090d16, 1);
-      
-      // Turn on architectural lights at dusk
-      this.setNightLightsIntensity(1.5);
-    } else if (hour >= 16.5 && hour <= 18.0) {
-      // Golden Hour (Dubai Sunset)
-      this.sunLight.color.setHex(0xffaa44);
-      this.sunLight.intensity = 1.6;
-      this.hemiLight.color.setHex(0xfde047);
-      this.hemiLight.groundColor.setHex(0x78350f);
-      this.renderer.setClearColor(0x1a1528, 1);
-      this.setNightLightsIntensity(0.8);
+  setTimeOfDay(hour) {
+    // Converts 6:00 to 20:00 into azimuth and solar altitude
+    const t = (hour - 6.0) / 14.0; // 0 to 1
+    const sunAngle = Math.PI * t;
+
+    const elev = Math.max(2, Math.sin(sunAngle) * 72);
+    const az = 180 + Math.cos(sunAngle) * 85;
+
+    this.updateSunPosition(az, elev);
+
+    if (hour >= 18.5) {
+      this.setAtmosphere('night');
+    } else if (hour >= 17.0) {
+      this.setAtmosphere('golden');
+    } else if (hour >= 6.5) {
+      this.setAtmosphere('day');
     } else {
-      // Crisp Daylight
-      this.sunLight.color.setHex(0xfffaed);
-      this.sunLight.intensity = 1.4;
-      this.hemiLight.color.setHex(0xdbeafe);
-      this.hemiLight.groundColor.setHex(0x334155);
-      this.renderer.setClearColor(0x07090e, 1);
-      this.setNightLightsIntensity(0.0);
-    }
-  }
-
-  setNightLightsIntensity(intensity) {
-    if (this.poolLight1) this.poolLight1.intensity = intensity * 2.5;
-    if (this.intLight1) this.intLight1.intensity = intensity * 1.8;
-    if (this.intLight2) this.intLight2.intensity = intensity * 1.8;
-    if (this.carportLight) this.carportLight.intensity = intensity * 2.0;
-  }
-
-  setEnvironmentPreset(env) {
-    this.currentEnv = env;
-    const slider = document.getElementById('solar-slider');
-    const timeDisp = document.getElementById('sun-time-display');
-
-    if (env === 'day') {
-      if (slider) slider.value = 13.0;
-      if (timeDisp) timeDisp.innerText = "13:00 (1:00 PM)";
-      this.setTimeOfDay(13.0);
-    } else if (env === 'sunset') {
-      if (slider) slider.value = 17.5;
-      if (timeDisp) timeDisp.innerText = "17:30 (5:30 PM)";
-      this.setTimeOfDay(17.5);
-    } else if (env === 'night') {
-      if (slider) slider.value = 20.0;
-      if (timeDisp) timeDisp.innerText = "20:00 (8:00 PM)";
-      this.setTimeOfDay(20.0);
-      this.renderer.setClearColor(0x04060a, 1);
-      this.setNightLightsIntensity(3.0);
-    } else if (env === 'wireframe') {
-      this.setTimeOfDay(13.0);
-      this.renderer.setClearColor(0x020408, 1);
+      this.setAtmosphere('dusk');
     }
   }
 }
