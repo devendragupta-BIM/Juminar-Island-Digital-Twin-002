@@ -516,7 +516,21 @@ class CameraManager {
     const rawSrc = (typeof frameItem === 'string') ? frameItem : (frameItem?.filename || cam.filename);
     const timeStr = (typeof frameItem === 'object' && frameItem?.time) ? `${frameItem.date || cam.date || '14 Oct 2026'} • ${frameItem.time}` : (cam.date || '14 Oct 2026');
 
-    const defaultFallback = '20840-1748865490206.jpeg';
+    const stationFallbacks = {
+      'CAM-01': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-02': 'Exterior Front Side - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-03': 'Exterior Front Yard - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-04': 'Exterior Parking - Jumeirah Islands 003 - 20261007180000.jpg.jpeg',
+      'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
+      'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-17': '20840-1711956940472.jpg',
+      'CAM-18': '20840-1748865490206.jpeg',
+      'CAM-19': '20840-1748865493553.jpeg'
+    };
+    const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
     const currentImg = encodeURI(rawSrc);
 
     const imgEl = document.getElementById('modal-site-image');
@@ -555,7 +569,21 @@ class CameraManager {
     container.innerHTML = '';
 
     const frames = (cam && cam.timelapseFrames && cam.timelapseFrames.length > 0) ? cam.timelapseFrames : [cam?.filename || '20840-1748865490206.jpeg'];
-    const defaultFallback = '20840-1748865490206.jpeg';
+    const stationFallbacks = {
+      'CAM-01': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-02': 'Exterior Front Side - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-03': 'Exterior Front Yard - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-04': 'Exterior Parking - Jumeirah Islands 003 - 20261007180000.jpg.jpeg',
+      'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
+      'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-17': '20840-1711956940472.jpg',
+      'CAM-18': '20840-1748865490206.jpeg',
+      'CAM-19': '20840-1748865493553.jpeg'
+    };
+    const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
 
     frames.forEach((f, idx) => {
       const rawSrc = (typeof f === 'string') ? f : (f?.filename || cam.filename);

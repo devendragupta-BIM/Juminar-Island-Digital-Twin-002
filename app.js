@@ -641,9 +641,24 @@ function populateCameraCarousel(cameraManager) {
   if (!container) return;
   container.innerHTML = '';
 
-  const defaultFallback = '20840-1748865490206.jpeg';
+  const stationFallbacks = {
+    'CAM-01': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-02': 'Exterior Front Side - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-03': 'Exterior Front Yard - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-04': 'Exterior Parking - Jumeirah Islands 003 - 20261007180000.jpg.jpeg',
+    'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
+    'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-17': '20840-1711956940472.jpg',
+    'CAM-18': '20840-1748865490206.jpeg',
+    'CAM-19': '20840-1748865493553.jpeg'
+  };
+
   const cameras = cameraManager.camerasData || [];
   cameras.forEach((cam) => {
+    const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
     const card = document.createElement('div');
     card.className = 'carousel-card spatial-card p-2 rounded-xl border border-white/10 hover:border-sky-400/50 transition cursor-pointer flex-shrink-0';
     card.style.width = '165px';
