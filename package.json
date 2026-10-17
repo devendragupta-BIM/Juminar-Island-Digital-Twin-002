@@ -1,0 +1,17 @@
+{
+  "name": "jumeirah-islands-digital-twin",
+  "version": "1.0.0",
+  "description": "3D Interactive Digital Twin & Site Telemetry for Jumeirah Islands Villa 003",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "digital-twin",
+    "threejs",
+    "bim",
+    "jumeirah-islands"
+  ],
+  "author": "devendragupta-BIM",
+  "license": "MIT"
+}
