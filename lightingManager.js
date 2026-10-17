@@ -214,6 +214,14 @@ class LightingManager {
     this.updateSunPosition(this.azimuth, this.elevation);
   }
 
+  setEnvironment(modeKey) {
+    return this.setAtmosphere(modeKey);
+  }
+
+  setEnvironmentPreset(modeKey) {
+    return this.setAtmosphere(modeKey);
+  }
+
   // ----------------------------------------------------
   // 4. SOLAR ARC & POSITION CALCULATOR
   // ----------------------------------------------------

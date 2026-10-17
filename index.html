@@ -463,18 +463,22 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <div class="font-semibold text-white">SDK Method Calls:</div>
-            <pre id="sdk-code-block" class="bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[11px] text-sky-300 overflow-x-auto leading-relaxed">// 1. Set Phase: 'shoring' | 'site' | 'render'
-window.JumeirahTwinAPI.setPhase('site');
+            <div class="font-semibold text-white">SDK & Iframe Protocol:</div>
+            <pre id="sdk-code-block" class="bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[11px] text-sky-300 overflow-x-auto leading-relaxed">// 1. Switch between 'render' and 'site' (or 'shoring')
+window.JumeirahTwinAPI.setSiteState('site');
 
-// 2. Fly to Photo-Matched Camera:
-window.JumeirahTwinAPI.setCamera('rearOrtho');
+// 2. Smoothly fly camera ('frontRender' | 'rearPool' | 'rearShoring' | 'frontYardTop' | 'carport'):
+window.JumeirahTwinAPI.setCameraView('rearPool');
 
-// 3. Slice BIM Model at Y = 3.6m (First Floor Slab):
-window.JumeirahTwinAPI.setSectionCut({ y: 3.6, x: 16.0 });
+// 3. Set Lighting Mode ('day' | 'dusk' | 'night'):
+window.JumeirahTwinAPI.setEnvironment('dusk');
 
-// 4. Set Atmosphere: 'day' | 'dusk' | 'golden' | 'night'
-window.JumeirahTwinAPI.setAtmosphere('dusk');</pre>
+// 4. Or via iframe postMessage from parent dashboard:
+iframeRef.contentWindow.postMessage({
+  type: 'TWIN_COMMAND',
+  action: 'SET_STATE',
+  payload: 'site'
+}, '*');</pre>
           </div>
 
           <div class="space-y-1.5 flex flex-col">
@@ -502,12 +506,12 @@ window.JumeirahTwinAPI.setAtmosphere('dusk');</pre>
   </div>
 
   <!-- Application Logic Modules -->
-  <script src="dashboardData.js"></script>
-  <script src="modelBuilder.js"></script>
-  <script src="lightingManager.js"></script>
-  <script src="cameraManager.js"></script>
-  <script src="measurementTool.js"></script>
-  <script src="minimap.js"></script>
-  <script src="app.js"></script>
+  <script src="dashboardData.js?v=4.2"></script>
+  <script src="modelBuilder.js?v=4.2"></script>
+  <script src="lightingManager.js?v=4.2"></script>
+  <script src="cameraManager.js?v=4.2"></script>
+  <script src="measurementTool.js?v=4.2"></script>
+  <script src="minimap.js?v=4.2"></script>
+  <script src="app.js?v=4.2"></script>
 </body>
 </html>

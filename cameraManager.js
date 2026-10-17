@@ -123,11 +123,15 @@ class CameraManager {
     // High-Resolution Photo-Match Viewpoint Bookmarks
     this.photoBookmarks = {
       frontHero:     { pos: new THREE.Vector3(-11.8, 3.8, 18.8), look: new THREE.Vector3(1.2, 2.9, 1.2), fov: 65, title: 'Front Elevation (#2,3,4)' },
+      frontRender:   { pos: new THREE.Vector3(-11.8, 3.8, 18.8), look: new THREE.Vector3(1.2, 2.9, 1.2), fov: 65, title: 'Front Elevation (#2,3,4)' },
       rearOrtho:     { pos: new THREE.Vector3(0.6, 2.2, -20.5),  look: new THREE.Vector3(0.6, 2.0, -1.0), fov: 62, title: 'Rear Pool Elevation (#5,10)' },
+      rearPool:      { pos: new THREE.Vector3(0.6, 2.2, -20.5),  look: new THREE.Vector3(0.6, 2.0, -1.0), fov: 62, title: 'Rear Pool Elevation (#5,10)' },
       rearShoring:   { pos: new THREE.Vector3(-10.5, 3.2, -18.5),look: new THREE.Vector3(2.0, 1.5, -3.5), fov: 68, title: 'Rear Shoring (#1)' },
       frontEntrance: { pos: new THREE.Vector3(-4.5, 2.5, 12.2),  look: new THREE.Vector3(-0.2, 3.2, 2.0), fov: 72, title: 'Main Entrance Portal (#6,7)' },
       topYard:       { pos: new THREE.Vector3(-1.5, 15.5, 14.8), look: new THREE.Vector3(-0.5, 0.0, 8.8), fov: 65, title: 'Top Yard Drone (#8)' },
+      frontYardTop:  { pos: new THREE.Vector3(-1.5, 15.5, 14.8), look: new THREE.Vector3(-0.5, 0.0, 8.8), fov: 65, title: 'Top Yard Drone (#8)' },
       parkingSide:   { pos: new THREE.Vector3(16.8, 2.9, 15.8),  look: new THREE.Vector3(6.5, 2.2, 4.5),  fov: 65, title: 'Carport & Palms (#9)' },
+      carport:       { pos: new THREE.Vector3(16.8, 2.9, 15.8),  look: new THREE.Vector3(6.5, 2.2, 4.5),  fov: 65, title: 'Carport & Palms (#9)' },
       aerial:        { pos: new THREE.Vector3(28.0, 36.0, 32.0), look: new THREE.Vector3(0.6, 2.5, 0.0), fov: 58, title: 'Aerial Master View' },
       lake:          { pos: new THREE.Vector3(-26.0, 7.5, -34.0),look: new THREE.Vector3(0.6, 2.0, -8.0), fov: 68, title: 'Waterfront Shoreline' }
     };
@@ -232,6 +236,24 @@ class CameraManager {
       return bookmark.title;
     }
     return presetKey;
+  }
+
+  // Camera view transition (supports preset bookmarks, spatial node IDs, or camera station IDs)
+  setCameraView(presetOrId) {
+    if (this.photoBookmarks[presetOrId]) {
+      return this.setPresetView(presetOrId);
+    }
+    const node = this.spatialNodes.find(n => n.id === presetOrId || n.code === presetOrId);
+    if (node) {
+      this.focusNode(node);
+      return node.title;
+    }
+    const cam = this.camerasData.find(c => c.id === presetOrId);
+    if (cam) {
+      this.enterInspection(presetOrId, false);
+      return cam.title;
+    }
+    return this.setPresetView(presetOrId);
   }
 
   // ----------------------------------------------------

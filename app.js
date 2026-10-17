@@ -115,7 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Sync Atmosphere
-    lightingManager.setAtmosphere(AppState.atmosphere);
+    if (lightingManager && typeof lightingManager.setAtmosphere === 'function') {
+      lightingManager.setAtmosphere(AppState.atmosphere);
+    } else if (lightingManager && typeof lightingManager.setEnvironmentPreset === 'function') {
+      lightingManager.setEnvironmentPreset(AppState.atmosphere);
+    }
     document.querySelectorAll('.env-btn').forEach(btn => {
       const match = btn.getAttribute('data-env') === AppState.atmosphere;
       btn.classList.toggle('active', match);
@@ -153,17 +157,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. PUBLIC API: window.JumeirahTwinAPI & POSTMESSAGE
   // ----------------------------------------------------
   window.JumeirahTwinAPI = {
+    // Switch between 'render' (Finished ONIX) and 'site' (Oct 2026 Construction) or 'shoring'
+    setSiteState: (stateKey) => {
+      mutateState(s => ({ ...s, phase: stateKey }), `Site State updated -> ${stateKey.toUpperCase()}`);
+    },
     setPhase: (phaseKey) => {
       mutateState(s => ({ ...s, phase: phaseKey }), `Phase updated -> ${phaseKey.toUpperCase()}`);
     },
-    setCamera: (bookmarkOrId) => {
-      if (cameraManager.photoBookmarks[bookmarkOrId]) {
-        cameraManager.setPresetView(bookmarkOrId);
-        logSDK(`Camera View -> ${bookmarkOrId}`);
-      } else {
-        cameraManager.enterInspection(bookmarkOrId, false);
-      }
+
+    // Smoothly fly camera: 'frontRender' | 'rearPool' | 'rearShoring' | 'frontYardTop' | 'carport' | station IDs
+    setCameraView: (viewKey) => {
+      const title = cameraManager.setCameraView(viewKey);
+      logSDK(`Camera View -> ${title || viewKey}`);
     },
+    setCamera: (bookmarkOrId) => {
+      const title = cameraManager.setCameraView(bookmarkOrId);
+      logSDK(`Camera View -> ${title || bookmarkOrId}`);
+    },
+
+    // Set Lighting Mode: 'day' | 'dusk' | 'night' | 'wireframe'
+    setEnvironment: (modeKey) => {
+      mutateState(s => ({ ...s, atmosphere: modeKey }), `Environment -> ${modeKey.toUpperCase()}`);
+    },
+    setAtmosphere: (modeKey) => {
+      mutateState(s => ({ ...s, atmosphere: modeKey }), `Atmosphere -> ${modeKey.toUpperCase()}`);
+    },
+
+    // BIM Section Cut Clipping Planes
     setSectionCut: (cutConfig) => {
       mutateState(s => ({
         ...s,
@@ -176,9 +196,20 @@ document.addEventListener('DOMContentLoaded', () => {
     resetSectionCut: () => {
       mutateState(s => ({ ...s, sectionCut: { y: 12.0, x: 16.0 } }), 'BIM Section Cut Reset');
     },
-    setAtmosphere: (modeKey) => {
-      mutateState(s => ({ ...s, atmosphere: modeKey }), `Atmosphere -> ${modeKey.toUpperCase()}`);
+
+    // BIM Exploded Axonometric View
+    explodeBIM: (enable) => {
+      modelBuilder.setExplodeBIM(enable);
+      mutateState(s => ({ ...s, exploded: !!enable }), `Explode BIM -> ${enable ? 'ON' : 'OFF'}`);
     },
+
+    // Select Camera Station & Inspect Timelapse Frames
+    selectCamera: (camId) => {
+      cameraManager.enterInspection(camId, true);
+      logSDK(`Selected Camera -> ${camId}`);
+    },
+
+    // Toggles & Floor Isolation
     toggleCAD: (force) => {
       mutateState(s => ({ ...s, cadEdges: force !== undefined ? force : !s.cadEdges }), 'Toggled CAD Edges');
     },
@@ -193,11 +224,67 @@ document.addEventListener('DOMContentLoaded', () => {
     getState: () => ({ ...AppState })
   };
 
+  // Parent iframe message bridge & TWIN_COMMAND dispatcher
   window.addEventListener('message', (event) => {
     if (!event.data || typeof event.data !== 'object') return;
-    const { action, payload } = event.data;
-    if (window.JumeirahTwinAPI[action]) {
+    const data = event.data;
+
+    let action = data.action;
+    let payload = data.payload;
+
+    if (data.type === 'TWIN_COMMAND') {
+      action = data.action;
+      payload = data.payload;
+    }
+
+    if (!action) return;
+
+    const actionUpper = String(action).toUpperCase();
+    const actionLower = String(action).toLowerCase().replace(/_/g, '');
+
+    if (actionUpper === 'SET_STATE' || actionLower === 'setstate' || actionLower === 'setsitestate' || actionLower === 'setphase') {
+      window.JumeirahTwinAPI.setSiteState(payload);
+    } else if (actionUpper === 'SET_CAMERA' || actionUpper === 'SET_VIEW' || actionUpper === 'SET_CAMERA_VIEW' || actionLower === 'setcameraview' || actionLower === 'setcamera') {
+      window.JumeirahTwinAPI.setCameraView(payload);
+    } else if (actionUpper === 'SET_ENVIRONMENT' || actionUpper === 'SET_LIGHTING' || actionUpper === 'SET_ATMOSPHERE' || actionLower === 'setenvironment' || actionLower === 'setatmosphere') {
+      window.JumeirahTwinAPI.setEnvironment(payload);
+    } else if (actionUpper === 'SET_SECTION' || actionUpper === 'SET_SECTION_CUT' || actionLower === 'setsectioncut') {
+      window.JumeirahTwinAPI.setSectionCut(payload);
+    } else if (actionUpper === 'RESET_SECTION' || actionLower === 'resetsectioncut') {
+      window.JumeirahTwinAPI.resetSectionCut();
+    } else if (actionUpper === 'ISOLATE_FLOOR' || actionLower === 'isolatefloor') {
+      window.JumeirahTwinAPI.isolateFloor(payload);
+    } else if (actionUpper === 'EXPLODE_BIM' || actionLower === 'explodebim') {
+      window.JumeirahTwinAPI.explodeBIM(payload);
+    } else if (actionUpper === 'SELECT_CAMERA' || actionLower === 'selectcamera') {
+      window.JumeirahTwinAPI.selectCamera(payload);
+    } else if (actionUpper === 'TOGGLE_CAD' || actionLower === 'togglecad') {
+      window.JumeirahTwinAPI.toggleCAD(payload);
+    } else if (actionUpper === 'TOGGLE_PINS' || actionLower === 'togglepins') {
+      window.JumeirahTwinAPI.togglePins(payload);
+    } else if (actionUpper === 'GET_STATE' || actionLower === 'getstate') {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'TWIN_STATE',
+          payload: window.JumeirahTwinAPI.getState()
+        }, '*');
+      }
+    } else if (typeof window.JumeirahTwinAPI[action] === 'function') {
       window.JumeirahTwinAPI[action](payload);
+    }
+
+    // Post acknowledge state event back to parent
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({
+          type: 'TWIN_COMMAND_ACK',
+          action: action,
+          payload: payload,
+          state: window.JumeirahTwinAPI.getState()
+        }, '*');
+      } catch (e) {
+        // Cross-origin safe
+      }
     }
   });
 
