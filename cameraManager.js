@@ -448,10 +448,31 @@ class CameraManager {
     const modal = document.getElementById('camera-modal');
     if (!modal) return;
 
+    if (!cam) {
+      cam = this.activeCamData || (this.camerasData && this.camerasData[0]);
+    }
+    if (!cam) return;
+
+    this.activeCamData = cam;
+    this.activeCameraId = cam.id;
+    if (this.currentFrameIndex === undefined || this.currentFrameIndex === null) {
+      this.currentFrameIndex = Math.floor(((cam.timelapseFrames && cam.timelapseFrames.length) || 1) / 2);
+    }
+
     modal.classList.remove('hidden');
-    document.getElementById('modal-cam-badge').textContent = cam.id;
-    document.getElementById('modal-cam-title').textContent = cam.title;
-    document.getElementById('modal-cam-subtitle').textContent = `Jumeirah Islands 003 • Station ${cam.code} (${cam.date})`;
+    modal.classList.add('flex');
+    const badgeEl = document.getElementById('modal-cam-badge');
+    const titleEl = document.getElementById('modal-cam-title');
+    const subEl = document.getElementById('modal-cam-subtitle');
+    if (badgeEl) badgeEl.textContent = cam.id;
+    if (titleEl) titleEl.textContent = cam.title;
+    if (subEl) subEl.textContent = `Jumeirah Islands 003 • Station ${cam.code || cam.id} (${cam.date || 'Oct 2026'})`;
+
+    // Reset play button state if stopped
+    if (!this.isPlayingTimelapse) {
+      const btn = document.getElementById('btn-timelapse-play');
+      if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Play Timelapse</span>';
+    }
 
     // Populate photo
     this.updateModalFrame(cam, this.currentFrameIndex);
@@ -460,18 +481,40 @@ class CameraManager {
 
   closePhotoModal() {
     const modal = document.getElementById('camera-modal');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
     this.stopTimelapse();
   }
 
-  updateModalFrame(cam, frameIndex) {
-    const frames = cam.timelapseFrames || [cam.filename];
-    const safeIdx = Math.max(0, Math.min(frames.length - 1, frameIndex));
+  updateModalFrame(camOrIndex, maybeIndex) {
+    let cam = this.activeCamData;
+    let frameIndex = 0;
+
+    if (typeof camOrIndex === 'number') {
+      frameIndex = camOrIndex;
+      cam = this.activeCamData || (this.camerasData && this.camerasData[0]);
+    } else if (camOrIndex && typeof camOrIndex === 'object') {
+      cam = camOrIndex;
+      frameIndex = (typeof maybeIndex === 'number') ? maybeIndex : this.currentFrameIndex;
+    } else {
+      frameIndex = (typeof maybeIndex === 'number') ? maybeIndex : this.currentFrameIndex;
+    }
+
+    if (!cam) {
+      cam = this.activeCamData || (this.camerasData && this.camerasData[0]);
+    }
+    if (!cam) return;
+    this.activeCamData = cam;
+
+    const frames = (cam.timelapseFrames && cam.timelapseFrames.length > 0) ? cam.timelapseFrames : [cam.filename];
+    const safeIdx = Math.max(0, Math.min(frames.length - 1, isNaN(frameIndex) ? 0 : frameIndex));
     this.currentFrameIndex = safeIdx;
 
     const frameItem = frames[safeIdx] || cam.filename;
     const rawSrc = (typeof frameItem === 'string') ? frameItem : (frameItem?.filename || cam.filename);
-    const timeStr = (typeof frameItem === 'object' && frameItem?.time) ? `${frameItem.date || cam.date} • ${frameItem.time}` : cam.date;
+    const timeStr = (typeof frameItem === 'object' && frameItem?.time) ? `${frameItem.date || cam.date || '14 Oct 2026'} • ${frameItem.time}` : (cam.date || '14 Oct 2026');
 
     const defaultFallback = '20840-1748865490206.jpeg';
     const currentImg = encodeURI(rawSrc);
@@ -499,7 +542,7 @@ class CameraManager {
     const counterLabel = document.getElementById('timelapse-counter');
 
     if (scrubber) {
-      scrubber.max = frames.length - 1;
+      scrubber.max = Math.max(0, frames.length - 1);
       scrubber.value = safeIdx;
     }
     if (counterLabel) counterLabel.textContent = `Capture ${safeIdx + 1} of ${frames.length}`;
@@ -511,7 +554,7 @@ class CameraManager {
     if (!container) return;
     container.innerHTML = '';
 
-    const frames = cam.timelapseFrames || [cam.filename];
+    const frames = (cam && cam.timelapseFrames && cam.timelapseFrames.length > 0) ? cam.timelapseFrames : [cam?.filename || '20840-1748865490206.jpeg'];
     const defaultFallback = '20840-1748865490206.jpeg';
 
     frames.forEach((f, idx) => {
@@ -520,7 +563,8 @@ class CameraManager {
       const thumb = document.createElement('div');
       thumb.className = `tl-thumb ${idx === this.currentFrameIndex ? 'active' : ''}`;
       thumb.innerHTML = `<img src="${encodedSrc}" alt="Frame ${idx + 1}" loading="lazy" onerror="this.src='${defaultFallback}'" />`;
-      thumb.addEventListener('click', () => {
+      thumb.addEventListener('click', (e) => {
+        e.stopPropagation();
         this.updateModalFrame(cam, idx);
         document.querySelectorAll('.tl-thumb').forEach(t => t.classList.remove('active'));
         thumb.classList.add('active');
@@ -538,29 +582,49 @@ class CameraManager {
   }
 
   startTimelapse() {
+    if (!this.activeCamData) {
+      this.activeCamData = (this.camerasData && this.camerasData.length > 0) ? this.camerasData[0] : null;
+    }
     if (!this.activeCamData) return;
+
     this.isPlayingTimelapse = true;
     const btn = document.getElementById('btn-timelapse-play');
     if (btn) btn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Pause</span>';
 
-    const interval = Math.floor(400 / this.timelapseSpeed);
-    const frames = this.activeCamData.timelapseFrames || [this.activeCamData.filename];
+    const interval = Math.floor(450 / (this.timelapseSpeed || 1));
+    const frames = (this.activeCamData.timelapseFrames && this.activeCamData.timelapseFrames.length > 0)
+      ? this.activeCamData.timelapseFrames
+      : [this.activeCamData.filename];
+
+    if (this.timelapseTimer) {
+      clearInterval(this.timelapseTimer);
+    }
 
     this.timelapseTimer = setInterval(() => {
+      if (!this.isPlayingTimelapse) {
+        clearInterval(this.timelapseTimer);
+        return;
+      }
       this.currentFrameIndex = (this.currentFrameIndex + 1) % frames.length;
       this.updateModalFrame(this.activeCamData, this.currentFrameIndex);
       const thumbs = document.querySelectorAll('.tl-thumb');
-      if (thumbs && thumbs[this.currentFrameIndex]) {
+      if (thumbs && thumbs.length > this.currentFrameIndex) {
         thumbs.forEach(t => t.classList.remove('active'));
-        thumbs[this.currentFrameIndex].classList.add('active');
-        thumbs[this.currentFrameIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const cur = thumbs[this.currentFrameIndex];
+        if (cur) {
+          cur.classList.add('active');
+          cur.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
       }
     }, interval);
   }
 
   stopTimelapse() {
     this.isPlayingTimelapse = false;
-    clearInterval(this.timelapseTimer);
+    if (this.timelapseTimer) {
+      clearInterval(this.timelapseTimer);
+      this.timelapseTimer = null;
+    }
     const btn = document.getElementById('btn-timelapse-play');
     if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Play Timelapse</span>';
   }
@@ -649,6 +713,41 @@ class CameraManager {
       const k = e.key.toLowerCase();
       if (this.walkKeys[k] !== undefined) this.walkKeys[k] = false;
     });
+
+    // Timelapse playback & photo inspection modal event listeners
+    const btnPlay = document.getElementById('btn-timelapse-play');
+    if (btnPlay) {
+      btnPlay.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggleTimelapse();
+      });
+    }
+
+    const scrubber = document.getElementById('timelapse-scrubber');
+    if (scrubber) {
+      scrubber.addEventListener('input', (e) => {
+        const idx = parseInt(e.target.value, 10);
+        this.updateModalFrame(idx);
+      });
+    }
+
+    const modalClose = document.getElementById('modal-close-btn');
+    if (modalClose) {
+      modalClose.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.exitInspection();
+      });
+    }
+
+    const modalBg = document.getElementById('camera-modal');
+    if (modalBg) {
+      modalBg.addEventListener('click', (e) => {
+        if (e.target === modalBg) {
+          this.exitInspection();
+        }
+      });
+    }
   }
 
   // Animation Loop Update

@@ -57,6 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const measurementTool = new MeasurementTool(scene, camera, renderer.domElement);
   const minimap = new SiteMinimap('radar-canvas', camera, controls, cameraManager);
 
+  // Expose subsystem engines to window for global access, inline handlers & parent integrations
+  window.cameraManager = cameraManager;
+  window.modelBuilder = modelBuilder;
+  window.lightingManager = lightingManager;
+  window.measurementTool = measurementTool;
+  window.minimap = minimap;
+
   // ----------------------------------------------------
   // 3. ENDOMORPHISM STATE MACHINE (End(S), o, id)
   // ----------------------------------------------------
@@ -144,7 +151,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (yVal) yVal.textContent = AppState.sectionCut.y >= 11.8 ? 'Full (12.0m)' : `${AppState.sectionCut.y.toFixed(1)}m`;
     if (xVal) xVal.textContent = AppState.sectionCut.x >= 15.8 ? 'Full (16.0m)' : `${AppState.sectionCut.x.toFixed(1)}m`;
 
-    // 5. Sync Clean HUD UI
+    // 5. Sync Floor Level Isolation Buttons
+    document.querySelectorAll('.floor-btn').forEach(btn => {
+      const f = btn.getAttribute('data-floor');
+      const match = f === AppState.activeFloor;
+      if (match) {
+        btn.className = 'floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium' + (f === 'basement' ? ' col-span-2' : '');
+      } else {
+        btn.className = 'floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white' + (f === 'basement' ? ' col-span-2' : '');
+      }
+    });
+
+    // 6. Sync Clean HUD UI
     const leftDock = document.getElementById('left-dock');
     const rightDock = document.getElementById('right-dock');
     const bottomDock = document.getElementById('bottom-dock');
@@ -466,6 +484,24 @@ document.addEventListener('DOMContentLoaded', () => {
     btnFlyInTwin.addEventListener('click', () => {
       cameraManager.closePhotoModal();
       showToast('Aligned 3D Viewport with Physical Camera Station');
+    });
+  }
+
+  // Timelapse playback and scrubber bindings
+  const btnTimelapsePlay = document.getElementById('btn-timelapse-play');
+  if (btnTimelapsePlay) {
+    btnTimelapsePlay.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      cameraManager.toggleTimelapse();
+    });
+  }
+
+  const timelapseScrubber = document.getElementById('timelapse-scrubber');
+  if (timelapseScrubber) {
+    timelapseScrubber.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      cameraManager.updateModalFrame(idx);
     });
   }
 

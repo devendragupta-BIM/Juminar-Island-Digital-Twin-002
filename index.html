@@ -256,11 +256,11 @@
           <i class="fa-solid fa-layer-group text-sky-400"></i> Floor Level Isolation
         </span>
         <div class="grid grid-cols-2 gap-1.5 text-xs">
-          <button class="floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white col-span-2" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
+          <button class="floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium" data-floor="all" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="roof" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="first" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="ground" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white col-span-2" data-floor="basement" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
         </div>
       </div>
     </div>
@@ -426,7 +426,7 @@
 
         <!-- Scrubber Bar -->
         <div class="w-full mt-3 p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-4">
-          <button id="btn-timelapse-play" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-2" onclick="cameraManager.toggleTimelapse()">
+          <button id="btn-timelapse-play" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-2" onclick="window.cameraManager && window.cameraManager.toggleTimelapse()">
             <i class="fa-solid fa-play"></i> <span>Play Timelapse</span>
           </button>
           <div class="flex-1 px-2">
@@ -434,7 +434,7 @@
               <span id="timelapse-time-label">14 Oct 2026 • 13:30</span>
               <span id="timelapse-counter" class="text-sky-400 font-bold">Capture 1 of 26</span>
             </div>
-            <input type="range" id="timelapse-scrubber" min="0" max="25" value="0" class="w-full" oninput="cameraManager.updateModalFrame(cameraManager.activeCamData, parseInt(this.value))" />
+            <input type="range" id="timelapse-scrubber" min="0" max="25" value="0" class="w-full" oninput="window.cameraManager && window.cameraManager.updateModalFrame(parseInt(this.value))" />
           </div>
         </div>
 
