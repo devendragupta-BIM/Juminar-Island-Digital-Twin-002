@@ -605,15 +605,18 @@ function populateCameraCarousel(cameraManager) {
   if (!container) return;
   container.innerHTML = '';
 
+  const defaultFallback = '20840-1748865490206.jpeg';
   const cameras = cameraManager.camerasData || [];
   cameras.forEach((cam) => {
     const card = document.createElement('div');
     card.className = 'carousel-card spatial-card p-2 rounded-xl border border-white/10 hover:border-sky-400/50 transition cursor-pointer flex-shrink-0';
     card.style.width = '165px';
     card.setAttribute('data-cam-id', cam.id);
+    const rawSrc = (typeof cam.filename === 'string') ? cam.filename : defaultFallback;
+    const encodedSrc = encodeURI(rawSrc);
     card.innerHTML = `
       <div class="relative w-full h-20 rounded-lg overflow-hidden bg-slate-950 mb-1.5">
-        <img src="${cam.filename}" alt="${cam.title}" class="w-full h-full object-cover" loading="lazy" />
+        <img src="${encodedSrc}" alt="${cam.title}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='${defaultFallback}'" />
         <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-slate-950/80 font-mono text-[9px] text-sky-300 font-bold border border-white/10">${cam.id}</span>
       </div>
       <div class="text-[11px] font-bold text-white truncate">${cam.title}</div>

@@ -469,14 +469,29 @@ class CameraManager {
     const safeIdx = Math.max(0, Math.min(frames.length - 1, frameIndex));
     this.currentFrameIndex = safeIdx;
 
-    const currentImg = frames[safeIdx] || cam.filename;
+    const frameItem = frames[safeIdx] || cam.filename;
+    const rawSrc = (typeof frameItem === 'string') ? frameItem : (frameItem?.filename || cam.filename);
+    const timeStr = (typeof frameItem === 'object' && frameItem?.time) ? `${frameItem.date || cam.date} • ${frameItem.time}` : cam.date;
+
+    const defaultFallback = '20840-1748865490206.jpeg';
+    const currentImg = encodeURI(rawSrc);
+
     const imgEl = document.getElementById('modal-site-image');
     const splitImg = document.getElementById('modal-split-image');
     const overlayImg = document.getElementById('modal-overlay-image');
 
-    if (imgEl) imgEl.src = currentImg;
-    if (splitImg) splitImg.src = currentImg;
-    if (overlayImg) overlayImg.src = currentImg;
+    if (imgEl) {
+      imgEl.onerror = () => { imgEl.src = defaultFallback; };
+      imgEl.src = currentImg;
+    }
+    if (splitImg) {
+      splitImg.onerror = () => { splitImg.src = defaultFallback; };
+      splitImg.src = currentImg;
+    }
+    if (overlayImg) {
+      overlayImg.onerror = () => { overlayImg.src = defaultFallback; };
+      overlayImg.src = currentImg;
+    }
 
     // Update scrubber UI
     const scrubber = document.getElementById('timelapse-scrubber');
@@ -488,7 +503,7 @@ class CameraManager {
       scrubber.value = safeIdx;
     }
     if (counterLabel) counterLabel.textContent = `Capture ${safeIdx + 1} of ${frames.length}`;
-    if (timeLabel) timeLabel.textContent = `${cam.date} • Frame ${safeIdx + 1}`;
+    if (timeLabel) timeLabel.textContent = `${timeStr} (Frame ${safeIdx + 1})`;
   }
 
   buildTimelapseThumbnails(cam) {
@@ -497,10 +512,14 @@ class CameraManager {
     container.innerHTML = '';
 
     const frames = cam.timelapseFrames || [cam.filename];
+    const defaultFallback = '20840-1748865490206.jpeg';
+
     frames.forEach((f, idx) => {
+      const rawSrc = (typeof f === 'string') ? f : (f?.filename || cam.filename);
+      const encodedSrc = encodeURI(rawSrc);
       const thumb = document.createElement('div');
       thumb.className = `tl-thumb ${idx === this.currentFrameIndex ? 'active' : ''}`;
-      thumb.innerHTML = `<img src="${f}" alt="Frame ${idx + 1}" loading="lazy" />`;
+      thumb.innerHTML = `<img src="${encodedSrc}" alt="Frame ${idx + 1}" loading="lazy" onerror="this.src='${defaultFallback}'" />`;
       thumb.addEventListener('click', () => {
         this.updateModalFrame(cam, idx);
         document.querySelectorAll('.tl-thumb').forEach(t => t.classList.remove('active'));
@@ -530,6 +549,12 @@ class CameraManager {
     this.timelapseTimer = setInterval(() => {
       this.currentFrameIndex = (this.currentFrameIndex + 1) % frames.length;
       this.updateModalFrame(this.activeCamData, this.currentFrameIndex);
+      const thumbs = document.querySelectorAll('.tl-thumb');
+      if (thumbs && thumbs[this.currentFrameIndex]) {
+        thumbs.forEach(t => t.classList.remove('active'));
+        thumbs[this.currentFrameIndex].classList.add('active');
+        thumbs[this.currentFrameIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     }, interval);
   }
 
