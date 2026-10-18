@@ -1,6 +1,6 @@
 /**
  * JUMEIRAH ISLANDS DIGITAL TWIN - 2D INTERACTIVE SITE RADAR & FLOORPLAN
- * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * Developed for Architectural BIM Consultancy & VH Contracting LLC
  * 
  * Features:
  * - Real-Time Architectural Footprint Projection (Main Villa, Carport, Cyan Pool, Lake Frontage)
@@ -96,10 +96,10 @@ class SiteMinimap {
     ctx.clearRect(0, 0, w, h);
 
     // 1. Background Grid
-    ctx.fillStyle = '#060912';
+    ctx.fillStyle = '#051F20';
     ctx.fillRect(0, 0, w, h);
 
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+    ctx.strokeStyle = 'rgba(142, 182, 155, 0.12)';
     ctx.lineWidth = 1;
     for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
     for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
@@ -107,32 +107,32 @@ class SiteMinimap {
     // 2. Lake Zone (North, -Z)
     const lakeTop = this.worldToRadar(0, -24).y;
     const lakeBottom = this.worldToRadar(0, -16.5).y;
-    ctx.fillStyle = 'rgba(16, 185, 129, 0.14)';
+    ctx.fillStyle = 'rgba(35, 83, 71, 0.35)';
     ctx.fillRect(0, lakeTop, w, lakeBottom - lakeTop);
 
     // 3. Swimming Pool Footprint
     const p1 = this.worldToRadar(1.5, -15.4);
     const p2 = this.worldToRadar(9.5, -5.0);
-    ctx.fillStyle = 'rgba(0, 210, 255, 0.32)';
-    ctx.strokeStyle = '#00d2ff';
-    ctx.lineWidth = 1;
+    ctx.fillStyle = 'rgba(142, 182, 155, 0.28)';
+    ctx.strokeStyle = '#8EB69B';
+    ctx.lineWidth = 1.2;
     ctx.fillRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
     ctx.strokeRect(p1.x, p1.y, p2.x - p1.x, p2.y - p1.y);
 
     // 4. Main Villa Footprint
     const v1 = this.worldToRadar(-7.5, -3.8);
     const v2 = this.worldToRadar(8.6, 6.4);
-    ctx.fillStyle = 'rgba(248, 250, 252, 0.2)';
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.lineWidth = 1.2;
+    ctx.fillStyle = 'rgba(11, 43, 38, 0.85)';
+    ctx.strokeStyle = '#DAF1DE';
+    ctx.lineWidth = 1.5;
     ctx.fillRect(v1.x, v1.y, v2.x - v1.x, v2.y - v1.y);
     ctx.strokeRect(v1.x, v1.y, v2.x - v1.x, v2.y - v1.y);
 
     // 5. Carport Pergola Footprint
     const c1 = this.worldToRadar(4.2, 3.0);
     const c2 = this.worldToRadar(14.2, 9.6);
-    ctx.fillStyle = 'rgba(148, 163, 184, 0.16)';
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
+    ctx.fillStyle = 'rgba(22, 56, 50, 0.7)';
+    ctx.strokeStyle = '#8EB69B';
     ctx.fillRect(c1.x, c1.y, c2.x - c1.x, c2.y - c1.y);
     ctx.strokeRect(c1.x, c1.y, c2.x - c1.x, c2.y - c1.y);
 
@@ -141,12 +141,12 @@ class SiteMinimap {
       this.cameraManager.spatialNodes.forEach(node => {
         const pt = this.worldToRadar(node.pos.x, node.pos.z);
         const isSel = this.cameraManager.activeNode && this.cameraManager.activeNode.code === node.code;
-        ctx.fillStyle = isSel ? '#ffffff' : '#38bdf8';
+        ctx.fillStyle = isSel ? '#DAF1DE' : '#8EB69B';
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, isSel ? 4.5 : 3.0, 0, Math.PI * 2);
         ctx.fill();
         if (isSel) {
-          ctx.strokeStyle = '#00d2ff';
+          ctx.strokeStyle = '#DAF1DE';
           ctx.lineWidth = 2;
           ctx.stroke();
         }
@@ -159,7 +159,7 @@ class SiteMinimap {
     const angle = Math.atan2(tgtPt.y - camPt.y, tgtPt.x - camPt.x);
 
     // Translucent viewing cone
-    ctx.fillStyle = 'rgba(0, 210, 255, 0.22)';
+    ctx.fillStyle = 'rgba(142, 182, 155, 0.22)';
     ctx.beginPath();
     ctx.moveTo(camPt.x, camPt.y);
     ctx.arc(camPt.x, camPt.y, 36, angle - 0.45, angle + 0.45);
@@ -167,11 +167,11 @@ class SiteMinimap {
     ctx.fill();
 
     // Camera center point
-    ctx.fillStyle = '#00d2ff';
+    ctx.fillStyle = '#8EB69B';
     ctx.beginPath();
     ctx.arc(camPt.x, camPt.y, 4.5, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = '#DAF1DE';
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }

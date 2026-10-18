@@ -8,7 +8,7 @@
 [![Dubai UAE](https://img.shields.io/badge/Location-Dubai%2C%20UAE-00732f?style=for-the-badge)](https://en.wikipedia.org/wiki/Jumeirah_Islands)
 [![Status](https://img.shields.io/badge/Construction%20Status-86.4%25%20Site%20State-blue?style=for-the-badge)](#project-telemetry)
 
-An enterprise-grade, browser-based **3D BIM Digital Twin** and site telemetry platform for **Jumeirah Islands Luxury Villa Plot 003** in Dubai, UAE, engineered for **ONIX Engineering Consultancy** and **VH Contracting LLC**.
+An enterprise-grade, browser-based **3D BIM Digital Twin** and site telemetry platform for **Jumeirah Islands Luxury Villa Plot 003** in Dubai, UAE, engineered for **Architectural BIM Consultancy** and **VH Contracting LLC**.
 
 Built on rigorous **Category Theory UI/UX Principles**:
 1. **Natural Transformation for View Transitions**: View state functors $V: \mathbf{Domain} \to \mathbf{ViewportState}$ with structure-preserving geodesic cubic Bezier morphs between representation systems (3D viewport $\leftrightarrow$ 2D tactical radar $\leftrightarrow$ camera stations $\leftrightarrow$ BIM cuts).
@@ -34,7 +34,7 @@ Host this digital twin directly on **GitHub Pages** with zero build configuratio
 - **Procedural PBR Textures**:
   - Micro-cement troweled stucco with calibrated bump maps and zero washout under ACES Filmic tone mapping.
   - Fluted American walnut panels with 3D bump shadow grooves.
-  - Signature ONIX etched wave decals across double-glazed curtain walls.
+  - Signature etched wave decals across double-glazed curtain walls.
   - Custom cyan river-vein mosaic pool texture matching real site captures (Photos #001 & #010).
   - Refractive animated pool water with normal maps and sheer descent waterfall weir with mist particle system.
 - **Architectural Elements across 3 Levels + Roof**:
@@ -46,7 +46,7 @@ Host this digital twin directly on **GitHub Pages** with zero build configuratio
 - **Three Chronological Construction Phases**:
   - **Phase 1: Structure & Shoring (62%)**: Raw concrete superstructure, rear lakeside shoring piles, and excavation ramp.
   - **Phase 2: 08 Oct 2026 Site State (86.4%)**: Terracotta sand staging beds, 6 concrete planter foundation pits, stacked scaffolding steel pipes, timber boards, portable solar site lamp post, contractor supply pickup truck, burlap-wrapped palms, and neighboring villa scaffolding.
-  - **Phase 3: ONIX Final Handover Render (100%)**: Manicured lawns, sculpted multi-tier bonsai tree, circular stone feature planter, glowing garden orbs, luxury vehicles (G-Wagon, Audi, Porsche), and mature tropical date palms.
+  - **Phase 3: Master Final Handover Render (100%)**: Manicured lawns, sculpted multi-tier bonsai tree, circular stone feature planter, glowing garden orbs, luxury vehicles (G-Wagon, Audi, Porsche), and mature tropical date palms.
 
 ### 📐 2. Real-Time BIM Section Cut Clipping Planes
 - Interactive Y-Axis horizontal level cut slider (-3.2m to 12.0m) to slice through floor slabs and inspect interior structural framing.
@@ -83,7 +83,7 @@ Embed the Digital Twin into React, Next.js, Vue, or an external dashboard via di
 
 ### Direct JavaScript API
 ```javascript
-// Switch between 'render' (Finished ONIX) and 'site' (Oct 2026 Construction)
+// Switch between 'render' (Finished Master) and 'site' (Oct 2026 Construction)
 window.JumeirahTwinAPI.setSiteState('site'); // or 'render'
 
 // Smoothly fly camera to architectural vantage points
@@ -152,7 +152,7 @@ export default function TwinEmbed() {
 | **Coordinates** | `25.0617° N, 55.1528° E` |
 | **Plot Area** | 12,450 sq.ft |
 | **Built-Up Area (BUA)** | 9,800 sq.ft (LG + G + 1 + Roof Terrace) |
-| **Engineering Consultant** | ONIX Engineering Consultancy |
+| **Engineering Consultant** | Architectural BIM Consultancy |
 | **Main Contractor** | VH Contracting LLC |
 | **As-Built Milestone** | October 2026 (84% Superstructure & Finishing Complete) |
 | **Site Stations** | 16 Active Multi-Angle Timelapse Stations (460+ captures) |
@@ -216,6 +216,6 @@ npx serve .
 
 ## 📄 License & Attribution
 
-- **Project Design & BIM Engineering**: Devendra Kumar Gupta & ONIX Engineering Consultancy.
+- **Project Design & BIM Engineering**: Devendra Kumar Gupta & Architectural BIM Engineering.
 - **Site Location**: Jumeirah Islands, Dubai, United Arab Emirates.
 - Released for BIM digital twin visualization, engineering portfolio, and construction site telemetry demonstration.

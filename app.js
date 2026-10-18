@@ -1,6 +1,6 @@
 /**
  * JUMEIRAH ISLANDS DIGITAL TWIN - MASTER APPLICATION CONTROLLER
- * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * Developed for Architectural BIM Consultancy & VH Contracting LLC
  * 
  * Mathematical Architecture:
  * 1. NATURAL TRANSFORMATION: View transitions operate functorially along structure-preserving geodesics.
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('viewport-3d-wrapper');
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x060912);
+  scene.background = new THREE.Color(0x051F20);
 
   const camera = new THREE.PerspectiveCamera(
     60,
@@ -95,8 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.phase-btn').forEach(btn => {
       const match = btn.getAttribute('data-phase') === AppState.phase;
       btn.className = match
-        ? 'phase-btn bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5'
-        : 'phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5';
+        ? 'phase-btn bg-gradient-to-r from-[#235347] to-[#163832] text-[#DAF1DE] border border-[#8EB69B] shadow-lg shadow-[#051F20]/50 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5'
+        : 'phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center gap-1.5';
     });
 
     const topBar = document.getElementById('top-progress-bar');
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modelBuilder.toggleCADEdges(AppState.cadEdges);
     const edgeBtn = document.getElementById('btn-toggle-edges');
     if (edgeBtn) {
-      edgeBtn.innerHTML = `<i class="fa-solid fa-vector-square text-sky-300"></i> <span class="hidden md:inline">CAD Edges: ${AppState.cadEdges ? 'ON' : 'OFF'}</span>`;
+      edgeBtn.innerHTML = `<i class="fa-solid fa-vector-square text-[#8EB69B]"></i> <span class="hidden md:inline">CAD Edges: ${AppState.cadEdges ? 'ON' : 'OFF'}</span>`;
       edgeBtn.classList.toggle('active', AppState.cadEdges);
     }
 
@@ -156,9 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const f = btn.getAttribute('data-floor');
       const match = f === AppState.activeFloor;
       if (match) {
-        btn.className = 'floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium' + (f === 'basement' ? ' col-span-2' : '');
+        btn.className = 'floor-btn active py-1.5 px-2 rounded-lg bg-[#235347]/60 border border-[#8EB69B] text-[#DAF1DE] font-medium' + (f === 'basement' ? ' col-span-2' : '');
       } else {
-        btn.className = 'floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white' + (f === 'basement' ? ' col-span-2' : '');
+        btn.className = 'floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-[#8EB69B] hover:text-[#DAF1DE]' + (f === 'basement' ? ' col-span-2' : '');
       }
     });
 
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 4. PUBLIC API: window.JumeirahTwinAPI & POSTMESSAGE
   // ----------------------------------------------------
   window.JumeirahTwinAPI = {
-    // Switch between 'render' (Finished ONIX) and 'site' (Oct 2026 Construction) or 'shoring'
+    // Switch between 'render' (Finished Master) and 'site' (Oct 2026 Construction) or 'shoring'
     setSiteState: (stateKey) => {
       mutateState(s => ({ ...s, phase: stateKey }), `Site State updated -> ${stateKey.toUpperCase()}`);
     },
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const p = btn.getAttribute('data-phase');
       window.JumeirahTwinAPI.setPhase(p);
-      showToast(`Phase: ${p === 'render' ? 'ONIX Final Render' : p === 'site' ? '08 Oct 2026 Site State' : 'Superstructure & Shoring'}`);
+      showToast(`Phase: ${p === 'render' ? 'Master Design Handover' : p === 'site' ? '08 Oct 2026 Site State' : 'Superstructure & Shoring'}`);
     });
   });
 
@@ -619,15 +619,15 @@ function populateSpatialNodesList(cameraManager) {
   cameraManager.spatialNodes.forEach((node, idx) => {
     const btn = document.createElement('button');
     btn.className = `spatial-node-item w-full text-left px-3 py-2 rounded-xl text-xs border transition flex items-center justify-between ${
-      idx === 0 ? 'active bg-sky-500/20 border-sky-400 text-white' : 'bg-slate-950/50 hover:bg-slate-900 border-white/5 text-slate-300'
+      idx === 0 ? 'active bg-[#235347]/60 border-[#8EB69B] text-[#DAF1DE]' : 'bg-[#0B2B26]/60 hover:bg-[#163832]/60 border-[#8EB69B]/20 text-[#8EB69B] hover:text-[#DAF1DE]'
     }`;
     btn.setAttribute('data-node-code', node.code);
     btn.innerHTML = `
       <div class="flex items-center gap-2 truncate">
-        <span class="px-1.5 py-0.5 rounded bg-sky-500/20 border border-sky-400/30 text-sky-300 font-mono text-[10px] font-bold">${node.code}</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#235347]/40 border border-[#8EB69B]/40 text-[#DAF1DE] font-mono text-[10px] font-medium">${node.code}</span>
         <span class="truncate font-medium">${node.title}</span>
       </div>
-      <span class="text-[10px] font-mono text-emerald-400 ml-2 font-semibold">${node.badge}</span>
+      <span class="text-[10px] font-mono text-[#DAF1DE] ml-2 font-medium">${node.badge}</span>
     `;
     btn.addEventListener('click', () => {
       cameraManager.selectSpatialNode(node, true);
@@ -660,18 +660,18 @@ function populateCameraCarousel(cameraManager) {
   cameras.forEach((cam) => {
     const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
     const card = document.createElement('div');
-    card.className = 'carousel-card spatial-card p-2 rounded-xl border border-white/10 hover:border-sky-400/50 transition cursor-pointer flex-shrink-0';
+    card.className = 'carousel-card spatial-card p-2 rounded-xl border border-[#8EB69B]/20 hover:border-[#8EB69B]/60 bg-[#0B2B26]/70 transition cursor-pointer flex-shrink-0';
     card.style.width = '165px';
     card.setAttribute('data-cam-id', cam.id);
     const rawSrc = (typeof cam.filename === 'string') ? cam.filename : defaultFallback;
     const encodedSrc = encodeURI(rawSrc);
     card.innerHTML = `
-      <div class="relative w-full h-20 rounded-lg overflow-hidden bg-slate-950 mb-1.5">
+      <div class="relative w-full h-20 rounded-lg overflow-hidden bg-[#051F20] mb-1.5 border border-[#8EB69B]/20">
         <img src="${encodedSrc}" alt="${cam.title}" class="w-full h-full object-cover" loading="lazy" onerror="this.src='${defaultFallback}'" />
-        <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-slate-950/80 font-mono text-[9px] text-sky-300 font-bold border border-white/10">${cam.id}</span>
+        <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-[#051F20]/90 font-mono text-[9px] text-[#DAF1DE] font-medium border border-[#8EB69B]/30">${cam.id}</span>
       </div>
-      <div class="text-[11px] font-bold text-white truncate">${cam.title}</div>
-      <div class="text-[10px] text-slate-400 font-mono truncate">${cam.date || 'Oct 2026 Site'}</div>
+      <div class="text-[11px] font-semibold text-white truncate font-display">${cam.title}</div>
+      <div class="text-[10px] text-[#8EB69B] font-mono truncate">${cam.date || 'Oct 2026 Site'}</div>
     `;
     card.addEventListener('click', () => {
       cameraManager.enterInspection(cam.id, true);

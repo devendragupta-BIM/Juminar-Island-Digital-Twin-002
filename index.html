@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jumeirah Islands 003 — Ultra-Photorealistic 3D Digital Twin & Site Telemetry | ONIX Engineering</title>
+  <title>Jumeirah Islands 003 — Ultra-Photorealistic 3D Digital Twin & Site Telemetry</title>
   
   <!-- SEO & Engineering Metadata -->
   <meta name="description" content="Next-Gen Architectural 3D BIM Digital Twin of Jumeirah Islands Villa 003 (Dubai, UAE). Features natural transformation view transitions, adjoint navigation depth, live BIM section cuts, 16 synchronized timelapse cameras with 460+ captures, and verified IoT telemetry." />
-  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, ONIX Engineering Consultancy, VH Contracting, Three.js Digital Twin, Construction Telemetry" />
+  <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, Architectural Engineering, Three.js Digital Twin, Construction Telemetry" />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏝️</text></svg>" />
 
-  <!-- Google Fonts: Inter, Outfit & JetBrains Mono -->
+  <!-- Google Fonts: Geist & Geist Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -28,16 +28,18 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            display: ['Outfit', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
+            sans: ['Geist', 'sans-serif'],
+            display: ['Geist', 'sans-serif'],
+            mono: ['Geist Mono', 'monospace'],
           },
           colors: {
-            onix: {
-              cyan: '#00d2ff',
-              blue: '#0088cc',
-              gold: '#d4af37',
-              emerald: '#10b981'
+            forest: {
+              deep: '#051F20',
+              pine: '#0B2B26',
+              dark: '#163832',
+              emerald: '#235347',
+              sage: '#8EB69B',
+              mint: '#DAF1DE'
             }
           }
         }
@@ -51,9 +53,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
   
   <!-- Master Design System Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=4.3" />
 </head>
-<body class="font-sans antialiased text-slate-100 bg-[#060912] selection:bg-sky-500 selection:text-white overflow-hidden">
+<body class="font-sans antialiased text-[#DAF1DE] bg-[#051F20] selection:bg-[#235347] selection:text-[#DAF1DE] overflow-hidden">
 
   <!-- ==================== 3D CANVAS VIEWPORT ==================== -->
   <div id="viewport-3d-wrapper" class="fixed inset-0 w-full h-full z-0">
@@ -61,14 +63,14 @@
   </div>
 
   <!-- Toast Notification Pill -->
-  <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-3 transition-all duration-300 spatial-glass px-5 py-2.5 rounded-full flex items-center gap-3 text-xs font-medium text-sky-200 border border-sky-400/50 shadow-2xl">
-    <i class="fa-solid fa-sparkles text-sky-400"></i>
+  <div id="toast-banner" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-3 transition-all duration-300 spatial-glass px-5 py-2.5 rounded-full flex items-center gap-3 text-xs font-medium text-[#DAF1DE] border border-[#8EB69B]/40 shadow-2xl">
+    <i class="fa-solid fa-sparkles text-[#8EB69B]"></i>
     <span id="toast-text">Jumeirah Islands 003 Digital Twin Ready</span>
   </div>
 
   <!-- First-Person Walk Mode Crosshair & Instructions HUD -->
   <div id="walk-hud" class="fixed top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-none hidden flex-col items-center gap-2">
-    <div class="spatial-glass px-5 py-2.5 rounded-full text-xs font-mono text-sky-300 border border-sky-400/40 flex items-center gap-3 shadow-2xl">
+    <div class="spatial-glass px-5 py-2.5 rounded-full text-xs font-mono text-[#DAF1DE] border border-[#8EB69B]/30 flex items-center gap-3 shadow-2xl">
       <span><strong class="text-white">WASD:</strong> Walk</span>
       <span>•</span>
       <span><strong class="text-white">Q / E:</strong> Elevation</span>
@@ -79,87 +81,87 @@
 
   <!-- ==================== TOP COMMAND BAR ==================== -->
   <header id="top-header" class="fixed top-3 left-3 right-3 h-14 spatial-glass rounded-2xl z-30 px-4 flex items-center justify-between">
-    <!-- Left: ONIX Engineering Identity & Left Dock Toggle -->
+    <!-- Left: Architectural BIM Identity & Left Dock Toggle -->
     <div class="flex items-center gap-3">
-      <button id="btn-toggle-left" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition" title="Toggle BIM & Lighting Dock">
+      <button id="btn-toggle-left" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-[#8EB69B]/20 flex items-center justify-center text-[#8EB69B] hover:text-[#DAF1DE] transition" title="Toggle BIM & Lighting Dock">
         <i class="fa-solid fa-bars-staggered"></i>
       </button>
-      <div class="relative flex items-center justify-center w-9 h-9 rounded-xl bg-slate-950/90 border border-white/15 shadow-inner">
-        <div class="w-6 h-6 rounded-full border-[2.5px] border-sky-400 border-r-amber-500 animate-spin" style="animation-duration: 14s;"></div>
+      <div class="relative flex items-center justify-center w-9 h-9 rounded-xl bg-[#051F20]/90 border border-[#8EB69B]/30 shadow-inner">
+        <div class="w-6 h-6 rounded-full border-[2.5px] border-[#8EB69B] border-r-[#DAF1DE] animate-spin" style="animation-duration: 14s;"></div>
       </div>
       <div>
         <div class="flex items-center gap-2">
           <span class="font-display font-extrabold tracking-wider text-sm text-white">JUMEIRAH ISLANDS • VILLA 003</span>
-          <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-400/30 font-semibold">PBR TWIN v4.2</span>
+          <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-md bg-[#235347]/40 text-[#DAF1DE] border border-[#8EB69B]/30 font-medium">PBR TWIN v4.2</span>
         </div>
-        <div class="text-[11px] text-slate-400 flex items-center gap-2 font-sans">
-          <span><strong class="text-amber-400 font-bold">ONIX</strong> Engineering Consultancy</span>
-          <span class="text-slate-600">•</span>
-          <span class="font-mono text-[10px] text-slate-300">Plot JI-003 • Dubai, UAE</span>
+        <div class="text-[11px] text-[#8EB69B] flex items-center gap-2 font-sans">
+          <span><strong class="text-[#DAF1DE] font-semibold">Architectural BIM</strong> & Spatial Telemetry</span>
+          <span class="text-[#8EB69B]/40">•</span>
+          <span class="font-mono text-[10px] text-[#DAF1DE]/90">Plot JI-003 • Dubai, UAE</span>
         </div>
       </div>
     </div>
 
     <!-- Center: Live Engine Diagnostics, Site Progress & Dubai Weather -->
-    <div class="hidden xl:flex items-center gap-5 bg-slate-950/75 px-4 py-1.5 rounded-xl border border-white/10">
+    <div class="hidden xl:flex items-center gap-5 bg-[#051F20]/80 px-4 py-1.5 rounded-xl border border-[#8EB69B]/20">
       <div class="flex items-center gap-2">
         <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8EB69B] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#8EB69B]"></span>
         </span>
-        <span class="text-[11px] font-mono text-slate-300">SYNC: <strong class="text-emerald-400 font-bold">LIVE</strong></span>
+        <span class="text-[11px] font-mono text-[#8EB69B]">SYNC: <strong class="text-[#DAF1DE] font-semibold">LIVE</strong></span>
       </div>
-      <div class="h-3.5 w-[1px] bg-white/10"></div>
+      <div class="h-3.5 w-[1px] bg-[#8EB69B]/20"></div>
       <div class="flex items-center gap-3 text-[11px] font-mono">
-        <span class="text-slate-400">CLARITY: <strong class="text-emerald-400">ULTRA HD</strong></span>
-        <span class="text-slate-400">FPS: <strong id="stat-fps" class="text-sky-400">60</strong></span>
-        <span class="text-slate-400">TRIS: <strong class="text-indigo-300">42.8K</strong></span>
+        <span class="text-[#8EB69B]">CLARITY: <strong class="text-[#DAF1DE]">ULTRA HD</strong></span>
+        <span class="text-[#8EB69B]">FPS: <strong id="stat-fps" class="text-[#DAF1DE]">60</strong></span>
+        <span class="text-[#8EB69B]">TRIS: <strong class="text-[#DAF1DE]">42.8K</strong></span>
       </div>
-      <div class="h-3.5 w-[1px] bg-white/10"></div>
+      <div class="h-3.5 w-[1px] bg-[#8EB69B]/20"></div>
       <div class="flex items-center gap-2.5">
-        <span class="text-[11px] text-slate-400">Site Progress:</span>
-        <div class="w-24 h-2 bg-slate-800 rounded-full overflow-hidden p-[1px]">
-          <div id="top-progress-bar" class="h-full bg-gradient-to-r from-sky-400 to-emerald-400 rounded-full transition-all duration-500" style="width: 100%"></div>
+        <span class="text-[11px] text-[#8EB69B]">Site Progress:</span>
+        <div class="w-24 h-2 bg-[#0B2B26] rounded-full overflow-hidden p-[1px] border border-[#8EB69B]/20">
+          <div id="top-progress-bar" class="h-full bg-gradient-to-r from-[#235347] via-[#8EB69B] to-[#DAF1DE] rounded-full transition-all duration-500" style="width: 100%"></div>
         </div>
-        <span id="top-progress-text" class="text-[11px] font-mono font-bold text-emerald-400">100%</span>
+        <span id="top-progress-text" class="text-[11px] font-mono font-medium text-[#DAF1DE]">100%</span>
       </div>
-      <div class="h-3.5 w-[1px] bg-white/10"></div>
-      <div class="flex items-center gap-1.5 text-[11px] text-amber-300 font-mono">
-        <i class="fa-solid fa-sun"></i>
+      <div class="h-3.5 w-[1px] bg-[#8EB69B]/20"></div>
+      <div class="flex items-center gap-1.5 text-[11px] text-[#DAF1DE] font-mono">
+        <i class="fa-solid fa-sun text-[#8EB69B]"></i>
         <span>31°C DXB • Clear</span>
       </div>
     </div>
 
     <!-- Right: Interactive Viewport Actions & Controls -->
     <div class="flex items-center gap-2">
-      <button id="btn-crystal-clear" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/25 hover:bg-emerald-500/35 text-emerald-300 border border-emerald-400/50 transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10" title="Maximize Building Clarity & Reset Cuts">
-        <i class="fa-solid fa-wand-sparkles text-emerald-300"></i>
+      <button id="btn-crystal-clear" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#235347]/40 hover:bg-[#235347]/60 text-[#DAF1DE] border border-[#8EB69B]/50 transition flex items-center gap-1.5 shadow-lg shadow-[#051F20]/30" title="Maximize Building Clarity & Reset Cuts">
+        <i class="fa-solid fa-wand-sparkles text-[#8EB69B]"></i>
         <span class="hidden sm:inline">Crystal Clear</span>
       </button>
-      <button id="btn-toggle-edges" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-sky-500/25 text-sky-200 border border-sky-400/50 hover:bg-sky-500/35 transition flex items-center gap-1.5" title="Toggle Architectural CAD Edge Outlines">
-        <i class="fa-solid fa-vector-square text-sky-300"></i>
+      <button id="btn-toggle-edges" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-[#163832]/60 hover:bg-[#235347]/60 text-[#DAF1DE] border border-[#8EB69B]/40 transition flex items-center gap-1.5" title="Toggle Architectural CAD Edge Outlines">
+        <i class="fa-solid fa-vector-square text-[#8EB69B]"></i>
         <span class="hidden md:inline">CAD Edges: ON</span>
       </button>
-      <button id="btn-walk-mode" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition flex items-center gap-1.5" title="First-Person Walk Mode (WASD)">
-        <i class="fa-solid fa-person-walking text-emerald-400"></i>
+      <button id="btn-walk-mode" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/20 transition flex items-center gap-1.5" title="First-Person Walk Mode (WASD)">
+        <i class="fa-solid fa-person-walking text-[#8EB69B]"></i>
         <span class="hidden md:inline">Walk Mode</span>
       </button>
-      <button id="btn-cinema-tour" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-white/15 text-slate-200 border border-white/10 transition flex items-center gap-1.5" title="Automated Cinematic Drone Tour">
-        <i class="fa-solid fa-film text-amber-400"></i>
+      <button id="btn-cinema-tour" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/20 transition flex items-center gap-1.5" title="Automated Cinematic Drone Tour">
+        <i class="fa-solid fa-film text-[#8EB69B]"></i>
         <span class="hidden md:inline">Cinema Tour</span>
       </button>
-      <button id="btn-toggle-pins" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 text-slate-300 border border-white/10 hover:bg-white/15 transition flex items-center gap-1.5" title="Toggle 3D Pins">
-        <i class="fa-solid fa-location-crosshairs"></i>
+      <button id="btn-toggle-pins" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-white/5 hover:bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/20 transition flex items-center gap-1.5" title="Toggle 3D Pins">
+        <i class="fa-solid fa-location-crosshairs text-[#8EB69B]"></i>
         <span class="hidden sm:inline">Pins</span>
       </button>
-      <button id="btn-ide-sdk" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500/30 to-sky-500/30 text-sky-200 border border-sky-400/40 hover:border-sky-300 transition flex items-center gap-1.5 shadow-lg shadow-sky-500/10" title="Antigravity IDE Bi-Directional SDK">
-        <i class="fa-solid fa-code text-sky-400"></i>
+      <button id="btn-ide-sdk" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-gradient-to-r from-[#235347]/40 to-[#163832]/40 hover:from-[#235347]/60 hover:to-[#163832]/60 text-[#DAF1DE] border border-[#8EB69B]/40 transition flex items-center gap-1.5 shadow-lg shadow-[#051F20]/20" title="Antigravity IDE Bi-Directional SDK">
+        <i class="fa-solid fa-code text-[#8EB69B]"></i>
         <span class="hidden lg:inline">SDK</span>
       </button>
-      <button id="btn-clean-ui" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10 transition flex items-center justify-center" title="Toggle Clean HUD Viewport">
-        <i class="fa-solid fa-eye"></i>
+      <button id="btn-clean-ui" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/20 transition flex items-center justify-center" title="Toggle Clean HUD Viewport">
+        <i class="fa-solid fa-eye text-[#8EB69B]"></i>
       </button>
-      <button id="btn-toggle-right" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition" title="Toggle Telemetry Dock">
+      <button id="btn-toggle-right" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 border border-[#8EB69B]/20 flex items-center justify-center text-[#8EB69B] hover:text-[#DAF1DE] transition" title="Toggle Telemetry Dock">
         <i class="fa-solid fa-chart-pie"></i>
       </button>
     </div>
@@ -167,40 +169,40 @@
 
   <!-- ==================== LEFT DOCK: BIM SECTION CUTS, SHADERS & LIGHTING ==================== -->
   <aside id="left-dock" class="fixed top-20 left-3 bottom-20 w-80 spatial-glass rounded-2xl z-20 flex flex-col overflow-hidden transition-transform duration-300">
-    <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
-      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-sky-400 font-display">
-        <i class="fa-solid fa-cubes-stacked"></i>
+    <div class="px-4 py-3 border-b border-[#8EB69B]/15 flex items-center justify-between bg-[#0B2B26]/60">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#DAF1DE] font-display">
+        <i class="fa-solid fa-cubes-stacked text-[#8EB69B]"></i>
         <span>BIM Section & Shaders</span>
       </div>
-      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 font-semibold">ACES Filmic</span>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/30 font-medium">ACES Filmic</span>
     </div>
 
     <div class="flex-1 overflow-y-auto p-3.5 space-y-4">
       <!-- 1. LIVE BIM SECTION CUT / CLIPPING PLANES -->
       <div class="spatial-card p-3 rounded-xl space-y-2.5">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 font-display">
-            <i class="fa-solid fa-scissors text-rose-400"></i> Live BIM Section Cut
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[#DAF1DE] flex items-center gap-1.5 font-display">
+            <i class="fa-solid fa-scissors text-[#8EB69B]"></i> Live BIM Section Cut
           </span>
-          <button id="btn-reset-clip" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/10 transition">
+          <button id="btn-reset-clip" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 hover:bg-[#235347]/40 text-[#8EB69B] hover:text-[#DAF1DE] border border-[#8EB69B]/20 transition">
             Reset
           </button>
         </div>
-        <p class="text-[10px] text-slate-400 leading-relaxed font-sans">
+        <p class="text-[10px] text-[#8EB69B] leading-relaxed font-sans">
           Slice floor slabs & curtain walls in real time to inspect interior dining, double-height atrium & structural columns.
         </p>
         <div class="space-y-2 pt-1">
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-slate-300">Horizontal Level Cut (Y-Axis)</span>
-              <span id="val-clip-y" class="font-mono text-sky-400">Full (12.0m)</span>
+              <span class="text-[#DAF1DE]/90">Horizontal Level Cut (Y-Axis)</span>
+              <span id="val-clip-y" class="font-mono text-[#DAF1DE] font-medium">Full (12.0m)</span>
             </div>
             <input type="range" id="slider-clip-y" min="-3.2" max="12.0" step="0.1" value="12.0" class="w-full" />
           </div>
           <div>
             <div class="flex justify-between text-[11px] mb-1">
-              <span class="text-slate-300">Longitudinal Cross-Cut (X-Axis)</span>
-              <span id="val-clip-x" class="font-mono text-sky-400">Full (16.0m)</span>
+              <span class="text-[#DAF1DE]/90">Longitudinal Cross-Cut (X-Axis)</span>
+              <span id="val-clip-x" class="font-mono text-[#DAF1DE] font-medium">Full (16.0m)</span>
             </div>
             <input type="range" id="slider-clip-x" min="-9.5" max="16.0" step="0.1" value="16.0" class="w-full" />
           </div>
@@ -209,42 +211,42 @@
 
       <!-- 2. LIGHTING & ATMOSPHERE STUDIO -->
       <div class="spatial-card p-3 rounded-xl space-y-3">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center justify-between font-display">
-          <span><i class="fa-solid fa-sun text-amber-400 mr-1"></i> Atmosphere & Lighting</span>
-          <span id="env-mode-badge" class="text-[10px] font-mono text-emerald-300">DAYLIGHT</span>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#DAF1DE] flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-sun text-[#8EB69B] mr-1"></i> Atmosphere & Lighting</span>
+          <span id="env-mode-badge" class="text-[10px] font-mono text-[#DAF1DE] font-medium">DAYLIGHT</span>
         </div>
 
         <div class="grid grid-cols-2 gap-1.5">
-          <button data-env="day" class="env-btn active bg-sky-500/25 border-sky-400 text-white py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-sun text-amber-300"></i> Crisp Day
+          <button data-env="day" class="env-btn active bg-[#235347]/60 border-[#8EB69B] text-[#DAF1DE] py-1.5 px-2.5 rounded-lg text-[11px] font-medium border flex items-center gap-2 transition">
+            <i class="fa-solid fa-sun text-[#DAF1DE]"></i> <span>Crisp Day</span>
           </button>
-          <button data-env="dusk" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-cloud-moon text-sky-300"></i> Blue Hour
+          <button data-env="dusk" class="env-btn bg-white/5 hover:bg-[#235347]/30 border-white/10 text-[#8EB69B] hover:text-[#DAF1DE] py-1.5 px-2.5 rounded-lg text-[11px] font-medium border flex items-center gap-2 transition">
+            <i class="fa-solid fa-cloud-moon text-[#8EB69B]"></i> <span>Blue Hour</span>
           </button>
-          <button data-env="golden" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-mountain-sun text-orange-400"></i> Sunset
+          <button data-env="golden" class="env-btn bg-white/5 hover:bg-[#235347]/30 border-white/10 text-[#8EB69B] hover:text-[#DAF1DE] py-1.5 px-2.5 rounded-lg text-[11px] font-medium border flex items-center gap-2 transition">
+            <i class="fa-solid fa-mountain-sun text-[#8EB69B]"></i> <span>Sunset</span>
           </button>
-          <button data-env="night" class="env-btn bg-white/5 hover:bg-white/10 border-white/10 text-slate-300 py-1.5 px-2 rounded-lg text-[11px] font-medium border flex items-center gap-1.5 transition">
-            <i class="fa-solid fa-star text-indigo-300"></i> Night LED
+          <button data-env="night" class="env-btn bg-white/5 hover:bg-[#235347]/30 border-white/10 text-[#8EB69B] hover:text-[#DAF1DE] py-1.5 px-2.5 rounded-lg text-[11px] font-medium border flex items-center gap-2 transition">
+            <i class="fa-solid fa-star text-[#8EB69B]"></i> <span>Night LED</span>
           </button>
         </div>
 
         <div class="space-y-2 pt-1 font-sans">
           <div class="flex justify-between text-[11px]">
-            <span class="text-slate-400">Sun Azimuth Angle</span>
-            <span id="val-azimuth" class="font-mono text-sky-400">212°</span>
+            <span class="text-[#8EB69B]">Sun Azimuth Angle</span>
+            <span id="val-azimuth" class="font-mono text-[#DAF1DE] font-medium">212°</span>
           </div>
           <input type="range" id="slider-azimuth" min="0" max="360" value="212" class="w-full" />
 
           <div class="flex justify-between text-[11px]">
-            <span class="text-slate-400">Solar Elevation</span>
-            <span id="val-elevation" class="font-mono text-sky-400">42°</span>
+            <span class="text-[#8EB69B]">Solar Elevation</span>
+            <span id="val-elevation" class="font-mono text-[#DAF1DE] font-medium">42°</span>
           </div>
           <input type="range" id="slider-elevation" min="1" max="85" value="42" class="w-full" />
 
           <div class="flex justify-between text-[11px]">
-            <span class="text-slate-400">Tone Mapping Exposure</span>
-            <span id="val-bloom" class="font-mono text-amber-300">0.85</span>
+            <span class="text-[#8EB69B]">Tone Mapping Exposure</span>
+            <span id="val-bloom" class="font-mono text-[#DAF1DE] font-medium">0.85</span>
           </div>
           <input type="range" id="slider-bloom" min="0.45" max="1.25" step="0.02" value="0.85" class="w-full" />
         </div>
@@ -252,15 +254,15 @@
 
       <!-- 3. FLOOR LEVEL ISOLATION -->
       <div class="spatial-card p-3 rounded-xl space-y-2">
-        <span class="text-[11px] font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5 font-display">
-          <i class="fa-solid fa-layer-group text-sky-400"></i> Floor Level Isolation
+        <span class="text-[11px] font-bold uppercase tracking-wider text-[#DAF1DE] flex items-center gap-1.5 font-display">
+          <i class="fa-solid fa-layer-group text-[#8EB69B]"></i> Floor Level Isolation
         </span>
         <div class="grid grid-cols-2 gap-1.5 text-xs">
-          <button class="floor-btn active py-1.5 px-2 rounded-lg bg-sky-500/20 border border-sky-400/40 text-white font-medium" data-floor="all" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="roof" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="first" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white" data-floor="ground" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
-          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:text-white col-span-2" data-floor="basement" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
+          <button class="floor-btn active py-1.5 px-2 rounded-lg bg-[#235347]/60 border border-[#8EB69B] text-[#DAF1DE] font-medium" data-floor="all" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-[#8EB69B] hover:text-[#DAF1DE]" data-floor="roof" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-[#8EB69B] hover:text-[#DAF1DE]" data-floor="first" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-[#8EB69B] hover:text-[#DAF1DE]" data-floor="ground" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
+          <button class="floor-btn py-1.5 px-2 rounded-lg bg-white/5 border border-white/10 text-[#8EB69B] hover:text-[#DAF1DE] col-span-2" data-floor="basement" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
         </div>
       </div>
     </div>
@@ -268,44 +270,44 @@
 
   <!-- ==================== RIGHT DOCK: 2D RADAR, IOT INSPECTOR & QA/QC ==================== -->
   <aside id="right-dock" class="fixed top-20 right-3 bottom-20 w-84 spatial-glass rounded-2xl z-20 flex flex-col overflow-hidden transition-transform duration-300" style="width: 340px;">
-    <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
-      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 font-display">
-        <i class="fa-solid fa-satellite-dish"></i>
+    <div class="px-4 py-3 border-b border-[#8EB69B]/15 flex items-center justify-between bg-[#0B2B26]/60">
+      <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#DAF1DE] font-display">
+        <i class="fa-solid fa-satellite-dish text-[#8EB69B]"></i>
         <span>Spatial Radar & Telemetry</span>
       </div>
-      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">QA/QC PASSED</span>
+      <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/30 font-medium">QA/QC PASSED</span>
     </div>
 
     <div class="flex-1 overflow-y-auto p-3.5 space-y-4">
       <!-- 1. LIVE 2D ARCHITECTURAL RADAR -->
       <div class="spatial-card p-3 rounded-xl space-y-2">
         <div class="flex items-center justify-between text-[11px] font-display">
-          <span class="font-bold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
-            <i class="fa-solid fa-compass text-sky-400"></i> Interactive Site Radar
+          <span class="font-bold uppercase tracking-wider text-[#DAF1DE] flex items-center gap-1.5">
+            <i class="fa-solid fa-compass text-[#8EB69B]"></i> Interactive Site Radar
           </span>
-          <span class="font-mono text-[10px] text-slate-400">Click to Teleport</span>
+          <span class="font-mono text-[10px] text-[#8EB69B]">Click to Teleport</span>
         </div>
-        <div class="relative w-full h-36 rounded-lg overflow-hidden bg-slate-950 border border-white/10 cursor-crosshair">
+        <div class="relative w-full h-36 rounded-lg overflow-hidden bg-[#051F20] border border-[#8EB69B]/20 cursor-crosshair">
           <canvas id="radar-canvas" width="300" height="144" class="w-full h-full block"></canvas>
-          <div class="absolute bottom-1.5 left-2 text-[9px] font-mono text-slate-400 pointer-events-none">
+          <div class="absolute bottom-1.5 left-2 text-[9px] font-mono text-[#8EB69B]/80 pointer-events-none">
             N ↑ • LAKE (-Z) TOP • STREET (+Z) BOTTOM
           </div>
         </div>
       </div>
 
       <!-- 2. ACTIVE SPATIAL IOT NODE INSPECTOR -->
-      <div class="bg-gradient-to-br from-slate-900/95 to-slate-950/95 p-3.5 rounded-xl border border-sky-400/40 shadow-xl space-y-2.5">
+      <div class="bg-gradient-to-br from-[#0B2B26]/95 to-[#051F20]/95 p-3.5 rounded-xl border border-[#8EB69B]/35 shadow-xl space-y-2.5">
         <div class="flex items-start justify-between gap-2">
           <div>
             <div class="flex items-center gap-1.5">
-              <span id="insp-code" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">MEP-004</span>
-              <span id="insp-photo-ref" class="text-[10px] font-mono text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">Photos #001, #005, #010</span>
+              <span id="insp-code" class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#235347]/40 text-[#DAF1DE] border border-[#8EB69B]/40 font-medium">MEP-004</span>
+              <span id="insp-photo-ref" class="text-[10px] font-mono text-[#DAF1DE] bg-[#235347]/25 px-1.5 py-0.5 rounded border border-[#8EB69B]/30">Photos #001, #005, #010</span>
             </div>
             <h3 id="insp-title" class="text-sm font-bold text-white mt-1.5 font-display">Waterfall Cantilever & Cyan Pool</h3>
           </div>
-          <span id="insp-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">VERIFIED</span>
+          <span id="insp-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#235347]/40 text-[#DAF1DE] border border-[#8EB69B]/40 font-medium">VERIFIED</span>
         </div>
-        <p id="insp-desc" class="text-[11px] text-slate-300 leading-relaxed font-sans">
+        <p id="insp-desc" class="text-[11px] text-[#8EB69B] leading-relaxed font-sans">
           Post-tensioned C50 white architectural concrete slab projecting over the rear pool with sheer descent waterfall weir and glowing cyan river-vein mosaic floor.
         </p>
         <div id="insp-metrics" class="grid grid-cols-2 gap-1.5 pt-1">
@@ -315,9 +317,9 @@
 
       <!-- 3. SPATIAL IOT TELEMETRY NODES LIST -->
       <div>
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between font-display">
-          <span><i class="fa-solid fa-location-dot text-sky-400 mr-1"></i> Verified Sensor Nodes</span>
-          <span class="text-[10px] font-mono text-slate-500">5 Active Stations</span>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#DAF1DE] mb-2 flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-location-dot text-[#8EB69B] mr-1"></i> Verified Sensor Nodes</span>
+          <span class="text-[10px] font-mono text-[#8EB69B]">5 Active Stations</span>
         </div>
         <div id="pins-list-container" class="space-y-1.5">
           <!-- Populated by JS -->
@@ -326,26 +328,26 @@
 
       <!-- 4. REAL-TIME OCT 2026 INSPECTION LOG -->
       <div class="spatial-card p-3 rounded-xl space-y-2">
-        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between font-display">
-          <span><i class="fa-solid fa-clipboard-check text-emerald-400 mr-1"></i> Oct 2026 Milestone Log</span>
-          <span class="text-[10px] font-mono text-sky-400">86.4% Site</span>
+        <div class="text-[11px] font-bold uppercase tracking-wider text-[#DAF1DE] flex items-center justify-between font-display">
+          <span><i class="fa-solid fa-clipboard-check text-[#8EB69B] mr-1"></i> Oct 2026 Milestone Log</span>
+          <span class="text-[10px] font-mono text-[#DAF1DE] font-medium">86.4% Site</span>
         </div>
         <div class="space-y-2 text-[11px]">
           <div>
-            <div class="flex justify-between mb-0.5"><span class="text-slate-300">White Micro-Cement Stucco & C-Frame</span><span class="font-mono text-emerald-400">100%</span></div>
-            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-emerald-400 rounded-full" style="width:100%"></div></div>
+            <div class="flex justify-between mb-0.5"><span class="text-[#8EB69B]">White Micro-Cement Stucco & C-Frame</span><span class="font-mono text-[#DAF1DE]">100%</span></div>
+            <div class="h-1.5 bg-[#051F20] rounded-full border border-[#8EB69B]/20"><div class="h-full bg-gradient-to-r from-[#235347] to-[#8EB69B] rounded-full" style="width:100%"></div></div>
           </div>
           <div>
-            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Curtain Glazing & Balustrades</span><span class="font-mono text-emerald-400">98%</span></div>
-            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-emerald-400 rounded-full" style="width:98%"></div></div>
+            <div class="flex justify-between mb-0.5"><span class="text-[#8EB69B]">Curtain Glazing & Balustrades</span><span class="font-mono text-[#DAF1DE]">98%</span></div>
+            <div class="h-1.5 bg-[#051F20] rounded-full border border-[#8EB69B]/20"><div class="h-full bg-gradient-to-r from-[#235347] to-[#8EB69B] rounded-full" style="width:98%"></div></div>
           </div>
           <div>
-            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Pool Shell & Cyan River-Vein Mosaic</span><span class="font-mono text-sky-400">95%</span></div>
-            <div class="h-1.5 bg-slate-800 rounded-full"><div class="h-full bg-sky-400 rounded-full" style="width:95%"></div></div>
+            <div class="flex justify-between mb-0.5"><span class="text-[#8EB69B]">Pool Shell & Cyan River-Vein Mosaic</span><span class="font-mono text-[#DAF1DE]">95%</span></div>
+            <div class="h-1.5 bg-[#051F20] rounded-full border border-[#8EB69B]/20"><div class="h-full bg-gradient-to-r from-[#235347] to-[#8EB69B] rounded-full" style="width:95%"></div></div>
           </div>
           <div>
-            <div class="flex justify-between mb-0.5"><span class="text-slate-300">Soft Landscaping & Carport Living Wall</span><span id="log-landscape-pct" class="font-mono text-emerald-400">100% (Render)</span></div>
-            <div class="h-1.5 bg-slate-800 rounded-full"><div id="log-landscape-bar" class="h-full bg-emerald-400 rounded-full transition-all duration-500" style="width:100%"></div></div>
+            <div class="flex justify-between mb-0.5"><span class="text-[#8EB69B]">Soft Landscaping & Carport Living Wall</span><span id="log-landscape-pct" class="font-mono text-[#DAF1DE]">100% (Render)</span></div>
+            <div class="h-1.5 bg-[#051F20] rounded-full border border-[#8EB69B]/20"><div id="log-landscape-bar" class="h-full bg-gradient-to-r from-[#235347] to-[#8EB69B] rounded-full transition-all duration-500" style="width:100%"></div></div>
           </div>
         </div>
       </div>
@@ -356,83 +358,83 @@
   <div id="bottom-dock" class="fixed bottom-3 left-1/2 -translate-x-1/2 z-30 spatial-glass rounded-2xl px-4 py-2.5 flex flex-col md:flex-row items-center gap-4 transition-transform duration-300 max-w-[96vw]">
     
     <!-- Chronological Phase Scrubber -->
-    <div class="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10">
-      <button data-phase="shoring" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5">
-        <i class="fa-solid fa-trowel-bricks text-slate-400"></i>
+    <div class="flex items-center gap-1.5 bg-[#051F20]/80 p-1 rounded-xl border border-[#8EB69B]/20">
+      <button data-phase="shoring" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center gap-1.5">
+        <i class="fa-solid fa-trowel-bricks text-[#8EB69B]"></i>
         <span>1. Superstructure & Shoring</span>
       </button>
-      <button data-phase="site" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white transition flex items-center gap-1.5">
-        <i class="fa-solid fa-helmet-safety text-amber-400"></i>
+      <button data-phase="site" class="phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center gap-1.5">
+        <i class="fa-solid fa-helmet-safety text-[#8EB69B]"></i>
         <span>2. 08 Oct 2026 Site State</span>
       </button>
-      <button data-phase="render" class="phase-btn bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg shadow-sky-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1.5">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>3. ONIX Handover Render</span>
+      <button data-phase="render" class="phase-btn bg-gradient-to-r from-[#235347] to-[#163832] text-[#DAF1DE] border border-[#8EB69B] shadow-lg shadow-[#051F20]/50 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+        <i class="fa-solid fa-wand-magic-sparkles text-[#8EB69B]"></i>
+        <span>3. Master Design Handover</span>
       </button>
     </div>
 
-    <div class="hidden md:block h-6 w-[1px] bg-white/10"></div>
+    <div class="hidden md:block h-6 w-[1px] bg-[#8EB69B]/20"></div>
 
     <!-- Photo-Match Camera Bookmarks -->
     <div class="flex items-center gap-1.5 overflow-x-auto max-w-full py-0.5">
-      <button data-cam="frontHero" class="cam-pill bg-sky-500/25 border-sky-400 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-camera-retro text-sky-400"></i> Front Elevation (#2,3,4)
+      <button data-cam="frontHero" class="cam-pill bg-[#235347]/50 border-[#8EB69B] text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-camera-retro text-[#8EB69B]"></i> Front Elevation (#2,3,4)
       </button>
-      <button data-cam="rearOrtho" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-water text-cyan-400"></i> Rear Pool (#5,10)
+      <button data-cam="rearOrtho" class="cam-pill bg-white/5 hover:bg-[#235347]/30 border border-[#8EB69B]/20 hover:border-[#8EB69B]/50 text-[#8EB69B] hover:text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-water text-[#8EB69B]"></i> Rear Pool (#5,10)
       </button>
-      <button data-cam="rearShoring" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-person-digging text-amber-400"></i> Rear Shoring (#1)
+      <button data-cam="rearShoring" class="cam-pill bg-white/5 hover:bg-[#235347]/30 border border-[#8EB69B]/20 hover:border-[#8EB69B]/50 text-[#8EB69B] hover:text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-person-digging text-[#8EB69B]"></i> Rear Shoring (#1)
       </button>
-      <button data-cam="frontEntrance" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-door-open text-emerald-400"></i> Main Portal (#6,7)
+      <button data-cam="frontEntrance" class="cam-pill bg-white/5 hover:bg-[#235347]/30 border border-[#8EB69B]/20 hover:border-[#8EB69B]/50 text-[#8EB69B] hover:text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-door-open text-[#8EB69B]"></i> Main Portal (#6,7)
       </button>
-      <button data-cam="topYard" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-arrow-down-up-across-line text-purple-400"></i> Top Yard Drone (#8)
+      <button data-cam="topYard" class="cam-pill bg-white/5 hover:bg-[#235347]/30 border border-[#8EB69B]/20 hover:border-[#8EB69B]/50 text-[#8EB69B] hover:text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-arrow-down-up-across-line text-[#8EB69B]"></i> Top Yard Drone (#8)
       </button>
-      <button data-cam="parkingSide" class="cam-pill bg-white/5 hover:bg-white/15 border-white/10 text-slate-300 px-2.5 py-1.5 rounded-lg text-[11px] font-medium border whitespace-nowrap transition flex items-center gap-1.5">
-        <i class="fa-solid fa-car-rear text-indigo-400"></i> Carport & Palms (#9)
+      <button data-cam="parkingSide" class="cam-pill bg-white/5 hover:bg-[#235347]/30 border border-[#8EB69B]/20 hover:border-[#8EB69B]/50 text-[#8EB69B] hover:text-[#DAF1DE] px-2.5 py-1.5 rounded-lg text-[11px] font-medium whitespace-nowrap transition flex items-center gap-1.5">
+        <i class="fa-solid fa-car-rear text-[#8EB69B]"></i> Carport & Palms (#9)
       </button>
     </div>
   </div>
 
   <!-- ==================== PHOTO INSPECTION & TIMELAPSE MODAL ==================== -->
-  <div id="camera-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="spatial-glass max-w-5xl w-full rounded-2xl border border-white/20 overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+  <div id="camera-modal" class="fixed inset-0 z-50 bg-[#051F20]/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="spatial-glass max-w-5xl w-full rounded-2xl border border-[#8EB69B]/30 overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
       <!-- Header -->
-      <div class="px-5 py-3.5 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
+      <div class="px-5 py-3.5 border-b border-[#8EB69B]/20 flex items-center justify-between bg-[#0B2B26]/85">
         <div class="flex items-center gap-3">
-          <div id="modal-cam-badge" class="px-2.5 py-1 rounded bg-sky-500/20 text-sky-300 font-mono text-xs font-bold border border-sky-400/30">CAM-01</div>
+          <div id="modal-cam-badge" class="px-2.5 py-1 rounded bg-[#235347]/40 text-[#DAF1DE] font-mono text-xs font-medium border border-[#8EB69B]/40">CAM-01</div>
           <div>
             <h3 id="modal-cam-title" class="text-sm font-bold text-white font-display">Exterior Front Main Entrance</h3>
-            <div id="modal-cam-subtitle" class="text-[11px] text-slate-400">Jumeirah Islands 003 • Station Capture</div>
+            <div id="modal-cam-subtitle" class="text-[11px] text-[#8EB69B]">Jumeirah Islands 003 • Station Capture</div>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button id="btn-fly-in-twin" class="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-sky-500/20">
-            <i class="fa-solid fa-paper-plane"></i> <span>Fly in 3D</span>
+          <button id="btn-fly-in-twin" class="px-3 py-1.5 rounded-xl bg-[#235347] hover:bg-[#163832] border border-[#8EB69B]/40 text-[#DAF1DE] font-medium text-xs transition flex items-center gap-1.5 shadow-lg shadow-[#051F20]/30">
+            <i class="fa-solid fa-paper-plane text-[#8EB69B]"></i> <span>Fly in 3D</span>
           </button>
-          <button id="modal-close-btn" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300 hover:text-white flex items-center justify-center transition">
+          <button id="modal-close-btn" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/15 text-[#8EB69B] hover:text-[#DAF1DE] flex items-center justify-center transition border border-[#8EB69B]/20">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
       </div>
 
       <!-- Body / Image Container -->
-      <div class="flex-1 overflow-hidden p-4 flex flex-col items-center justify-center bg-slate-950/50">
-        <div class="relative w-full h-[52vh] rounded-xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
+      <div class="flex-1 overflow-hidden p-4 flex flex-col items-center justify-center bg-[#051F20]/60">
+        <div class="relative w-full h-[52vh] rounded-xl overflow-hidden bg-[#051F20] flex items-center justify-center border border-[#8EB69B]/20">
           <img id="modal-site-image" src="" alt="Station Capture" class="max-w-full max-h-full object-contain" />
         </div>
 
         <!-- Scrubber Bar -->
-        <div class="w-full mt-3 p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-4">
-          <button id="btn-timelapse-play" class="px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition flex items-center gap-2" onclick="window.cameraManager && window.cameraManager.toggleTimelapse()">
-            <i class="fa-solid fa-play"></i> <span>Play Timelapse</span>
+        <div class="w-full mt-3 p-3 rounded-xl bg-[#0B2B26]/85 border border-[#8EB69B]/25 flex items-center justify-between gap-4">
+          <button id="btn-timelapse-play" class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#235347] to-[#163832] hover:from-[#163832] hover:to-[#235347] border border-[#8EB69B] text-[#DAF1DE] font-medium text-xs transition flex items-center gap-2 shadow-md shadow-[#051F20]/40" onclick="window.cameraManager && window.cameraManager.toggleTimelapse()">
+            <i class="fa-solid fa-play text-[#8EB69B]"></i> <span>Play Timelapse</span>
           </button>
           <div class="flex-1 px-2">
-            <div class="flex justify-between text-[11px] text-slate-300 font-mono mb-1">
+            <div class="flex justify-between text-[11px] text-[#8EB69B] font-mono mb-1">
               <span id="timelapse-time-label">14 Oct 2026 • 13:30</span>
-              <span id="timelapse-counter" class="text-sky-400 font-bold">Capture 1 of 26</span>
+              <span id="timelapse-counter" class="text-[#DAF1DE] font-medium">Capture 1 of 26</span>
             </div>
             <input type="range" id="timelapse-scrubber" min="0" max="25" value="0" class="w-full" oninput="window.cameraManager && window.cameraManager.updateModalFrame(parseInt(this.value))" />
           </div>
@@ -445,26 +447,26 @@
   </div>
 
   <!-- ==================== ANTIGRAVITY IDE SDK MODAL ==================== -->
-  <div id="ide-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="spatial-glass max-w-3xl w-full rounded-2xl border border-white/20 overflow-hidden shadow-2xl">
-      <div class="px-5 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950/80">
+  <div id="ide-modal" class="fixed inset-0 z-50 bg-[#051F20]/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="spatial-glass max-w-3xl w-full rounded-2xl border border-[#8EB69B]/30 overflow-hidden shadow-2xl">
+      <div class="px-5 py-4 border-b border-[#8EB69B]/20 flex items-center justify-between bg-[#0B2B26]/90">
         <div class="flex items-center gap-2.5 font-display">
-          <i class="fa-solid fa-terminal text-sky-400"></i>
-          <h2 class="text-sm font-bold uppercase tracking-wider text-white">Antigravity IDE • Digital Twin SDK & Event Stream</h2>
+          <i class="fa-solid fa-terminal text-[#8EB69B]"></i>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-white">Digital Twin SDK & Event Stream</h2>
         </div>
-        <button id="btn-close-ide" class="text-slate-400 hover:text-white p-1">
+        <button id="btn-close-ide" class="text-[#8EB69B] hover:text-[#DAF1DE] p-1">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
       </div>
-      <div class="p-5 space-y-4 text-xs text-slate-300 max-h-[78vh] overflow-y-auto">
+      <div class="p-5 space-y-4 text-xs text-[#8EB69B] max-h-[78vh] overflow-y-auto font-sans">
         <p class="leading-relaxed">
-          Control this Digital Twin programmatically from the Antigravity IDE, external dashboards, or parent iframes using <code class="text-sky-300 font-mono">window.JumeirahTwinAPI</code> or <code class="text-sky-300 font-mono">window.postMessage</code>.
+          Control this Digital Twin programmatically from external dashboards, or parent iframes using <code class="text-[#DAF1DE] font-mono">window.JumeirahTwinAPI</code> or <code class="text-[#DAF1DE] font-mono">window.postMessage</code>.
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div class="space-y-1.5">
-            <div class="font-semibold text-white">SDK & Iframe Protocol:</div>
-            <pre id="sdk-code-block" class="bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[11px] text-sky-300 overflow-x-auto leading-relaxed">// 1. Switch between 'render' and 'site' (or 'shoring')
+            <div class="font-medium text-white">SDK & Iframe Protocol:</div>
+            <pre id="sdk-code-block" class="bg-[#051F20] p-3 rounded-xl border border-[#8EB69B]/20 font-mono text-[11px] text-[#DAF1DE] overflow-x-auto leading-relaxed">// 1. Switch between 'render' (Finished Master) and 'site' (Oct 2026 Site)
 window.JumeirahTwinAPI.setSiteState('site');
 
 // 2. Smoothly fly camera ('frontRender' | 'rearPool' | 'rearShoring' | 'frontYardTop' | 'carport'):
@@ -482,21 +484,21 @@ iframeRef.contentWindow.postMessage({
           </div>
 
           <div class="space-y-1.5 flex flex-col">
-            <div class="font-semibold text-white flex items-center justify-between">
+            <div class="font-medium text-white flex items-center justify-between">
               <span>Live SDK Event Stream:</span>
-              <span class="text-[10px] font-mono text-emerald-400">● LISTENING</span>
+              <span class="text-[10px] font-mono text-[#DAF1DE]">● LISTENING</span>
             </div>
-            <div id="sdk-console" class="flex-1 bg-slate-950 p-3 rounded-xl border border-white/10 font-mono text-[10px] text-emerald-400 overflow-y-auto space-y-1 max-h-44">
+            <div id="sdk-console" class="flex-1 bg-[#051F20] p-3 rounded-xl border border-[#8EB69B]/20 font-mono text-[10px] text-[#DAF1DE] overflow-y-auto space-y-1 max-h-44">
               <div>[SYS] JumeirahTwinAPI v4.2 initialized</div>
               <div>[PMREM] Procedural PBR materials & textures compiled</div>
               <div>[BIM] 5 spatial telemetry nodes online</div>
             </div>
             <div class="flex gap-2 pt-1">
-              <button id="btn-test-sdk" class="flex-1 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium transition">
+              <button id="btn-test-sdk" class="flex-1 py-2 rounded-lg bg-white/10 hover:bg-[#235347]/40 text-[#DAF1DE] font-medium transition border border-[#8EB69B]/20">
                 Trigger Test SDK
               </button>
-              <button id="btn-copy-sdk" class="flex-1 py-2 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold transition flex items-center justify-center gap-1.5">
-                <i class="fa-regular fa-copy"></i> Copy SDK
+              <button id="btn-copy-sdk" class="flex-1 py-2 rounded-lg bg-[#235347] hover:bg-[#163832] border border-[#8EB69B] text-[#DAF1DE] font-medium transition flex items-center justify-center gap-1.5">
+                <i class="fa-regular fa-copy text-[#8EB69B]"></i> Copy SDK
               </button>
             </div>
           </div>

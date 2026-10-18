@@ -1,6 +1,6 @@
 /**
  * JUMEIRAH ISLANDS DIGITAL TWIN - CAMERA SYSTEM & CATEGORICAL TRANSITIONS
- * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * Developed for Architectural BIM Consultancy & VH Contracting LLC
  * 
  * Mathematical Foundations:
  * 1. NATURAL TRANSFORMATION FOR VIEW TRANSITIONS:
@@ -338,9 +338,9 @@ class CameraManager {
 
     if (metricsEl) {
       metricsEl.innerHTML = node.metrics.map(([k, v]) => `
-        <div class="spatial-card p-2 rounded-lg border border-white/5 bg-slate-950/70">
-          <div class="text-[10px] text-slate-400 font-sans">${k}</div>
-          <div class="text-xs font-mono font-bold text-sky-300 mt-0.5">${v}</div>
+        <div class="spatial-card p-2 rounded-lg border border-[#8EB69B]/20 bg-[#051F20]/75">
+          <div class="text-[10px] text-[#8EB69B] font-sans">${k}</div>
+          <div class="text-xs font-mono font-medium text-[#DAF1DE] mt-0.5">${v}</div>
         </div>
       `).join('');
     }
@@ -365,14 +365,14 @@ class CameraManager {
       root.position.copy(node.pos);
       root.userData = { nodeData: node };
 
-      // Cyan / Ice-Blue Spatial Beacon
+      // Sage Mint Spatial Beacon
       const coreGeo = new THREE.SphereGeometry(0.32, 16, 16);
-      const coreMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0x8EB69B });
       const coreMesh = new THREE.Mesh(coreGeo, coreMat);
       root.add(coreMesh);
 
       const haloGeo = new THREE.RingGeometry(0.42, 0.65, 24);
-      const haloMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.6 });
+      const haloMat = new THREE.MeshBasicMaterial({ color: 0xDAF1DE, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
       const haloMesh = new THREE.Mesh(haloGeo, haloMat);
       haloMesh.rotation.x = Math.PI / 2;
       root.add(haloMesh);
@@ -388,16 +388,16 @@ class CameraManager {
       root.position.set(cam.position.x, cam.position.y, cam.position.z);
       root.userData = { cameraData: cam, index: idx };
 
-      // Frosted Titanium Camera Body
+      // Emerald Titanium Camera Body
       const bodyGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.25, 16);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.85, roughness: 0.2 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x163832, metalness: 0.85, roughness: 0.25 });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
       body.rotation.x = Math.PI / 2;
       root.add(body);
 
       // Lens Glass
       const lensGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.28, 14);
-      const lensMat = new THREE.MeshBasicMaterial({ color: 0x070b14 });
+      const lensMat = new THREE.MeshBasicMaterial({ color: 0x051F20 });
       const lens = new THREE.Mesh(lensGeo, lensMat);
       lens.position.z = 0.15;
       lens.rotation.x = Math.PI / 2;
@@ -409,9 +409,9 @@ class CameraManager {
       const coneRadius = Math.tan(fovRad / 2) * coneLength;
       const coneGeo = new THREE.ConeGeometry(coneRadius, coneLength, 14, 1, true);
       const coneMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
+        color: 0x8EB69B,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.14,
         side: THREE.DoubleSide,
         depthWrite: false
       });
@@ -422,7 +422,7 @@ class CameraManager {
 
       // Ground Beacon Ring
       const ringGeo = new THREE.RingGeometry(0.5, 0.72, 20);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x8EB69B, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.position.y = -cam.position.y + 0.05;
       ring.rotation.x = -Math.PI / 2;

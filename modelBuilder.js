@@ -1,6 +1,6 @@
 /**
  * JUMEIRAH ISLANDS VILLA 003 — LUXURY BIM PROCEDURAL MODEL BUILDER
- * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * Developed for Architectural BIM Consultancy & VH Contracting LLC
  * 
  * Features:
  * - High-Res Procedural PBR Textures (Micro-cement, Fluted Walnut with Bump Maps,
@@ -8,7 +8,7 @@
  * - Three Chronological Phases:
  *   1. 'shoring': Superstructure Concrete & Rear Shoring Piles (62%)
  *   2. 'site': Actual 08 Oct 2026 Construction Site (86.4% - Matched to 460+ Captures)
- *   3. 'render': Finished ONIX Target Luxury Handover Render (100%)
+ *   3. 'render': Finished Master Target Luxury Handover Render (100%)
  * - Real-Time BIM Section Cut Clipping Planes (Horizontal Y Slab Cut & Longitudinal X Cut)
  * - Crisp Architectural CAD Edge Outlines (Vector Definition)
  * - Double-Height Entrance Atrium with Floating Travertine Stairs & 3-Tier Chandelier
@@ -249,7 +249,7 @@ class VillaModelBuilder {
     const waterfallTex = new THREE.CanvasTexture(wfCanvas);
     waterfallTex.wrapS = waterfallTex.wrapT = THREE.RepeatWrapping;
 
-    // 8. Signature ONIX Etched Wave Glazing Decal Texture
+    // 8. Signature Architectural Etched Wave Glazing Decal Texture
     const waveCanvas = document.createElement('canvas');
     waveCanvas.width = 512; waveCanvas.height = 256;
     const wvCtx = waveCanvas.getContext('2d');
@@ -508,7 +508,7 @@ class VillaModelBuilder {
     this.buildFirstFloorLevel();
     this.buildRoofCanopyLevel();
     this.buildPoolAndWaterfall();
-    this.buildPhaseThreeAssets(); // ONIX Final Render
+    this.buildPhaseThreeAssets(); // Master Final Render
     this.buildPhaseTwoAssets();   // 08 Oct 2026 Site State
     this.buildPhaseOneAssets();   // Structure & Shoring
 
@@ -816,7 +816,7 @@ class VillaModelBuilder {
   }
 
   // ----------------------------------------------------
-  // 7. PHASE 3: ONIX FINAL HANDOVER RENDER (100%)
+  // 7. PHASE 3: MASTER FINAL HANDOVER RENDER (100%)
   // ----------------------------------------------------
   buildPhaseThreeAssets() {
     // Manicured Lawns

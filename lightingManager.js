@@ -1,12 +1,12 @@
 /**
  * JUMEIRAH ISLANDS DIGITAL TWIN - ATMOSPHERIC LIGHTING & SOLAR STUDY ENGINE
- * Developed for ONIX Engineering Consultancy & VH Contracting LLC
+ * Developed for Architectural BIM Consultancy & VH Contracting LLC
  * 
  * Features:
  * - Gradient Architectural Sky Dome Shader (Simulates Rayleigh/Mie Atmospheric Scattering)
  * - 4 Curated Atmosphere Presets:
  *   1. 'day': Crisp Daylight (Calibrated ACES Filmic, Zero Washout, High Edge Contrast)
- *   2. 'dusk': ONIX Blue Hour (Deep Sapphire Sky, Warm 3000K Linear LEDs)
+ *   2. 'dusk': Executive Blue Hour (Deep Sapphire Sky, Warm 3000K Linear LEDs)
  *   3. 'golden': Golden Sunset (Rich Amber Solar Horizon, Travertine Warmth)
  *   4. 'night': Luxury Night LED Mode (Obsidian Skies, Cyan Mosaic Pool Glow)
  * - Dubai Solar Arc Simulator (Latitude 25.06° N, Longitude 55.15° E)
@@ -190,8 +190,8 @@ class LightingManager {
       this.azimuth = 250;
       this.elevation = 14;
     } else if (modeKey === 'night') {
-      this.skyUniforms.topColor.value.setHex(0x040914);
-      this.skyUniforms.bottomColor.value.setHex(0x132647);
+      this.skyUniforms.topColor.value.setHex(0x051F20);
+      this.skyUniforms.bottomColor.value.setHex(0x0B2B26);
       this.exposure = 0.78;
       this.sunLight.color.setHex(0x93c5fd);
       this.sunLight.intensity = 0.25;
