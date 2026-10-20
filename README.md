@@ -102,7 +102,43 @@ window.JumeirahTwinAPI.selectCamera('CAM-09');
 // Query Current Twin State
 const state = window.JumeirahTwinAPI.getState();
 console.log(state); // { siteState: 'site', environment: 'day', activeCamera: 'CAM-01', ... }
+
+// Open / Toggle AI Building Assistant
+window.JumeirahTwinAPI.toggleAssistant(true);
+
+// Ask the AI Building Assistant a question programmatically
+window.JumeirahTwinAPI.askAssistant('Where is the cantilevered carport pergola?');
 ```
+
+---
+
+## 🤖 AI Building Assistant (Groq `openai/gpt-oss-20b`)
+
+The digital twin includes an enterprise-grade **AI Building Assistant** that connects the 3D model directly to the project's BIM database and Groq's high-speed inference engine.
+
+### 🌟 Key Capabilities
+1. **Grounded BIM Telemetry Retrieval**:
+   - Queries exact geometric coordinates, elevations, materials, and contractor progress metrics.
+   - Strictly refuses to hallucinate: missing fields (e.g. pump warranties, unrecorded serial numbers, rebar certifications) are explicitly disclosed as unrecorded in project BIM records.
+2. **Safe 3D Tool Calling (Function Calling)**:
+   - `get_building_summary`: Returns verified BUA, plot dimensions, concrete grades, and milestone progress.
+   - `search_elements`: Finds components across disciplines (Architecture, Structure, MEP, Landscape, Pools).
+   - `get_element_details`: Returns full geometric properties and material finishes for stable element IDs.
+   - `locate_element`: Automatically glides the camera along a geodesic path, focuses the viewport on the element, and renders a glowing emerald 3D bounding box and pulsing locator beacon.
+   - `isolate_floor`: Safely filters visibility to Basement / Lower Pool Deck, Ground Floor, First Floor Suites, or Roof Canopy.
+3. **Zero Arbitrary Client Code Execution**:
+   - The LLM never sends raw JavaScript to the browser.
+   - Every tool call argument is strictly validated on the Node.js backend.
+   - The client UI interprets safe, structured action descriptors (`LOCATE_ELEMENT`, `ISOLATE_FLOOR`).
+4. **Safety & Compliance Grounding**:
+   - System prompts enforce that AI responses never serve as structural engineering or life-safety certification.
+   - Explicit confirmation is required before modifying any project state.
+
+### 🔌 AI Backend Architecture & Services
+- [`server.js`](file:///server.js): Secure Express server hosting static assets, CORS, `/api/health`, and the `/api/chat` endpoint.
+- [`services/buildingDataService.js`](file:///services/buildingDataService.js): Grounded BIM registry modeling actual dimensions, zones, and explicit `missingFields`.
+- [`services/aiChatService.js`](file:///services/aiChatService.js): Multi-turn tool execution loop powered by Groq SDK and `openai/gpt-oss-20b`.
+- [`buildingAssistant.js`](file:///buildingAssistant.js): Client controller managing the floating glass chat dock, Markdown tables, and non-destructive 3D highlight rendering.
 
 ### Iframe Embed & PostMessage (React / Next.js / Vue)
 ```jsx
@@ -162,6 +198,11 @@ export default function TwinEmbed() {
 ## 📂 Project Structure
 
 ```text
+├── server.js                  # Express backend & API proxy (POST /api/chat, GET /api/health)
+├── services/
+│   ├── buildingDataService.js # Grounded BIM element registry, dimensions, zones, & queries
+│   └── aiChatService.js       # Groq OpenAI/GPT-OSS-20b client, tool calling, & grounding
+├── buildingAssistant.js       # AI Assistant frontend controller, 3D highlights & streaming UI
 ├── index.html                 # Main application shell with glassmorphism HUD & Minimap
 ├── style.css                  # Enterprise design system, glass cards, responsive layout
 ├── app.js                     # Core controller: Three.js renderer, JumeirahTwinAPI, postMessage
@@ -171,6 +212,7 @@ export default function TwinEmbed() {
 ├── measurementTool.js          # Interactive 3D laser dimensioning & distance measurement
 ├── minimap.js                  # Tactical 2D canvas site radar with live viewing cone
 ├── dashboardData.js            # Telemetry metadata, project specs, and 460+ frame camera registry
+├── .env.example               # Template environment configuration (GROQ_API_KEY)
 ├── site-pictures/              # 16 on-site photo capture timelapse folders (460+ frames)
 └── README.md                   # Comprehensive developer documentation & API specification
 ```
@@ -179,21 +221,36 @@ export default function TwinEmbed() {
 
 ## 🛠️ How to Run Locally
 
-### Option 1: VS Code Live Server (Fastest)
-1. Open this repository in [Visual Studio Code](https://code.visualstudio.com/).
-2. Install the **Live Server** extension (`ritwickdey.LiveServer`).
-3. Right-click [`index.html`](index.html) and select **Open with Live Server**.
+### Option 1: Full-Stack with AI Assistant (Recommended)
+To run the full 3D Digital Twin with the Groq AI Building Assistant enabled:
 
-### Option 2: Python HTTP Server (Built-in)
-```bash
-python -m http.server 8080
-```
-Open `http://localhost:8080` in your web browser.
+1. **Clone and install dependencies**:
+   ```bash
+   git clone https://github.com/devendragupta-BIM/Juminar-Island-Digital-Twin-002.git
+   cd Juminar-Island-Digital-Twin-002
+   npm install
+   ```
 
-### Option 3: Node.js / npx
-```bash
-npx serve .
-```
+2. **Configure your Groq API Key**:
+   Copy `.env.example` to `.env` and insert your key:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set: GROQ_API_KEY=gsk_your_groq_api_key_here
+   ```
+
+3. **Start the server**:
+   ```bash
+   npm start
+   # or: node server.js
+   ```
+
+4. **Open your browser**:
+   Navigate to `http://localhost:8085` (or the port shown in your terminal). Click the **AI Copilot** button or press <kbd>A</kbd> to interact with the assistant!
+
+### Option 2: Static Client Only (Without AI Backend)
+If you only need the 3D viewer and client tools without the backend AI Assistant:
+- **VS Code Live Server**: Open `index.html` with Live Server.
+- **Python HTTP**: `python -m http.server 8080`
 
 ---
 
@@ -202,6 +259,7 @@ npx serve .
 | Key | Action |
 | :--- | :--- |
 | <kbd>1</kbd> - <kbd>5</kbd> | Preset Views (*Front*, *Rear Pool*, *Aerial*, *Entrance*, *Lake*) |
+| <kbd>A</kbd> | **Toggle AI Building Assistant Dock** |
 | <kbd>Space</kbd> | Toggle 360° Cinematic Orbital Tour |
 | <kbd>C</kbd> | Toggle 3D Camera Pins & Frustum Cones |
 | <kbd>M</kbd> | Toggle 3D Laser Dimension / Measurement Tool |
@@ -210,7 +268,7 @@ npx serve .
 | <kbd>H</kbd> | Toggle Minimalist Clean HUD Mode |
 | <kbd>P</kbd> | Capture High-Resolution Viewport Screenshot PNG |
 | <kbd>?</kbd> | Open Keyboard Shortcuts Reference HUD |
-| <kbd>Esc</kbd> | Close Modal / Return to 3D Viewport |
+| <kbd>Esc</kbd> | Close Modals / Close AI Dock / Return to 3D Viewport |
 
 ---
 

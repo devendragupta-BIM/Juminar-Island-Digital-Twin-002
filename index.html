@@ -158,6 +158,14 @@
         <i class="fa-solid fa-code text-[#8EB69B]"></i>
         <span class="hidden lg:inline">SDK</span>
       </button>
+      <button id="btn-toggle-ai" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#235347] to-[#163832] hover:from-[#163832] hover:to-[#235347] text-[#DAF1DE] border border-[#8EB69B]/60 transition flex items-center gap-1.5 shadow-lg shadow-[#051F20]/40 relative group" title="Open AI Building Assistant (openai/gpt-oss-20b)">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8EB69B] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#DAF1DE]"></span>
+        </span>
+        <i class="fa-solid fa-sparkles text-[#8EB69B]"></i>
+        <span class="font-sans">AI Copilot</span>
+      </button>
       <button id="btn-clean-ui" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-[#235347]/30 text-[#DAF1DE] border border-[#8EB69B]/20 transition flex items-center justify-center" title="Toggle Clean HUD Viewport">
         <i class="fa-solid fa-eye text-[#8EB69B]"></i>
       </button>
@@ -446,6 +454,79 @@
     </div>
   </div>
 
+  <!-- ==================== AI BUILDING ASSISTANT DOCK ==================== -->
+  <aside id="ai-chat-dock" class="fixed top-20 right-3 bottom-20 w-96 max-w-[calc(100vw-24px)] spatial-glass rounded-2xl z-30 flex flex-col overflow-hidden shadow-2xl transition-all duration-300 translate-x-full opacity-0 pointer-events-none" style="width: 390px;">
+    <!-- Header -->
+    <div class="px-4 py-3 border-b border-[#8EB69B]/20 flex items-center justify-between bg-[#0B2B26]/90 backdrop-blur-md">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-[#235347] border border-[#8EB69B]/40 flex items-center justify-center text-[#DAF1DE] shadow-sm">
+          <i class="fa-solid fa-sparkles text-xs"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white font-display tracking-wide">AI Building Assistant</span>
+            <span id="ai-online-status" class="inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#235347]/40 text-[#DAF1DE] border border-[#8EB69B]/30 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#8EB69B] animate-pulse"></span>
+              <span>GROQ 20B</span>
+            </span>
+          </div>
+          <div class="text-[10px] text-[#8EB69B] font-mono">Villa 003 BIM Intelligence</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1">
+        <button id="btn-clear-chat" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-[#235347]/40 text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center justify-center border border-[#8EB69B]/20 text-xs" title="Reset Conversation">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+        <button id="btn-close-ai" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-[#235347]/40 text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center justify-center border border-[#8EB69B]/20 text-xs" title="Close Assistant">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active 3D Element Banner -->
+    <div id="ai-active-element-banner" class="hidden px-3.5 py-2 bg-gradient-to-r from-[#235347]/80 to-[#163832]/80 border-b border-[#8EB69B]/30 flex items-center justify-between gap-2 text-xs">
+      <div class="flex items-center gap-2 min-w-0">
+        <i class="fa-solid fa-crosshairs text-[#8EB69B] text-xs"></i>
+        <div class="truncate">
+          <span class="text-[10px] font-mono text-[#8EB69B] block" id="ai-active-element-id">PERGOLA-CARPORT-01</span>
+          <span class="text-[11px] font-semibold text-white truncate block" id="ai-active-element-name">Cantilevered Carport Pergola</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <button id="btn-ai-focus-element" class="px-2 py-1 rounded bg-[#0B2B26] hover:bg-[#051F20] text-[#DAF1DE] border border-[#8EB69B]/40 text-[10px] font-mono font-medium transition" title="Fly camera to element">
+          Focus
+        </button>
+        <button id="btn-ai-clear-highlight" class="w-6 h-6 rounded bg-white/5 hover:bg-white/10 text-[#8EB69B] hover:text-[#DAF1DE] flex items-center justify-center text-[10px] transition" title="Clear 3D Box">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Messages Container -->
+    <div id="ai-messages-container" class="flex-1 overflow-y-auto p-3.5 space-y-3 font-sans">
+      <!-- Dynamic Messages Injected Here -->
+    </div>
+
+    <!-- Suggested Questions Pill Track -->
+    <div class="px-3 py-1.5 border-t border-[#8EB69B]/15 bg-[#051F20]/70 flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="ai-suggestions-track">
+      <!-- Injected pills -->
+    </div>
+
+    <!-- Input Footer -->
+    <div class="p-3 border-t border-[#8EB69B]/20 bg-[#0B2B26]/90 backdrop-blur-md">
+      <div class="relative flex items-center">
+        <input id="ai-chat-input" type="text" placeholder="Ask about Villa 003 or locate elements..." class="w-full bg-[#051F20]/90 text-[#DAF1DE] placeholder-[#8EB69B]/60 text-xs rounded-xl pl-3 pr-10 py-2.5 border border-[#8EB69B]/35 focus:outline-none focus:border-[#8EB69B] focus:ring-1 focus:ring-[#8EB69B]/50 transition font-sans" autocomplete="off" />
+        <button id="btn-ai-send" class="absolute right-1.5 w-7 h-7 rounded-lg bg-gradient-to-r from-[#235347] to-[#163832] hover:from-[#163832] hover:to-[#235347] text-[#DAF1DE] border border-[#8EB69B]/40 flex items-center justify-center transition shadow-sm" title="Send (Enter)">
+          <i class="fa-solid fa-paper-plane text-[11px] text-[#DAF1DE]"></i>
+        </button>
+      </div>
+      <div class="flex items-center justify-between mt-1.5 px-1 text-[9px] text-[#8EB69B]/80 font-mono">
+        <span>Grounded BIM Telemetry</span>
+        <span>Shift+Enter for newline</span>
+      </div>
+    </div>
+  </aside>
+
   <!-- ==================== ANTIGRAVITY IDE SDK MODAL ==================== -->
   <div id="ide-modal" class="fixed inset-0 z-50 bg-[#051F20]/85 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="spatial-glass max-w-3xl w-full rounded-2xl border border-[#8EB69B]/30 overflow-hidden shadow-2xl">
@@ -514,6 +595,7 @@ iframeRef.contentWindow.postMessage({
   <script src="cameraManager.js?v=4.2"></script>
   <script src="measurementTool.js?v=4.2"></script>
   <script src="minimap.js?v=4.2"></script>
-  <script src="app.js?v=4.2"></script>
+  <script src="buildingAssistant.js?v=4.3"></script>
+  <script src="app.js?v=4.3"></script>
 </body>
 </html>

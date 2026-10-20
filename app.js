@@ -56,6 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const cameraManager = new CameraManager(scene, camera, controls, renderer.domElement, lightingManager, modelBuilder);
   const measurementTool = new MeasurementTool(scene, camera, renderer.domElement);
   const minimap = new SiteMinimap('radar-canvas', camera, controls, cameraManager);
+  const buildingAssistant = new BuildingAssistant();
+  buildingAssistant.init(scene, camera, controls, cameraManager, modelBuilder);
 
   // Expose subsystem engines to window for global access, inline handlers & parent integrations
   window.cameraManager = cameraManager;
@@ -63,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.lightingManager = lightingManager;
   window.measurementTool = measurementTool;
   window.minimap = minimap;
+  window.buildingAssistant = buildingAssistant;
 
   // ----------------------------------------------------
   // 3. ENDOMORPHISM STATE MACHINE (End(S), o, id)
@@ -239,6 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
       modelBuilder.isolateFloor(floorName);
       mutateState(s => ({ ...s, activeFloor: floorName }), `Floor Isolation -> ${floorName.toUpperCase()}`);
     },
+    toggleAssistant: (force) => {
+      buildingAssistant.toggle(force);
+    },
+    askAssistant: (question) => {
+      buildingAssistant.toggle(true);
+      if (question) buildingAssistant.sendMessage(question);
+    },
     getState: () => ({ ...AppState })
   };
 
@@ -272,6 +282,10 @@ document.addEventListener('DOMContentLoaded', () => {
       window.JumeirahTwinAPI.resetSectionCut();
     } else if (actionUpper === 'ISOLATE_FLOOR' || actionLower === 'isolatefloor') {
       window.JumeirahTwinAPI.isolateFloor(payload);
+    } else if (actionUpper === 'TOGGLE_ASSISTANT' || actionLower === 'toggleassistant') {
+      window.JumeirahTwinAPI.toggleAssistant(payload);
+    } else if (actionUpper === 'ASK_ASSISTANT' || actionLower === 'askassistant') {
+      window.JumeirahTwinAPI.askAssistant(payload);
     } else if (actionUpper === 'EXPLODE_BIM' || actionLower === 'explodebim') {
       window.JumeirahTwinAPI.explodeBIM(payload);
     } else if (actionUpper === 'SELECT_CAMERA' || actionLower === 'selectcamera') {
@@ -542,6 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (k === '4') window.JumeirahTwinAPI.setCamera('topYard');
     if (k === '5') window.JumeirahTwinAPI.setCamera('parkingSide');
     if (k === 'c') window.JumeirahTwinAPI.togglePins();
+    if (k === 'a') window.JumeirahTwinAPI.toggleAssistant();
     if (k === 'm') measurementTool.toggleMode();
     if (k === 'h') window.JumeirahTwinAPI.toggleCleanUI?.();
     if (k === 'l') {
@@ -553,6 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (k === 'escape') {
       cameraManager.exitInspection();
       ideModal?.classList.add('hidden');
+      buildingAssistant?.toggle(false);
     }
   });
 
@@ -587,6 +603,7 @@ document.addEventListener('DOMContentLoaded', () => {
     controls.update();
     cameraManager.update(time);
     modelBuilder.update(time);
+    buildingAssistant.update(time);
 
     // Redraw 2D Radar Minimap
     if (minimap) {
