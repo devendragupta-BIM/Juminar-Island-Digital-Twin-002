@@ -529,8 +529,15 @@ class VillaModelBuilder {
     this.addBox(12.0, 0.2, 4.2, -2.8, -0.09, 4.8, this.mats.pavingGrey, this.groups.structural, false, true);
     this.addBox(2.8, 0.2, 16.0, -9.2, -0.1, 6.0, this.mats.pavingGrey, this.groups.structural, false, true);
 
-    // Lower Rear Lakeside Terrace Slab (Y = -3.4)
-    this.addBox(26.0, 0.4, 15.5, 1.0, -3.6, -9.5, this.mats.travertine, this.groups.structural, false, true);
+    // Lower Rear Lakeside Terrace Slabs (Y = -3.4, with open pool void at X = -9.5 to -1.5)
+    // 1. East Terrace & Sunken Seating Deck (X = -1.5 to +14.0, W = 15.5m, D = 15.5m)
+    this.addBox(15.5, 0.4, 15.5, 6.25, -3.6, -9.5, this.mats.travertine, this.groups.structural, false, true);
+    // 2. West Walkway by Boundary Wall (X = -12.0 to -9.5, W = 2.5m, D = 15.5m)
+    this.addBox(2.5, 0.4, 15.5, -10.75, -3.6, -9.5, this.mats.travertine, this.groups.structural, false, true);
+    // 3. North Lakefront Promenade Strip (Z = -17.25 to -15.4, W = 8.0m, D = 1.85m)
+    this.addBox(8.0, 0.4, 1.85, -5.5, -3.6, -16.325, this.mats.travertine, this.groups.structural, false, true);
+    // 4. South Lower Terrace Threshold Strip (Z = -5.0 to -1.75, W = 8.0m, D = 3.25m)
+    this.addBox(8.0, 0.4, 3.25, -5.5, -3.6, -3.375, this.mats.travertine, this.groups.structural, false, true);
 
     // Rear Jumeirah Islands Lake (-Z = -17.2 to -34, Y = -4.3)
     this.addBox(72, 0.2, 22, 0, -4.3, -26.5, this.mats.lakeWater, this.groups.water, false, true);
@@ -546,7 +553,7 @@ class VillaModelBuilder {
     this.addBox(0.35, 3.8, 12.0, -10.5, 0.2, 7.0, this.mats.whiteConcrete, this.groups.structural);
     this.addBox(0.35, 3.2, 6.5, -10.5, -0.8, -2.0, this.mats.whiteConcrete, this.groups.structural);
     this.addBox(0.35, 2.4, 11.5, -10.5, -2.1, -10.8, this.mats.whiteConcrete, this.groups.structural);
-    this.addBox(0.06, 1.05, 5.2, -7.8, -2.6, -4.5, this.mats.balustradeGlass, this.groups.glazing);
+    this.addBox(0.06, 1.05, 5.2, 7.8, -2.6, -4.5, this.mats.balustradeGlass, this.groups.glazing);
 
     // Right Stepped White Boundary Wall (Photos #005 & #010)
     this.addBox(0.35, 2.8, 15.0, 14.3, 1.2, 8.0, this.mats.whiteConcrete, this.groups.structural);
@@ -773,31 +780,45 @@ class VillaModelBuilder {
   // 6. SWIMMING POOL (CYAN RIVER-VEIN MOSAIC) & WATERFALL
   // ----------------------------------------------------
   buildPoolAndWaterfall() {
-    // Pool Coping / Surrounds (Positioned on the Right when looking from the lake, X = -5.5)
-    this.addBox(8.4, 0.16, 0.45, -5.5, -3.32, -5.0, this.mats.travertine, this.groups.water);
-    this.addBox(8.4, 0.16, 0.45, -5.5, -3.32, -15.4, this.mats.travertine, this.groups.water);
-    this.addBox(0.45, 0.16, 10.8, -9.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
-    this.addBox(0.45, 0.16, 10.8, -1.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
+    // 1. Honed Travertine Pool Coping Rim (Height 0.20m, Top at Y = -3.20m)
+    this.addBox(8.4, 0.20, 0.45, -5.5, -3.30, -5.0, this.mats.travertine, this.groups.water);
+    this.addBox(8.4, 0.20, 0.45, -5.5, -3.30, -15.4, this.mats.travertine, this.groups.water);
+    this.addBox(0.45, 0.20, 10.8, -9.5, -3.30, -10.2, this.mats.travertine, this.groups.water);
+    this.addBox(0.45, 0.20, 10.8, -1.5, -3.30, -10.2, this.mats.travertine, this.groups.water);
 
-    // Pool Floor with Exact Cyan River-Vein Mosaic Texture
+    // 2. Interior Sunken Basin Tiled Walls (Dropping from Y = -3.20m to Floor Y = -4.15m)
+    this.addBox(0.12, 0.95, 10.0, -9.28, -3.68, -10.2, this.mats.whiteConcrete, this.groups.water);
+    this.addBox(0.12, 0.95, 10.0, -1.72, -3.68, -10.2, this.mats.whiteConcrete, this.groups.water);
+    this.addBox(7.6, 0.95, 0.12, -5.5, -3.68, -15.18, this.mats.whiteConcrete, this.groups.water);
+    this.addBox(7.6, 0.95, 0.12, -5.5, -3.68, -5.22, this.mats.whiteConcrete, this.groups.water);
+
+    // 3. Pool Floor with Exact Cyan River-Vein Mosaic Texture (Photo #001 & #010)
     const poolFloor = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 10.0), this.mats.poolBottom);
     poolFloor.rotation.x = -Math.PI / 2;
     poolFloor.position.set(-5.5, -4.15, -10.2);
     poolFloor.receiveShadow = true;
     this.groups.water.add(poolFloor);
 
-    // Refractive Normal-Mapped Pool Water Surface
-    const poolSurface = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 10.0, 32, 32), this.mats.poolWater);
+    // 4. Crystal-Clear Refractive Normal-Mapped Pool Water Surface (Open at Y = -3.32m)
+    const poolSurface = new THREE.Mesh(new THREE.PlaneGeometry(7.56, 9.96, 32, 32), this.mats.poolWater);
     poolSurface.rotation.x = -Math.PI / 2;
-    poolSurface.position.set(-5.5, -3.42, -10.2);
+    poolSurface.position.set(-5.5, -3.32, -10.2);
     this.groups.water.add(poolSurface);
 
-    // Sheer Descent Waterfall Sheet
+    // 5. Underwater Cyan LED Pool Lighting (16W glow)
+    const poolLight1 = new THREE.PointLight(0x00f5ff, 3.2, 10.0);
+    poolLight1.position.set(-5.5, -3.65, -7.5);
+    this.groups.water.add(poolLight1);
+    const poolLight2 = new THREE.PointLight(0x00f5ff, 3.2, 10.0);
+    poolLight2.position.set(-5.5, -3.65, -12.5);
+    this.groups.water.add(poolLight2);
+
+    // 6. Sheer Descent Waterfall Sheet
     this.waterfallMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 3.45, 16, 16), this.mats.waterfallMat);
     this.waterfallMesh.position.set(-5.6, -1.68, -5.35);
     this.groups.renderOnly.add(this.waterfallMesh);
 
-    // Waterfall Mist Particle System
+    // 7. Waterfall Mist Particle System
     const mistCount = 120;
     const mistGeo = new THREE.BufferGeometry();
     const mistPositions = new Float32Array(mistCount * 3);
@@ -811,7 +832,7 @@ class VillaModelBuilder {
     this.mistParticles = new THREE.Points(mistGeo, mistMat);
     this.groups.renderOnly.add(this.mistParticles);
 
-    // Sunken Artificial Turf Seating Pit (Photo #001)
+    // 8. Sunken Artificial Turf Seating Pit (Photo #001)
     this.addBox(4.8, 0.12, 3.2, 6.2, -3.34, -8.8, this.mats.grassLawn, this.groups.structural);
   }
 

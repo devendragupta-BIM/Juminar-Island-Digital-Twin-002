@@ -395,7 +395,7 @@ class CameraManager {
       root.position.set(cam.position.x, cam.position.y, cam.position.z);
       root.userData = { cameraData: cam, index: idx };
 
-      // Dedicated Head Subgroup oriented to target via lookAt
+      // Dedicated Head Subgroup oriented to target via lookAt (+Z points to target)
       const head = new THREE.Group();
       root.add(head);
 
@@ -403,57 +403,84 @@ class CameraManager {
       const bodyGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.32, 16);
       bodyGeo.rotateX(Math.PI / 2);
       const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0x163832,
-        metalness: 0.85,
-        roughness: 0.25
+        color: 0x1e3a34,
+        metalness: 0.45,
+        roughness: 0.35,
+        emissive: 0x064e3b,
+        emissiveIntensity: 0.4
       });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
       head.add(body);
 
-      // Sage Green Lens Accent Ring
+      // Active Green Status Indicator LED
+      const ledGeo = new THREE.SphereGeometry(0.06, 8, 8);
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0x34d399 });
+      const led = new THREE.Mesh(ledGeo, ledMat);
+      led.position.set(0, 0.22, 0.05);
+      head.add(led);
+
+      // Sage Green Lens Accent Ring (Facing +Z towards target)
       const lensRingGeo = new THREE.CylinderGeometry(0.24, 0.26, 0.12, 16);
       lensRingGeo.rotateX(Math.PI / 2);
       const lensRingMat = new THREE.MeshStandardMaterial({
-        color: 0x8EB69B,
-        metalness: 0.9,
-        roughness: 0.15
+        color: 0x86efac,
+        metalness: 0.8,
+        roughness: 0.2
       });
       const lensRing = new THREE.Mesh(lensRingGeo, lensRingMat);
-      lensRing.position.z = -0.16;
+      lensRing.position.z = 0.16;
       head.add(lensRing);
 
-      // Camera Glass Lens (Extending along local -Z towards target)
+      // Camera Glass Lens (Extending along local +Z towards target)
       const lensGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.10, 16);
       lensGeo.rotateX(Math.PI / 2);
-      const lensMat = new THREE.MeshBasicMaterial({ color: 0x051F20 });
+      const lensMat = new THREE.MeshStandardMaterial({
+        color: 0x022c22,
+        roughness: 0.1,
+        metalness: 0.9,
+        emissive: 0x059669,
+        emissiveIntensity: 0.25
+      });
       const lens = new THREE.Mesh(lensGeo, lensMat);
-      lens.position.z = -0.20;
+      lens.position.z = 0.20;
       head.add(lens);
 
       // Translucent Viewing Frustum / Cone
-      // Apex at origin (0, 0, 0), expanding along local -Z axis towards target
+      // Apex at origin (0, 0, 0), expanding along local +Z axis towards target
       const fovRad = (cam.fov || 75) * (Math.PI / 180);
       const coneLength = 5.2;
       const coneRadius = Math.tan(fovRad / 2) * coneLength;
       const coneGeo = new THREE.ConeGeometry(coneRadius, coneLength, 16, 1, true);
       // Shift apex from +coneLength/2 to 0, base from -coneLength/2 to -coneLength
       coneGeo.translate(0, -coneLength / 2, 0);
-      // Rotate by +90deg around X so (0, -L, 0) maps to (0, 0, -L) along -Z
-      coneGeo.rotateX(Math.PI / 2);
+      // Rotate by -90deg around X so base (0, -L, 0) rotates to (0, 0, +L) along +Z
+      coneGeo.rotateX(-Math.PI / 2);
 
       const coneMat = new THREE.MeshBasicMaterial({
-        color: 0x8EB69B,
+        color: 0x5eead4,
         transparent: true,
-        opacity: 0.14,
+        opacity: 0.22,
         side: THREE.DoubleSide,
         depthWrite: false
       });
       const cone = new THREE.Mesh(coneGeo, coneMat);
-      cone.position.set(0, 0, -0.22);
+      cone.position.set(0, 0, 0.22);
       // CRITICAL: Disable raycasting on viewing cone so orbiting/clicking never hits the cone!
       cone.raycast = () => {};
       cone.userData.ignoreRaycast = true;
       head.add(cone);
+
+      // Crisp Wireframe Frustum Edge Lines for unmistakable 3D directional visibility
+      const coneEdgeGeo = new THREE.EdgesGeometry(coneGeo, 20);
+      const coneEdgeMat = new THREE.LineBasicMaterial({
+        color: 0xa7f3d0,
+        transparent: true,
+        opacity: 0.7
+      });
+      const coneLines = new THREE.LineSegments(coneEdgeGeo, coneEdgeMat);
+      coneLines.position.set(0, 0, 0.22);
+      coneLines.raycast = () => {};
+      head.add(coneLines);
 
       // Dedicated Hit Target for crisp tapping on the camera pin
       const hitGeo = new THREE.SphereGeometry(0.75, 12, 12);
@@ -478,7 +505,7 @@ class CameraManager {
       root.add(ring);
       root.userData.beaconRing = ring;
 
-      // Align head to look at cam.target in world coordinates
+      // Align head so its local +Z points directly at cam.target in world coordinates
       if (cam.target) {
         root.updateMatrixWorld(true);
         const targetVec = new THREE.Vector3(cam.target.x, cam.target.y, cam.target.z);
