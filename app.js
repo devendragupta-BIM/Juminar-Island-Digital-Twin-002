@@ -337,7 +337,11 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => {
       const camKey = btn.getAttribute('data-cam') || btn.getAttribute('data-view');
       if (camKey) {
-        window.JumeirahTwinAPI.setCamera(camKey);
+        if (camKey.startsWith('CAM-')) {
+          cameraManager.enterInspection(camKey, true);
+        } else {
+          window.JumeirahTwinAPI.setCamera(camKey);
+        }
         showToast(`Camera: ${camKey}`);
       }
     });
@@ -666,8 +670,8 @@ function populateCameraCarousel(cameraManager) {
     'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
     'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
     'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
-    'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
-    'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+    'CAM-08': 'site-pictures/Exterior rear/20261014143000.jpg',
+    'CAM-09': 'site-pictures/GF Main Entrance Khutoot Wall/20260925080000.jpg',
     'CAM-17': '20840-1711956940472.jpg',
     'CAM-18': '20840-1748865490206.jpeg',
     'CAM-19': '20840-1748865493553.jpeg'

@@ -317,6 +317,8 @@ class AIChatService {
         actions: collectedActions
       };
     }
+  }
+
   /**
    * Safely extracts viewer actions (locate_element, isolate_floor) from assistant markdown or user queries
    * as a robust fallback when the LLM outputs JSON actions inline.

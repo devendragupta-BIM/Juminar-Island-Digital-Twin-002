@@ -34,9 +34,9 @@ class CameraManager {
         photoRef: 'Photos #001, #005, #010',
         title: 'Waterfall Cantilever & Cyan Pool',
         badge: 'VERIFIED',
-        pos: new THREE.Vector3(5.6, 0.1, -5.3),
-        camPos: new THREE.Vector3(0.6, 2.2, -23.5),
-        camLook: new THREE.Vector3(0.6, 2.0, -1.0),
+        pos: new THREE.Vector3(-5.6, 0.1, -5.3),
+        camPos: new THREE.Vector3(-0.6, 2.2, -20.5),
+        camLook: new THREE.Vector3(-5.6, 0.1, -5.3),
         fov: 62,
         desc: 'Post-tensioned C50 white architectural concrete slab projecting over the rear pool with sheer descent waterfall weir and glowing cyan river-vein mosaic floor.',
         metrics: [
@@ -52,9 +52,9 @@ class CameraManager {
         photoRef: 'Photos #001, #010',
         title: 'Rear Lakeside Shoring & Ramp',
         badge: 'STABLE',
-        pos: new THREE.Vector3(-5.2, -1.8, -3.5),
-        camPos: new THREE.Vector3(-11.5, 3.2, -20.5),
-        camLook: new THREE.Vector3(2.2, 1.5, -3.5),
+        pos: new THREE.Vector3(5.2, -1.8, -3.5),
+        camPos: new THREE.Vector3(11.5, 3.2, -20.5),
+        camLook: new THREE.Vector3(-2.2, 1.5, -3.5),
         fov: 68,
         desc: '3-story sloped lakeside elevation with open left service/shoring bay, frameless glass ramp balustrade, sunken turf seating pit, and lake reed bank.',
         metrics: [
@@ -124,9 +124,9 @@ class CameraManager {
     this.photoBookmarks = {
       frontHero:     { pos: new THREE.Vector3(-11.8, 3.8, 18.8), look: new THREE.Vector3(1.2, 2.9, 1.2), fov: 65, title: 'Front Elevation (#2,3,4)' },
       frontRender:   { pos: new THREE.Vector3(-11.8, 3.8, 18.8), look: new THREE.Vector3(1.2, 2.9, 1.2), fov: 65, title: 'Front Elevation (#2,3,4)' },
-      rearOrtho:     { pos: new THREE.Vector3(0.6, 2.2, -20.5),  look: new THREE.Vector3(0.6, 2.0, -1.0), fov: 62, title: 'Rear Pool Elevation (#5,10)' },
-      rearPool:      { pos: new THREE.Vector3(0.6, 2.2, -20.5),  look: new THREE.Vector3(0.6, 2.0, -1.0), fov: 62, title: 'Rear Pool Elevation (#5,10)' },
-      rearShoring:   { pos: new THREE.Vector3(-10.5, 3.2, -18.5),look: new THREE.Vector3(2.0, 1.5, -3.5), fov: 68, title: 'Rear Shoring (#1)' },
+      rearOrtho:     { pos: new THREE.Vector3(-0.6, 2.2, -20.5),  look: new THREE.Vector3(-2.5, 2.0, -1.0), fov: 62, title: 'Rear Pool Elevation (#5,10)' },
+      rearPool:      { pos: new THREE.Vector3(-3.5, 2.5, -18.5),  look: new THREE.Vector3(-5.5, -1.0, -6.0), fov: 65, title: 'Rear Pool Elevation (#5,10)' },
+      rearShoring:   { pos: new THREE.Vector3(-11.5, 3.2, -18.5),look: new THREE.Vector3(-2.0, 1.5, -3.5), fov: 68, title: 'Rear Shoring (#1)' },
       frontEntrance: { pos: new THREE.Vector3(-4.5, 2.5, 12.2),  look: new THREE.Vector3(-0.2, 3.2, 2.0), fov: 72, title: 'Main Entrance Portal (#6,7)' },
       topYard:       { pos: new THREE.Vector3(-1.5, 15.5, 14.8), look: new THREE.Vector3(-0.5, 0.0, 8.8), fov: 65, title: 'Top Yard Drone (#8)' },
       frontYardTop:  { pos: new THREE.Vector3(-1.5, 15.5, 14.8), look: new THREE.Vector3(-0.5, 0.0, 8.8), fov: 65, title: 'Top Yard Drone (#8)' },
@@ -365,17 +365,24 @@ class CameraManager {
       root.position.copy(node.pos);
       root.userData = { nodeData: node };
 
-      // Sage Mint Spatial Beacon
-      const coreGeo = new THREE.SphereGeometry(0.32, 16, 16);
+      // Sage Mint Spatial Beacon Core
+      const coreGeo = new THREE.SphereGeometry(0.36, 16, 16);
       const coreMat = new THREE.MeshBasicMaterial({ color: 0x8EB69B });
       const coreMesh = new THREE.Mesh(coreGeo, coreMat);
       root.add(coreMesh);
 
-      const haloGeo = new THREE.RingGeometry(0.42, 0.65, 24);
+      const haloGeo = new THREE.RingGeometry(0.42, 0.68, 24);
       const haloMat = new THREE.MeshBasicMaterial({ color: 0xDAF1DE, side: THREE.DoubleSide, transparent: true, opacity: 0.7 });
       const haloMesh = new THREE.Mesh(haloGeo, haloMat);
       haloMesh.rotation.x = Math.PI / 2;
+      haloMesh.raycast = () => {}; // Ignore halo during raycast
       root.add(haloMesh);
+
+      // Hit sphere for reliable tapping
+      const hitGeo = new THREE.SphereGeometry(0.65, 12, 12);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitMesh = new THREE.Mesh(hitGeo, hitMat);
+      root.add(hitMesh);
 
       this.nodeGroup.add(root);
       this.nodeMarkers.push(root);
@@ -388,26 +395,52 @@ class CameraManager {
       root.position.set(cam.position.x, cam.position.y, cam.position.z);
       root.userData = { cameraData: cam, index: idx };
 
-      // Emerald Titanium Camera Body
-      const bodyGeo = new THREE.CylinderGeometry(0.42, 0.42, 0.25, 16);
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x163832, metalness: 0.85, roughness: 0.25 });
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      body.rotation.x = Math.PI / 2;
-      root.add(body);
+      // Dedicated Head Subgroup oriented to target via lookAt
+      const head = new THREE.Group();
+      root.add(head);
 
-      // Lens Glass
-      const lensGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.28, 14);
+      // Emerald Titanium Camera Body (Cylinder along Z)
+      const bodyGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.32, 16);
+      bodyGeo.rotateX(Math.PI / 2);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x163832,
+        metalness: 0.85,
+        roughness: 0.25
+      });
+      const body = new THREE.Mesh(bodyGeo, bodyMat);
+      head.add(body);
+
+      // Sage Green Lens Accent Ring
+      const lensRingGeo = new THREE.CylinderGeometry(0.24, 0.26, 0.12, 16);
+      lensRingGeo.rotateX(Math.PI / 2);
+      const lensRingMat = new THREE.MeshStandardMaterial({
+        color: 0x8EB69B,
+        metalness: 0.9,
+        roughness: 0.15
+      });
+      const lensRing = new THREE.Mesh(lensRingGeo, lensRingMat);
+      lensRing.position.z = -0.16;
+      head.add(lensRing);
+
+      // Camera Glass Lens (Extending along local -Z towards target)
+      const lensGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.10, 16);
+      lensGeo.rotateX(Math.PI / 2);
       const lensMat = new THREE.MeshBasicMaterial({ color: 0x051F20 });
       const lens = new THREE.Mesh(lensGeo, lensMat);
-      lens.position.z = 0.15;
-      lens.rotation.x = Math.PI / 2;
-      root.add(lens);
+      lens.position.z = -0.20;
+      head.add(lens);
 
-      // Translucent Viewing Cone (Frustum)
+      // Translucent Viewing Frustum / Cone
+      // Apex at origin (0, 0, 0), expanding along local -Z axis towards target
       const fovRad = (cam.fov || 75) * (Math.PI / 180);
-      const coneLength = 4.8;
+      const coneLength = 5.2;
       const coneRadius = Math.tan(fovRad / 2) * coneLength;
-      const coneGeo = new THREE.ConeGeometry(coneRadius, coneLength, 14, 1, true);
+      const coneGeo = new THREE.ConeGeometry(coneRadius, coneLength, 16, 1, true);
+      // Shift apex from +coneLength/2 to 0, base from -coneLength/2 to -coneLength
+      coneGeo.translate(0, -coneLength / 2, 0);
+      // Rotate by +90deg around X so (0, -L, 0) maps to (0, 0, -L) along -Z
+      coneGeo.rotateX(Math.PI / 2);
+
       const coneMat = new THREE.MeshBasicMaterial({
         color: 0x8EB69B,
         transparent: true,
@@ -416,18 +449,41 @@ class CameraManager {
         depthWrite: false
       });
       const cone = new THREE.Mesh(coneGeo, coneMat);
-      cone.rotation.x = -Math.PI / 2;
-      cone.position.z = coneLength / 2 + 0.2;
-      root.add(cone);
+      cone.position.set(0, 0, -0.22);
+      // CRITICAL: Disable raycasting on viewing cone so orbiting/clicking never hits the cone!
+      cone.raycast = () => {};
+      cone.userData.ignoreRaycast = true;
+      head.add(cone);
 
-      // Ground Beacon Ring
-      const ringGeo = new THREE.RingGeometry(0.5, 0.72, 20);
-      const ringMat = new THREE.MeshBasicMaterial({ color: 0x8EB69B, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+      // Dedicated Hit Target for crisp tapping on the camera pin
+      const hitGeo = new THREE.SphereGeometry(0.75, 12, 12);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitTarget = new THREE.Mesh(hitGeo, hitMat);
+      root.add(hitTarget);
+
+      // Ground Beacon Ring (remains flat on the ground plane, Y=0.05)
+      const ringGeo = new THREE.RingGeometry(0.48, 0.76, 24);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x8EB69B,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.55
+      });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.position.y = -cam.position.y + 0.05;
       ring.rotation.x = -Math.PI / 2;
+      // CRITICAL: Disable raycasting on ground beacon ring
+      ring.raycast = () => {};
+      ring.userData.ignoreRaycast = true;
       root.add(ring);
       root.userData.beaconRing = ring;
+
+      // Align head to look at cam.target in world coordinates
+      if (cam.target) {
+        root.updateMatrixWorld(true);
+        const targetVec = new THREE.Vector3(cam.target.x, cam.target.y, cam.target.z);
+        head.lookAt(targetVec);
+      }
 
       this.cameraGroup.add(root);
       this.cameraMarkers.push(root);
@@ -524,8 +580,8 @@ class CameraManager {
       'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
       'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
       'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
-      'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
-      'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-08': 'site-pictures/Exterior rear/20261014143000.jpg',
+      'CAM-09': 'site-pictures/GF Main Entrance Khutoot Wall/20260925080000.jpg',
       'CAM-17': '20840-1711956940472.jpg',
       'CAM-18': '20840-1748865490206.jpeg',
       'CAM-19': '20840-1748865493553.jpeg'
@@ -577,8 +633,8 @@ class CameraManager {
       'CAM-05': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
       'CAM-06': 'Exterior Rear Elevation Shoring - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
       'CAM-07': 'Exterior Rear Elevation Ramp - Jumeirah Islands 003 - 20261004083000.jpg.jpeg',
-      'CAM-08': 'Exterior Rear Elevation - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
-      'CAM-09': 'Exterior Front Main Entrance - Jumeirah Islands 003 - 20261008130000.jpg.jpeg',
+      'CAM-08': 'site-pictures/Exterior rear/20261014143000.jpg',
+      'CAM-09': 'site-pictures/GF Main Entrance Khutoot Wall/20260925080000.jpg',
       'CAM-17': '20840-1711956940472.jpg',
       'CAM-18': '20840-1748865490206.jpeg',
       'CAM-19': '20840-1748865493553.jpeg'
@@ -697,12 +753,23 @@ class CameraManager {
   // 6. RAYCASTING & USER INTERACTION EVENTS
   // ----------------------------------------------------
   initEventListeners() {
-    this.domElement.addEventListener('pointerdown', () => {
+    this.domElement.addEventListener('pointerdown', (e) => {
       if (this.cinemaTourActive) this.toggleCinemaTour(false);
+      this.pointerDownPos = { x: e.clientX, y: e.clientY, time: performance.now() };
     });
 
     this.domElement.addEventListener('click', (e) => {
       if (this.walkModeActive) return;
+
+      // Prevent triggering camera inspection on mouse orbit, pan, or long press
+      if (this.pointerDownPos) {
+        const dx = e.clientX - this.pointerDownPos.x;
+        const dy = e.clientY - this.pointerDownPos.y;
+        const dist = Math.hypot(dx, dy);
+        const elapsed = performance.now() - this.pointerDownPos.time;
+        if (dist > 6 || elapsed > 350) return;
+      }
+
       const rect = this.domElement.getBoundingClientRect();
       this.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       this.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
@@ -720,7 +787,7 @@ class CameraManager {
         }
       }
 
-      // Check Camera Pins
+      // Check Camera Pins (Only hits dedicated pin hitTarget / body since cones/rings have raycast disabled)
       const camHits = this.raycaster.intersectObjects(this.cameraMarkers, true);
       if (camHits.length > 0) {
         let p = camHits[0].object;

@@ -1381,14 +1381,14 @@ const SITE_DATA = {
       "fov": 84,
       "description": "Elevated wide angle showing the luxury swimming pool basin, lake frontage with shoring piles, side facade louvers, and water edge.",
       "position": {
-        "x": -28,
-        "y": 8.5,
-        "z": -34
+        "x": -11.5,
+        "y": 3.0,
+        "z": -20.5
       },
       "target": {
-        "x": 4,
-        "y": 6.5,
-        "z": -2
+        "x": 1.5,
+        "y": 3.5,
+        "z": -2.0
       },
       "timelapseFrames": [
         {
@@ -1616,14 +1616,14 @@ const SITE_DATA = {
       "fov": 80,
       "description": "Side ramp pathway inspection overlooking 3-tier rear glass terraces, swimming pool construction, and eastern boundary wall.",
       "position": {
-        "x": -24,
-        "y": 6,
-        "z": -24
+        "x": 10.5,
+        "y": 2.8,
+        "z": -19.5
       },
       "target": {
-        "x": 2,
-        "y": 7,
-        "z": -4
+        "x": -2.5,
+        "y": 4.0,
+        "z": -3.0
       },
       "timelapseFrames": [
         {
@@ -1839,26 +1839,26 @@ const SITE_DATA = {
     {
       "id": "CAM-08",
       "code": "EXT-REAR-LAKE",
-      "title": "Exterior Rear Lake & Garden Perspective",
+      "title": "Exterior Rear Pool & Lake (Overhead View)",
       "category": "exterior-rear",
       "floor": "exterior",
       "folder": "Exterior rear",
       "filename": "site-pictures/Exterior rear/20261014143000.jpg",
       "date": "14 Oct 2026 • 14:30 (2:30 PM)",
       "timeFormatted": "14:30 GST",
-      "height": "2.60 m (Lake Embankment)",
-      "azimuth": "315° NW Lake View",
-      "fov": 78,
-      "description": "Panoramic view from the lake shore edge looking up at the infinity pool waterfall coping and rear architectural cantilever terraces.",
+      "height": "8.80 m (Upper Terrace Balcony)",
+      "azimuth": "350° Looking Downwards at Pool",
+      "fov": 76,
+      "description": "Overhead perspective from the upper building terrace looking downwards across the luxury infinity swimming pool, sand staging bed, sunken turf pit, and waterfront lake edge.",
       "position": {
-        "x": 18,
-        "y": 5.5,
-        "z": -30
+        "x": 0.6,
+        "y": 8.8,
+        "z": -2.8
       },
       "target": {
-        "x": -2,
-        "y": 6,
-        "z": -4
+        "x": -3.5,
+        "y": -3.6,
+        "z": -10.5
       },
       "timelapseFrames": [
         {

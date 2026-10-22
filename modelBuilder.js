@@ -584,17 +584,17 @@ class VillaModelBuilder {
       this.addBox(0.45, 0.45, 0.45, cx, -2.95, -1.1, this.mats.flutedWood, parent);
       this.addBox(0.45, 0.45, 0.45, cx, -2.95, 0.3, this.mats.flutedWood, parent);
     }
-    // Lounge sofa in right poolside bay (Photo #005)
-    this.addBox(2.8, 0.45, 0.95, 5.6, -3.05, -0.6, this.mats.travertine, parent);
+    // Lounge sofa in poolside bay (Photo #005)
+    this.addBox(2.8, 0.45, 0.95, -5.6, -3.05, -0.6, this.mats.travertine, parent);
 
-    // Sliding glass doors on center & right bays
+    // Sliding glass doors on center & poolside bays
     this.addBox(4.6, 3.1, 0.1, 0.3, -1.75, -1.6, this.mats.curtainGlass, parent);
-    this.addBox(5.2, 3.1, 0.1, 5.6, -1.75, -2.2, this.mats.curtainGlass, parent);
-    for (let x of [-1.2, 0.3, 1.8, 3.9, 5.6, 7.3]) {
-      this.addBox(0.07, 3.15, 0.14, x, -1.75, x > 2.5 ? -2.2 : -1.6, this.mats.darkBronze, parent);
+    this.addBox(5.2, 3.1, 0.1, -5.6, -1.75, -2.2, this.mats.curtainGlass, parent);
+    for (let x of [-1.2, 0.3, 1.8, -3.9, -5.6, -7.3]) {
+      this.addBox(0.07, 3.15, 0.14, x, -1.75, x < -2.5 ? -2.2 : -1.6, this.mats.darkBronze, parent);
     }
     // Recessed soffit downlights above lower rear terrace
-    for (let x of [-5.5, -3.8, -1.0, 1.5, 4.2, 6.8]) {
+    for (let x of [-6.8, -4.2, -1.5, 1.0, 3.8, 5.5]) {
       this.addPinholeSpot(x, -0.28, -2.6, parent);
     }
   }
@@ -608,12 +608,12 @@ class VillaModelBuilder {
     // Main Ground Floor Slab
     this.addBox(16.4, 0.55, 11.2, 0.6, 0.0, 0.2, this.mats.whiteConcrete, parent);
 
-    // Rear Left Terrace Overhang Box (Bay 1)
-    this.addBox(5.4, 0.65, 2.2, -4.7, 0.05, -2.8, this.mats.whiteConcrete, parent);
+    // Rear Service Terrace Overhang Box (Bay 1 opposite pool)
+    this.addBox(5.4, 0.65, 2.2, 4.7, 0.05, -2.8, this.mats.whiteConcrete, parent);
 
-    // Rear Right Cantilever Balcony Box over Pool (Waterfall Weir Slot, Photos #005 & #010)
-    this.addBox(6.4, 0.72, 3.4, 5.6, 0.08, -3.8, this.mats.whiteConcrete, parent);
-    this.addBox(3.6, 0.06, 0.1, 5.6, 0.1, -5.51, this.mats.darkBronze, parent);
+    // Rear Cantilever Balcony Box over Pool (Waterfall Weir Slot, Photos #005 & #010)
+    this.addBox(6.4, 0.72, 3.4, -5.6, 0.08, -3.8, this.mats.whiteConcrete, parent);
+    this.addBox(3.6, 0.06, 0.1, -5.6, 0.1, -5.51, this.mats.darkBronze, parent);
 
     // Living Room Fluted Walnut Cladding (Photos #002, #004, #006)
     this.addBox(0.35, 3.6, 8.8, -7.3, 1.8, 0.8, this.mats.flutedWood, parent);
@@ -773,28 +773,28 @@ class VillaModelBuilder {
   // 6. SWIMMING POOL (CYAN RIVER-VEIN MOSAIC) & WATERFALL
   // ----------------------------------------------------
   buildPoolAndWaterfall() {
-    // Pool Coping / Surrounds
-    this.addBox(8.4, 0.16, 0.45, 5.5, -3.32, -5.0, this.mats.travertine, this.groups.water);
-    this.addBox(8.4, 0.16, 0.45, 5.5, -3.32, -15.4, this.mats.travertine, this.groups.water);
-    this.addBox(0.45, 0.16, 10.8, 1.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
-    this.addBox(0.45, 0.16, 10.8, 9.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
+    // Pool Coping / Surrounds (Positioned on the Right when looking from the lake, X = -5.5)
+    this.addBox(8.4, 0.16, 0.45, -5.5, -3.32, -5.0, this.mats.travertine, this.groups.water);
+    this.addBox(8.4, 0.16, 0.45, -5.5, -3.32, -15.4, this.mats.travertine, this.groups.water);
+    this.addBox(0.45, 0.16, 10.8, -9.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
+    this.addBox(0.45, 0.16, 10.8, -1.5, -3.32, -10.2, this.mats.travertine, this.groups.water);
 
     // Pool Floor with Exact Cyan River-Vein Mosaic Texture
     const poolFloor = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 10.0), this.mats.poolBottom);
     poolFloor.rotation.x = -Math.PI / 2;
-    poolFloor.position.set(5.5, -4.15, -10.2);
+    poolFloor.position.set(-5.5, -4.15, -10.2);
     poolFloor.receiveShadow = true;
     this.groups.water.add(poolFloor);
 
     // Refractive Normal-Mapped Pool Water Surface
     const poolSurface = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 10.0, 32, 32), this.mats.poolWater);
     poolSurface.rotation.x = -Math.PI / 2;
-    poolSurface.position.set(5.5, -3.42, -10.2);
+    poolSurface.position.set(-5.5, -3.42, -10.2);
     this.groups.water.add(poolSurface);
 
     // Sheer Descent Waterfall Sheet
     this.waterfallMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 3.45, 16, 16), this.mats.waterfallMat);
-    this.waterfallMesh.position.set(5.6, -1.68, -5.35);
+    this.waterfallMesh.position.set(-5.6, -1.68, -5.35);
     this.groups.renderOnly.add(this.waterfallMesh);
 
     // Waterfall Mist Particle System
@@ -802,7 +802,7 @@ class VillaModelBuilder {
     const mistGeo = new THREE.BufferGeometry();
     const mistPositions = new Float32Array(mistCount * 3);
     for (let i = 0; i < mistCount; i++) {
-      mistPositions[i * 3] = 4.3 + Math.random() * 2.6;
+      mistPositions[i * 3] = -6.8 + Math.random() * 2.6;
       mistPositions[i * 3 + 1] = -3.4 + Math.random() * 0.7;
       mistPositions[i * 3 + 2] = -5.5 + (Math.random() - 0.5) * 0.6;
     }
@@ -812,7 +812,7 @@ class VillaModelBuilder {
     this.groups.renderOnly.add(this.mistParticles);
 
     // Sunken Artificial Turf Seating Pit (Photo #001)
-    this.addBox(4.8, 0.12, 3.2, -6.2, -3.34, -8.8, this.mats.grassLawn, this.groups.structural);
+    this.addBox(4.8, 0.12, 3.2, 6.2, -3.34, -8.8, this.mats.grassLawn, this.groups.structural);
   }
 
   // ----------------------------------------------------
@@ -822,7 +822,7 @@ class VillaModelBuilder {
     // Manicured Lawns
     this.addBox(10.6, 0.12, 3.8, -2.8, -0.02, 7.2, this.mats.grassLawn, this.groups.renderOnly, false, true);
     this.addBox(10.6, 0.12, 5.2, -2.8, -0.02, 13.9, this.mats.grassLawn, this.groups.renderOnly, false, true);
-    this.addBox(11.4, 0.12, 9.6, -4.4, -3.36, -10.2, this.mats.grassLawn, this.groups.renderOnly, false, true);
+    this.addBox(11.4, 0.12, 9.6, 4.4, -3.36, -10.2, this.mats.grassLawn, this.groups.renderOnly, false, true);
 
     // Multi-Tier Bonsai Tree & Feature Planter (Photos #002, #004)
     const bonsaiTrunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 2.4, 8), this.mats.flutedWood);
@@ -867,7 +867,7 @@ class VillaModelBuilder {
     // Terracotta Sand Staging Beds
     this.addBox(10.6, 0.10, 3.8, -2.8, -0.03, 7.2, this.mats.sandBed, this.groups.siteOnly, false, true);
     this.addBox(10.6, 0.10, 5.2, -2.8, -0.03, 13.9, this.mats.sandBed, this.groups.siteOnly, false, true);
-    this.addBox(11.4, 0.10, 9.6, -4.4, -3.37, -10.2, this.mats.sandBed, this.groups.siteOnly, false, true);
+    this.addBox(11.4, 0.10, 9.6, 4.4, -3.37, -10.2, this.mats.sandBed, this.groups.siteOnly, false, true);
 
     // Concrete Planter Foundation Pits (Photos #006 & #008)
     [[-4.8, 7.0], [-4.8, 8.1], [-2.5, 6.5], [-2.5, 7.6], [-1.4, 7.6], [-3.6, 7.6]].forEach(([sx, sz]) => {

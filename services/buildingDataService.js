@@ -245,17 +245,17 @@ const BUILDING_ELEMENTS = [
       copingLength_m: 10.8,
       waterVolume_m3: "~55 m³"
     },
-    position: { x: 5.5, y: -3.78, z: -10.2 },
+    position: { x: -5.5, y: -3.78, z: -10.2 },
     cameraView: {
-      pos: { x: 0.6, y: 2.2, z: -20.5 },
-      target: { x: 0.6, y: 2.0, z: -1.0 },
+      pos: { x: -0.6, y: 2.2, z: -20.5 },
+      target: { x: -5.5, y: -2.0, z: -10.2 },
       fov: 62
     },
     properties: {
       finish: "Custom artisan cyan glass river-vein mosaic inlay tiles (matched to Photos #001 & #010)",
       coping: "Honed anti-slip travertine stone perimeter edge (0.45m width)",
       telemetry: "Water Temp 27.8°C, pH 7.4, automated chlorine/saline dosing",
-      underwaterLighting: "High-output LED underwater pool lights (16W cyan glow at x=5.5, y=-2.6, z=-10.2)"
+      underwaterLighting: "High-output LED underwater pool lights (16W cyan glow at x=-5.5, y=-2.6, z=-10.2)"
     },
     missingFields: [
       "Circulation Pump Manufacturer Model",
@@ -275,10 +275,10 @@ const BUILDING_ELEMENTS = [
       waterDropHeight_m: 3.45,
       cantileverProjection_m: 3.4
     },
-    position: { x: 5.6, y: -1.68, z: -5.35 },
+    position: { x: -5.6, y: -1.68, z: -5.35 },
     cameraView: {
-      pos: { x: 0.6, y: 2.2, z: -23.5 },
-      target: { x: 5.6, y: 0.1, z: -5.3 },
+      pos: { x: -0.6, y: 2.2, z: -23.5 },
+      target: { x: -5.6, y: 0.1, z: -5.3 },
       fov: 62
     },
     properties: {

@@ -110,9 +110,9 @@ class SiteMinimap {
     ctx.fillStyle = 'rgba(35, 83, 71, 0.35)';
     ctx.fillRect(0, lakeTop, w, lakeBottom - lakeTop);
 
-    // 3. Swimming Pool Footprint
-    const p1 = this.worldToRadar(1.5, -15.4);
-    const p2 = this.worldToRadar(9.5, -5.0);
+    // 3. Swimming Pool Footprint (West/Right Elevation from Lake, X = -9.5 to -1.5)
+    const p1 = this.worldToRadar(-9.5, -15.4);
+    const p2 = this.worldToRadar(-1.5, -5.0);
     ctx.fillStyle = 'rgba(142, 182, 155, 0.28)';
     ctx.strokeStyle = '#8EB69B';
     ctx.lineWidth = 1.2;
