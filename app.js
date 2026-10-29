@@ -60,12 +60,205 @@ document.addEventListener('DOMContentLoaded', () => {
   buildingAssistant.init(scene, camera, controls, cameraManager, modelBuilder);
 
   // Expose subsystem engines to window for global access, inline handlers & parent integrations
+  window.scene = scene;
+  window.camera = camera;
   window.cameraManager = cameraManager;
   window.modelBuilder = modelBuilder;
   window.lightingManager = lightingManager;
   window.measurementTool = measurementTool;
   window.minimap = minimap;
   window.buildingAssistant = buildingAssistant;
+
+  // ----------------------------------------------------
+  // VISION RECONCILER — ARCHITECTURAL SCENE RECONCILIATION
+  // Steps 1 to 5 from Vision-Based Scene Reconciliation Guide
+  // ----------------------------------------------------
+  const VISION_CONFIG = {
+    // Phase 1: Default to site photo with vehicle in carport / parking
+    imageUrl: 'site-pictures/Exterior Parking/20261013180000.jpg',
+    pollInterval: null, // null = manual only; set number (e.g. 60000) for auto-polling
+    confidenceThreshold: 0.75
+  };
+
+  // Step 1: Fetch latest site photo and convert to base64
+  async function fetchLatestSitePhoto(url) {
+    const targetUrl = url || VISION_CONFIG.imageUrl;
+    const cacheBustedUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+    
+    const response = await fetch(cacheBustedUrl);
+    if (!response.ok) throw new Error('Failed to fetch site photo: ' + response.status);
+    
+    const blob = await response.blob();
+    const mimeType = blob.type || 'image/jpeg';
+    
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve({
+        base64: e.target.result.split(',')[1],
+        mimeType
+      });
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Step 2: Analyze photo with Claude Vision AI
+  async function analyzeWithVision(base64Image, mimeType, imageUrl) {
+    // Primary path: Use secure server-side endpoint (handles CORS and API security)
+    try {
+      const serverResp = await fetch('/api/vision-reconcile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl, base64Image, mimeType })
+      });
+      if (serverResp.ok) {
+        const data = await serverResp.json();
+        if (data.status === 'ok' && data.sceneState) {
+          return data.sceneState;
+        }
+      }
+    } catch (serverErr) {
+      console.warn('Server vision proxy unavailable, attempting direct API:', serverErr);
+    }
+
+    // Direct Claude Vision call as specified in guide
+    const prompt = `You are a construction site vision AI for Jumeirah Islands Villa 003, Dubai UAE.
+Analyze this site photo and detect the presence or absence of each element.
+Return ONLY valid JSON, no markdown, no explanation:
+
+{
+  "car_in_carport": true,
+  "car_in_carport_conf": 0.95,
+  "workers_present": false,
+  "workers_present_conf": 0.85,
+  "crane_active": false,
+  "crane_active_conf": 0.90,
+  "scaffolding_present": true,
+  "scaffolding_present_conf": 0.88,
+  "pool_has_water": true,
+  "pool_has_water_conf": 0.92,
+  "summary": "one sentence describing the current site state"
+}
+
+Definitions for this specific site:
+- car_in_carport: any vehicle (car, van, truck) in the front yard carport/driveway area under the cantilevered pergola
+- workers_present: any construction worker, laborer, or person in PPE visible anywhere on site
+- crane_active: tower crane or mobile lift erected and visible
+- scaffolding_present: temporary scaffolding or shoring on the building facade
+- pool_has_water: rear swimming pool contains water (blue/cyan color visible in pool shell)`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64Image }},
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error('Vision API error: ' + data.error.message);
+
+    const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+    return JSON.parse(raw);
+  }
+
+  // Step 3: Apply scene state to Digital Twin
+  function applySceneState(sceneState, threshold) {
+    const t = threshold || VISION_CONFIG.confidenceThreshold;
+
+    // --- CAR IN CARPORT ---
+    const carVisible = !!(sceneState.car_in_carport && sceneState.car_in_carport_conf >= t);
+    toggleSceneObject('carport-car-mesh', carVisible);
+    logToEventStream(
+      carVisible
+        ? `[VISION] Car detected in carport (${Math.round(sceneState.car_in_carport_conf * 100)}% conf) → mesh SHOWN`
+        : `[VISION] No car in carport (${Math.round(sceneState.car_in_carport_conf * 100)}% conf) → mesh HIDDEN`
+    );
+
+    // --- WORKERS ---
+    const workersVisible = !!(sceneState.workers_present && sceneState.workers_present_conf >= t);
+    toggleSceneObject('worker-group-mesh', workersVisible);
+
+    // --- CRANE ---
+    const craneVisible = !!(sceneState.crane_active && sceneState.crane_active_conf >= t);
+    toggleSceneObject('crane-tower-mesh', craneVisible);
+
+    // --- SCAFFOLDING ---
+    const scaffoldVisible = !!(sceneState.scaffolding_present && sceneState.scaffolding_present_conf >= t);
+    toggleSceneObject('scaffold-mesh', scaffoldVisible);
+
+    // --- POOL WATER ---
+    if (sceneState.pool_has_water && sceneState.pool_has_water_conf >= t) {
+      if (window.JumeirahTwinAPI?.setSiteState) {
+        // Pool water is active in twin
+      }
+    }
+
+    // --- SUMMARY LOG ---
+    logToEventStream('[VISION] Scene summary: ' + (sceneState.summary || 'Analysis complete'));
+
+    // Optional Auto-Camera transition to inspect Carport if car is detected
+    if (carVisible && cameraManager) {
+      showToast('Vision Reconciler: Carport 3D State Synchronized');
+    }
+  }
+
+  // Helper: toggle a mesh by name in the Three.js scene
+  function toggleSceneObject(meshName, visible) {
+    const obj = scene.getObjectByName(meshName);
+    if (obj) {
+      obj.visible = visible;
+    }
+    // Also fire via postMessage in case this runs from a parent frame
+    try {
+      window.postMessage({
+        type: 'TWIN_COMMAND',
+        action: 'TOGGLE_ELEMENT',
+        payload: { elementId: meshName, visible }
+      }, '*');
+    } catch(e) { /* cross-origin */ }
+  }
+
+  // Helper: write to the twin's own SDK event stream div
+  function logToEventStream(message) {
+    const stream = document.getElementById('sdkEventStream') || document.getElementById('sdk-console');
+    if (stream) {
+      const line = document.createElement('div');
+      line.textContent = message;
+      line.style.color = '#00d4ff';
+      stream.appendChild(line);
+      stream.scrollTop = stream.scrollHeight;
+    }
+    console.log(message);
+  }
+
+  // Step 5: Master Vision Reconciliation Function
+  async function runVisionReconciliation(imageUrl) {
+    logToEventStream('[VISION] Starting scene reconciliation…');
+    try {
+      const targetUrl = imageUrl || VISION_CONFIG.imageUrl;
+      logToEventStream('[VISION] Fetching latest site photo: ' + targetUrl);
+      const { base64, mimeType } = await fetchLatestSitePhoto(targetUrl);
+
+      logToEventStream('[VISION] Sending to Claude Vision AI…');
+      const sceneState = await analyzeWithVision(base64, mimeType, targetUrl);
+      logToEventStream('[VISION] Analysis complete.');
+
+      applySceneState(sceneState);
+      return sceneState;
+    } catch (err) {
+      logToEventStream('[VISION ERROR] ' + err.message);
+      console.error('Vision reconciliation failed:', err);
+    }
+  }
 
   // ----------------------------------------------------
   // 3. ENDOMORPHISM STATE MACHINE (End(S), o, id)
@@ -249,6 +442,13 @@ document.addEventListener('DOMContentLoaded', () => {
       buildingAssistant.toggle(true);
       if (question) buildingAssistant.sendMessage(question);
     },
+    // Vision-Based Scene Reconciliation (Step 5)
+    runVisionReconcile: (imageUrl) => {
+      return runVisionReconciliation(imageUrl);
+    },
+    toggleElement: (elementId, visible) => {
+      toggleSceneObject(elementId, visible);
+    },
     getState: () => ({ ...AppState })
   };
 
@@ -294,6 +494,12 @@ document.addEventListener('DOMContentLoaded', () => {
       window.JumeirahTwinAPI.toggleCAD(payload);
     } else if (actionUpper === 'TOGGLE_PINS' || actionLower === 'togglepins') {
       window.JumeirahTwinAPI.togglePins(payload);
+    } else if (actionUpper === 'TOGGLE_ELEMENT' || actionLower === 'toggleelement') {
+      const meshName = payload?.elementId || payload?.meshName || payload;
+      const visible = !!payload?.visible;
+      toggleSceneObject(meshName, visible);
+    } else if (actionUpper === 'RUN_VISION_RECONCILE' || actionLower === 'runvisionreconcile') {
+      runVisionReconciliation(payload?.imageUrl || payload);
     } else if (actionUpper === 'GET_STATE' || actionLower === 'getstate') {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({
@@ -479,6 +685,63 @@ document.addEventListener('DOMContentLoaded', () => {
       const code = document.getElementById('sdk-code-block')?.textContent || '';
       navigator.clipboard.writeText(code);
       showToast('SDK code copied to clipboard');
+    });
+  }
+
+  // Vision AI Header Button & Controller Panel
+  const btnVisionAi = document.getElementById('btn-vision-ai');
+  const btnRunVision = document.getElementById('btn-run-vision');
+  const inputVisionUrl = document.getElementById('vision-image-url');
+  const btnToggleCarportMesh = document.getElementById('btn-toggle-carport-mesh');
+  const valCarMeshVis = document.getElementById('val-car-mesh-vis');
+
+  if (btnVisionAi && ideModal) {
+    btnVisionAi.addEventListener('click', () => {
+      ideModal.classList.remove('hidden');
+      if (inputVisionUrl) inputVisionUrl.focus();
+    });
+  }
+
+  if (btnRunVision) {
+    btnRunVision.addEventListener('click', async () => {
+      const url = inputVisionUrl ? inputVisionUrl.value.trim() : null;
+      btnRunVision.disabled = true;
+      btnRunVision.innerHTML = '<i class="fa-solid fa-spinner animate-spin text-[#8EB69B]"></i> Analyzing…';
+      try {
+        const state = await runVisionReconciliation(url);
+        if (state && valCarMeshVis) {
+          const isCar = !!state.car_in_carport;
+          valCarMeshVis.textContent = isCar ? 'SHOWN' : 'HIDDEN';
+          valCarMeshVis.className = isCar ? 'text-emerald-300 font-bold' : 'text-rose-300';
+        }
+      } finally {
+        btnRunVision.disabled = false;
+        btnRunVision.innerHTML = '<i class="fa-solid fa-bolt text-[#8EB69B]"></i> <span>Reconcile Scene</span>';
+      }
+    });
+  }
+
+  document.querySelectorAll('.vision-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const u = btn.getAttribute('data-url');
+      if (inputVisionUrl && u) {
+        inputVisionUrl.value = u;
+      }
+      if (btnRunVision) btnRunVision.click();
+    });
+  });
+
+  if (btnToggleCarportMesh) {
+    btnToggleCarportMesh.addEventListener('click', () => {
+      const carMesh = scene.getObjectByName('carport-car-mesh');
+      if (carMesh) {
+        carMesh.visible = !carMesh.visible;
+        if (valCarMeshVis) {
+          valCarMeshVis.textContent = carMesh.visible ? 'SHOWN' : 'HIDDEN';
+          valCarMeshVis.className = carMesh.visible ? 'text-emerald-300 font-bold' : 'text-rose-300';
+        }
+        showToast(`Carport Car Mesh: ${carMesh.visible ? 'SHOWN' : 'HIDDEN'}`);
+      }
     });
   }
 

@@ -511,6 +511,7 @@ class VillaModelBuilder {
     this.buildPhaseThreeAssets(); // Master Final Render
     this.buildPhaseTwoAssets();   // 08 Oct 2026 Site State
     this.buildPhaseOneAssets();   // Structure & Shoring
+    this.addCarportCarMesh();     // Vision Reconciler Carport Mesh (carport-car-mesh)
 
     // Set initial phase
     this.setSiteState(this.siteState);
@@ -1040,6 +1041,75 @@ class VillaModelBuilder {
       truck.add(w);
     });
     this.groups.siteOnly.add(truck);
+  }
+
+  // ----------------------------------------------------
+  // VISION RECONCILER: CARPORT CAR MESH (STEP 4)
+  // ----------------------------------------------------
+  addCarportCarMesh() {
+    const carGroup = new THREE.Group();
+    carGroup.name = 'carport-car-mesh'; // Exact ID required by Vision Reconciler
+
+    // Car body
+    const bodyGeo = new THREE.BoxGeometry(4.2, 1.4, 1.9);
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x222a30,
+      metalness: 0.75,
+      roughness: 0.28
+    });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.7;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    carGroup.add(body);
+
+    // Car roof (cabin, slightly raised)
+    const roofGeo = new THREE.BoxGeometry(2.4, 0.9, 1.7);
+    const roof = new THREE.Mesh(roofGeo, bodyMat);
+    roof.position.set(-0.2, 1.85, 0);
+    roof.castShadow = true;
+    carGroup.add(roof);
+
+    // Windscreen tint
+    const glassGeo = new THREE.BoxGeometry(0.08, 0.7, 1.5);
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0x88ccff,
+      metalness: 0.2,
+      roughness: 0.05,
+      transparent: true,
+      opacity: 0.65
+    });
+    const glass = new THREE.Mesh(glassGeo, glassMat);
+    glass.position.set(0.96, 1.6, 0);
+    carGroup.add(glass);
+
+    // Four wheels
+    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 16);
+    wheelGeo.rotateZ(Math.PI / 2);
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.85 });
+    const wheelPositions = [
+      [-1.45, 0.38,  0.95],
+      [-1.45, 0.38, -0.95],
+      [ 1.45, 0.38,  0.95],
+      [ 1.45, 0.38, -0.95],
+    ];
+    wheelPositions.forEach(pos => {
+      const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+      wheel.position.set(...pos);
+      wheel.castShadow = true;
+      carGroup.add(wheel);
+    });
+
+    // Position directly in the carport bay (X=8.2, Y=0, Z=5.8)
+    carGroup.position.set(8.2, 0, 5.8);
+    carGroup.rotation.y = -0.35;
+
+    // Start hidden — Vision AI will show it when car is detected
+    carGroup.visible = false;
+
+    this.scene.add(carGroup);
+    this.carportCarMesh = carGroup;
+    return carGroup;
   }
 
   // ----------------------------------------------------
