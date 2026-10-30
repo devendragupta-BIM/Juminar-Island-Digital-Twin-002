@@ -513,6 +513,15 @@ class VillaModelBuilder {
     this.buildPhaseOneAssets();   // Structure & Shoring
     this.addCarportCarMesh();     // Vision Reconciler Carport Mesh (carport-car-mesh)
 
+    // Additional Vision Reconciler scene telemetry target groups
+    const workerGroup = new THREE.Group();
+    workerGroup.name = 'worker-group-mesh';
+    this.scene.add(workerGroup);
+
+    const craneGroup = new THREE.Group();
+    craneGroup.name = 'crane-tower-mesh';
+    this.scene.add(craneGroup);
+
     // Set initial phase
     this.setSiteState(this.siteState);
   }
@@ -870,10 +879,13 @@ class VillaModelBuilder {
       this.groups.renderOnly.add(orb);
     });
 
-    // Luxury Vehicles in Carport
-    this.createLuxuryCar('gwagon', 4.8, 0.0, 5.2, 0.05);
-    this.createLuxuryCar('audi', 8.2, 0.0, 6.8, -0.45);
-    this.createLuxuryCar('porsche', 11.6, 0.0, 6.5, -0.25);
+    // Luxury Vehicles in Carport (grouped for Vision-Based Scene Reconciliation)
+    this.carportCarsGroup = new THREE.Group();
+    this.carportCarsGroup.name = 'carport-luxury-cars';
+    this.createLuxuryCar('gwagon', 4.8, 0.0, 5.2, 0.05, this.carportCarsGroup);
+    this.createLuxuryCar('audi', 8.2, 0.0, 6.8, -0.45, this.carportCarsGroup);
+    this.createLuxuryCar('porsche', 11.6, 0.0, 6.5, -0.25, this.carportCarsGroup);
+    this.groups.renderOnly.add(this.carportCarsGroup);
 
     // Landscaping Palm Trees
     this.createPalmTree(11.5, 0, 15.2, 1.1, false, this.groups.renderOnly);
@@ -914,7 +926,7 @@ class VillaModelBuilder {
     solarPanel.rotation.x = 0.45;
 
     // VH Contracting Pickup Truck on Driveway
-    this.createSiteTruck(6.8, 0.0, 9.8, -0.35);
+    this.siteTruck = this.createSiteTruck(6.8, 0.0, 9.8, -0.35);
 
     // Burlap-Wrapped Protection Palms along Front Fence
     for (let i = 0; i < 4; i++) {
@@ -923,6 +935,7 @@ class VillaModelBuilder {
 
     // Neighboring Villa with Scaffolding in Background Left (Photos #001 & #010)
     const neighborGroup = new THREE.Group();
+    neighborGroup.name = 'scaffold-mesh'; // Step 3 Scaffold mesh
     neighborGroup.position.set(-19.5, 0, -2.5);
     this.addBox(11, 7.5, 11, 0, 3.75, 0, this.mats.whiteConcrete, neighborGroup);
     for (let x = -5; x <= 5; x += 2.5) {
@@ -982,7 +995,7 @@ class VillaModelBuilder {
     targetGroup.add(palm);
   }
 
-  createLuxuryCar(type, x, y, z, rotY) {
+  createLuxuryCar(type, x, y, z, rotY, targetGroup = null) {
     const car = new THREE.Group();
     car.position.set(x, y, z);
     car.rotation.y = rotY;
@@ -1018,11 +1031,15 @@ class VillaModelBuilder {
       w.position.set(wx, wy, wz);
       car.add(w);
     });
-    this.groups.renderOnly.add(car);
+
+    const destGroup = targetGroup || this.carportCarsGroup || this.groups.renderOnly;
+    destGroup.add(car);
+    return car;
   }
 
   createSiteTruck(x, y, z, rotY) {
     const truck = new THREE.Group();
+    truck.name = 'site-truck-mesh';
     truck.position.set(x, y, z);
     truck.rotation.y = rotY;
     const cabMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.4 });
@@ -1041,6 +1058,7 @@ class VillaModelBuilder {
       truck.add(w);
     });
     this.groups.siteOnly.add(truck);
+    return truck;
   }
 
   // ----------------------------------------------------
@@ -1053,9 +1071,9 @@ class VillaModelBuilder {
     // Car body
     const bodyGeo = new THREE.BoxGeometry(4.2, 1.4, 1.9);
     const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x222a30,
-      metalness: 0.75,
-      roughness: 0.28
+      color: 0x2a2a2a,
+      metalness: 0.7,
+      roughness: 0.3
     });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.position.y = 0.7;
@@ -1063,7 +1081,7 @@ class VillaModelBuilder {
     body.receiveShadow = true;
     carGroup.add(body);
 
-    // Car roof (cabin, slightly raised)
+    // Car roof (slightly smaller, raised)
     const roofGeo = new THREE.BoxGeometry(2.4, 0.9, 1.7);
     const roof = new THREE.Mesh(roofGeo, bodyMat);
     roof.position.set(-0.2, 1.85, 0);
@@ -1074,10 +1092,10 @@ class VillaModelBuilder {
     const glassGeo = new THREE.BoxGeometry(0.08, 0.7, 1.5);
     const glassMat = new THREE.MeshStandardMaterial({
       color: 0x88ccff,
-      metalness: 0.2,
+      metalness: 0.1,
       roughness: 0.05,
       transparent: true,
-      opacity: 0.65
+      opacity: 0.5
     });
     const glass = new THREE.Mesh(glassGeo, glassMat);
     glass.position.set(0.96, 1.6, 0);
@@ -1085,31 +1103,44 @@ class VillaModelBuilder {
 
     // Four wheels
     const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 16);
-    wheelGeo.rotateZ(Math.PI / 2);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.85 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
     const wheelPositions = [
-      [-1.45, 0.38,  0.95],
-      [-1.45, 0.38, -0.95],
-      [ 1.45, 0.38,  0.95],
-      [ 1.45, 0.38, -0.95],
+      [-1.45, 0.38,  1.0],
+      [-1.45, 0.38, -1.0],
+      [ 1.45, 0.38,  1.0],
+      [ 1.45, 0.38, -1.0],
     ];
     wheelPositions.forEach(pos => {
       const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+      wheel.rotation.x = Math.PI / 2;
       wheel.position.set(...pos);
       wheel.castShadow = true;
       carGroup.add(wheel);
     });
 
-    // Position directly in the carport bay (X=8.2, Y=0, Z=5.8)
+    // POSITION: Carport bay (X=8.2, Y=0, Z=5.8)
     carGroup.position.set(8.2, 0, 5.8);
-    carGroup.rotation.y = -0.35;
+    carGroup.rotation.y = Math.PI / 2;   // facing into the carport bay
 
-    // Start hidden — Vision AI will show it when car is detected
+    // Start hidden — Vision AI will show it if a car is detected
     carGroup.visible = false;
 
     this.scene.add(carGroup);
     this.carportCarMesh = carGroup;
     return carGroup;
+  }
+
+  setCarportVehiclesVisible(visible) {
+    this.carportVehiclesReconciled = visible;
+    if (this.carportCarMesh) {
+      this.carportCarMesh.visible = visible;
+    }
+    if (this.carportCarsGroup) {
+      this.carportCarsGroup.visible = visible;
+    }
+    if (this.siteTruck) {
+      this.siteTruck.visible = visible;
+    }
   }
 
   // ----------------------------------------------------
@@ -1136,6 +1167,13 @@ class VillaModelBuilder {
       this.groups.shoringOnly.visible = false;
       this.groups.wood.visible = true;
       this.groups.interiors.visible = true;
+    }
+
+    // Apply Vision-reconciled state to carport vehicles regardless of phase
+    if (this.carportVehiclesReconciled !== undefined) {
+      if (this.carportCarsGroup) this.carportCarsGroup.visible = this.carportVehiclesReconciled;
+      if (this.carportCarMesh) this.carportCarMesh.visible = this.carportVehiclesReconciled;
+      if (this.siteTruck) this.siteTruck.visible = this.carportVehiclesReconciled;
     }
   }
 
@@ -1224,3 +1262,15 @@ class VillaModelBuilder {
 }
 
 window.VillaModelBuilder = VillaModelBuilder;
+
+// VISION RECONCILER — Step 4: Standalone helper for scene integration
+function addCarportCarMesh(scene) {
+  const targetScene = scene || (window.modelBuilder && window.modelBuilder.scene) || window.scene;
+  if (!targetScene) return null;
+  const existing = targetScene.getObjectByName('carport-car-mesh');
+  if (existing) return existing;
+  if (window.modelBuilder && typeof window.modelBuilder.addCarportCarMesh === 'function') {
+    return window.modelBuilder.addCarportCarMesh();
+  }
+}
+window.addCarportCarMesh = addCarportCarMesh;

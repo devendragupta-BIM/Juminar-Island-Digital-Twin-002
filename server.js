@@ -14,6 +14,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { Groq } = require('groq-sdk');
 
 const buildingDataService = require('./services/buildingDataService');
 const aiChatService = require('./services/aiChatService');
@@ -22,9 +23,14 @@ const app = express();
 const PORT = process.env.PORT || 8085;
 const PUBLIC_DIR = __dirname;
 
+// Groq AI client initialization
+const groqClient = process.env.GROQ_API_KEY ? new Groq({ apiKey: process.env.GROQ_API_KEY }) : null;
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.8-27b';
+
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ----------------------------------------------------
 // 1. HEALTH & TELEMETRY STATUS ENDPOINT
@@ -35,6 +41,7 @@ app.get('/api/health', (req, res) => {
     service: 'Jumeirah Islands 003 Digital Twin API',
     timestamp: new Date().toISOString(),
     groqConfigured: !!process.env.GROQ_API_KEY,
+    groqVisionModel: GROQ_VISION_MODEL,
     model: process.env.GROQ_MODEL || 'openai/gpt-oss-20b'
   });
 });
@@ -82,7 +89,9 @@ app.post('/api/vision-reconcile', async (req, res) => {
     // 1. Resolve image if imageUrl is provided
     if (!base64Image && imageUrl) {
       // Check if it's a local file relative to server
-      const cleanPath = imageUrl.split('?')[0].replace(/^\//, '');
+      const rawPath = imageUrl.split('?')[0].replace(/^\//, '');
+      let cleanPath = rawPath;
+      try { cleanPath = decodeURIComponent(rawPath); } catch (e) {}
       const localFilePath = path.join(PUBLIC_DIR, cleanPath);
 
       if (fs.existsSync(localFilePath) && fs.statSync(localFilePath).isFile()) {
@@ -140,35 +149,103 @@ Definitions for this specific site:
 - pool_has_water: rear swimming pool contains water (blue/cyan color visible in pool shell)`;
 
     let sceneState = null;
+    let engineUsed = 'none';
+    let modelUsed = 'none';
 
-    // Option A: Call Claude Vision if key is available
-    if (anthropicKey) {
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': anthropicKey,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 500,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64Image } },
-              { type: 'text', text: visionPrompt }
-            ]
-          }]
-        })
-      });
+    // Priority 1: Groq Vision AI (fast multi-modal inference via user's GROQ_API_KEY)
+    if (groqClient) {
+      try {
+        console.log(`[Vision AI] Initiating Groq Vision analysis (${GROQ_VISION_MODEL})...`);
+        const completion = await groqClient.chat.completions.create({
+          model: GROQ_VISION_MODEL,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: visionPrompt },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          response_format: { type: 'json_object' },
+          max_tokens: 450
+        });
 
-      const data = await resp.json();
-      if (data.error) throw new Error('Anthropic Vision error: ' + data.error.message);
-      const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
-      sceneState = JSON.parse(raw);
-    } else {
-      // Option B: Smart site photo classifier for local collection & demo testing
+        const raw = completion.choices[0]?.message?.content || '{}';
+        sceneState = JSON.parse(raw);
+        engineUsed = 'Groq Vision AI';
+        modelUsed = GROQ_VISION_MODEL;
+        console.log(`[Vision AI] Groq Vision analysis complete.`);
+      } catch (groqErr) {
+        console.warn('[Vision AI] Groq Vision error, falling back:', groqErr.message);
+      }
+    }
+
+    // Priority 2: Anthropic Claude Vision (if Anthropic key is supplied)
+    if (!sceneState && anthropicKey) {
+      try {
+        let resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': anthropicKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 500,
+            messages: [{
+              role: 'user',
+              content: [
+                { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64Image } },
+                { type: 'text', text: visionPrompt }
+              ]
+            }]
+          })
+        });
+
+        let data = await resp.json();
+        if (data.error && (data.error.type === 'not_found_error' || (data.error.message && data.error.message.includes('model')))) {
+          resp = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': anthropicKey,
+              'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+              model: 'claude-3-5-sonnet-20241022',
+              max_tokens: 500,
+              messages: [{
+                role: 'user',
+                content: [
+                  { type: 'image', source: { type: 'base64', media_type: mimeType, data: base64Image } },
+                  { type: 'text', text: visionPrompt }
+                ]
+              }]
+            })
+          });
+          data = await resp.json();
+        }
+
+        if (!data.error) {
+          const raw = data.content.map(b => b.text || '').join('').replace(/```json|```/g, '').trim();
+          sceneState = JSON.parse(raw);
+          engineUsed = 'Claude Vision';
+          modelUsed = 'claude-sonnet';
+        }
+      } catch (anthropicErr) {
+        console.warn('[Vision AI] Anthropic Vision error:', anthropicErr.message);
+      }
+    }
+
+    // Priority 3: Fallback Smart Classifier for offline testing
+    if (!sceneState) {
       const lowerUrl = (resolvedUrl || '').toLowerCase();
       const isParking = lowerUrl.includes('parking') || lowerUrl.includes('carport') || lowerUrl.includes('driveway');
       const isPool = lowerUrl.includes('pool') || lowerUrl.includes('rear');
@@ -193,10 +270,14 @@ Definitions for this specific site:
           ? "Vehicle detected in the front carport area beneath the cantilever pergola; active construction underway."
           : "Carport and driveway clear of vehicles; structural envelope and shoring active."
       };
+      engineUsed = 'Heuristic Classifier';
+      modelUsed = 'static';
     }
 
     return res.json({
       status: 'ok',
+      engine: engineUsed,
+      model: modelUsed,
       sceneState,
       imageUrl: resolvedUrl
     });

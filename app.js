@@ -74,13 +74,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Steps 1 to 5 from Vision-Based Scene Reconciliation Guide
   // ----------------------------------------------------
   const VISION_CONFIG = {
-    // Phase 1: Default to site photo with vehicle in carport / parking
-    imageUrl: 'site-pictures/Exterior Parking/20261013180000.jpg',
+    // Phase 1: Default to site photo with vehicle in front yard / carport
+    imageUrl: '20840-1748865490206.jpeg',
     pollInterval: null, // null = manual only; set number (e.g. 60000) for auto-polling
     confidenceThreshold: 0.75
   };
 
-  // Step 1: Fetch latest site photo and convert to base64
+  // Step 1: Fetch latest site photo and convert to optimized base64
   async function fetchLatestSitePhoto(url) {
     const targetUrl = url || VISION_CONFIG.imageUrl;
     const cacheBustedUrl = targetUrl + (targetUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
@@ -92,13 +92,55 @@ document.addEventListener('DOMContentLoaded', () => {
     const mimeType = blob.type || 'image/jpeg';
     
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve({
-        base64: e.target.result.split(',')[1],
-        mimeType
-      });
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
+      // Use Image + Canvas to optimize resolution for Vision AI (prevents 429 token limits & latency)
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(blob);
+      img.onload = () => {
+        try {
+          const maxDim = 1024;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(objectUrl);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          resolve({
+            base64: dataUrl.split(',')[1],
+            mimeType: 'image/jpeg'
+          });
+        } catch (e) {
+          // Fallback if canvas cross-origin prevents export
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve({
+            base64: ev.target.result.split(',')[1],
+            mimeType
+          });
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        }
+      };
+      img.onerror = () => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve({
+          base64: ev.target.result.split(',')[1],
+          mimeType
+        });
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      };
+      img.src = objectUrl;
     });
   }
 
@@ -114,6 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (serverResp.ok) {
         const data = await serverResp.json();
         if (data.status === 'ok' && data.sceneState) {
+          if (data.engine) {
+            logToEventStream(`[VISION AI] Powered by ${data.engine}${data.model ? ' (' + data.model + ')' : ''}`);
+          }
           return data.sceneState;
         }
       }
@@ -217,6 +262,27 @@ Definitions for this specific site:
     if (obj) {
       obj.visible = visible;
     }
+
+    if (meshName === 'carport-car-mesh') {
+      // Synchronize all carport vehicle representations across all phases so the carport is genuinely empty when visible = false!
+      const luxuryCars = scene.getObjectByName('carport-luxury-cars');
+      if (luxuryCars) {
+        luxuryCars.visible = visible;
+      }
+      const siteTruck = scene.getObjectByName('site-truck-mesh');
+      if (siteTruck) {
+        siteTruck.visible = visible;
+      }
+      if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
+        window.modelBuilder.setCarportVehiclesVisible(visible);
+      }
+      const valVis = document.getElementById('val-car-mesh-vis');
+      if (valVis) {
+        valVis.textContent = visible ? 'SHOWN' : 'HIDDEN';
+        valVis.className = visible ? 'text-emerald-300 font-bold' : 'text-rose-300';
+      }
+    }
+
     // Also fire via postMessage in case this runs from a parent frame
     try {
       window.postMessage({
@@ -246,9 +312,17 @@ Definitions for this specific site:
     try {
       const targetUrl = imageUrl || VISION_CONFIG.imageUrl;
       logToEventStream('[VISION] Fetching latest site photo: ' + targetUrl);
-      const { base64, mimeType } = await fetchLatestSitePhoto(targetUrl);
+      let base64 = null;
+      let mimeType = 'image/jpeg';
+      try {
+        const photoData = await fetchLatestSitePhoto(targetUrl);
+        base64 = photoData.base64;
+        mimeType = photoData.mimeType;
+      } catch (fetchErr) {
+        logToEventStream('[VISION] Note: Direct browser fetch bypassed (CORS/remote); delegating to proxy…');
+      }
 
-      logToEventStream('[VISION] Sending to Claude Vision AI…');
+      logToEventStream('[VISION] Sending to Groq Vision AI…');
       const sceneState = await analyzeWithVision(base64, mimeType, targetUrl);
       logToEventStream('[VISION] Analysis complete.');
 
@@ -258,6 +332,20 @@ Definitions for this specific site:
       logToEventStream('[VISION ERROR] ' + err.message);
       console.error('Vision reconciliation failed:', err);
     }
+  }
+
+  // Expose Vision Reconciler helpers to window for console/external testing
+  window.VISION_CONFIG = VISION_CONFIG;
+  window.fetchLatestSitePhoto = fetchLatestSitePhoto;
+  window.analyzeWithVision = analyzeWithVision;
+  window.applySceneState = applySceneState;
+  window.toggleSceneObject = toggleSceneObject;
+  window.logToEventStream = logToEventStream;
+  window.runVisionReconciliation = runVisionReconciliation;
+
+  // Phase 2: Auto-poll if pollInterval is configured
+  if (VISION_CONFIG.pollInterval && typeof VISION_CONFIG.pollInterval === 'number') {
+    setInterval(() => runVisionReconciliation(), VISION_CONFIG.pollInterval);
   }
 
   // ----------------------------------------------------
@@ -444,6 +532,9 @@ Definitions for this specific site:
     },
     // Vision-Based Scene Reconciliation (Step 5)
     runVisionReconcile: (imageUrl) => {
+      return runVisionReconciliation(imageUrl);
+    },
+    runVisionReconciliation: (imageUrl) => {
       return runVisionReconciliation(imageUrl);
     },
     toggleElement: (elementId, visible) => {
@@ -734,14 +825,11 @@ Definitions for this specific site:
   if (btnToggleCarportMesh) {
     btnToggleCarportMesh.addEventListener('click', () => {
       const carMesh = scene.getObjectByName('carport-car-mesh');
-      if (carMesh) {
-        carMesh.visible = !carMesh.visible;
-        if (valCarMeshVis) {
-          valCarMeshVis.textContent = carMesh.visible ? 'SHOWN' : 'HIDDEN';
-          valCarMeshVis.className = carMesh.visible ? 'text-emerald-300 font-bold' : 'text-rose-300';
-        }
-        showToast(`Carport Car Mesh: ${carMesh.visible ? 'SHOWN' : 'HIDDEN'}`);
-      }
+      const luxuryCars = scene.getObjectByName('carport-luxury-cars');
+      const isCurrentlyVisible = (carMesh && carMesh.visible) || (luxuryCars && luxuryCars.visible);
+      const newVisible = !isCurrentlyVisible;
+      toggleSceneObject('carport-car-mesh', newVisible);
+      showToast(`Carport Vehicles: ${newVisible ? 'SHOWN' : 'HIDDEN'}`);
     });
   }
 
@@ -965,7 +1053,7 @@ function populateCameraCarousel(cameraManager) {
 }
 
 function logSDK(msg) {
-  const box = document.getElementById('sdk-console');
+  const box = document.getElementById('sdkEventStream') || document.getElementById('sdk-console');
   if (!box) return;
   const line = document.createElement('div');
   const time = new Date().toLocaleTimeString();

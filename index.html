@@ -576,7 +576,7 @@ iframeRef.contentWindow.postMessage({
               <span>Live SDK Event Stream:</span>
               <span class="text-[10px] font-mono text-[#DAF1DE]">● LISTENING</span>
             </div>
-            <div id="sdk-console" class="flex-1 bg-[#051F20] p-3 rounded-xl border border-[#8EB69B]/20 font-mono text-[10px] text-[#DAF1DE] overflow-y-auto space-y-1 max-h-44">
+            <div id="sdkEventStream" data-id="sdk-console" class="flex-1 bg-[#051F20] p-3 rounded-xl border border-[#8EB69B]/20 font-mono text-[10px] text-[#DAF1DE] overflow-y-auto space-y-1 max-h-44">
               <div>[SYS] JumeirahTwinAPI v4.2 initialized</div>
               <div>[PMREM] Procedural PBR materials & textures compiled</div>
               <div>[BIM] 5 spatial telemetry nodes online</div>
@@ -598,7 +598,7 @@ iframeRef.contentWindow.postMessage({
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-camera-retro text-[#8EB69B]"></i>
               <span class="font-bold text-white uppercase tracking-wider text-[11px]">Vision-Based Scene Reconciliation</span>
-              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#235347]/50 text-[#DAF1DE] border border-[#8EB69B]/30">CLAUDE VISION + 3D MESH</span>
+              <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#235347]/50 text-[#DAF1DE] border border-[#8EB69B]/30">GROQ VISION (QWEN 3.8-27B)</span>
             </div>
             <button id="btn-toggle-carport-mesh" class="px-2.5 py-1 rounded-lg text-[10px] font-mono bg-white/5 hover:bg-[#235347]/40 text-[#DAF1DE] border border-[#8EB69B]/30 transition">
               Car Mesh: <span id="val-car-mesh-vis" class="text-rose-300">HIDDEN</span>
@@ -606,7 +606,7 @@ iframeRef.contentWindow.postMessage({
           </div>
 
           <div class="flex flex-col sm:flex-row gap-2">
-            <input type="text" id="vision-image-url" value="site-pictures/Exterior Parking/20261013180000.jpg" placeholder="Enter image URL or local site-pictures path" class="flex-1 bg-[#051F20] text-[#DAF1DE] px-3 py-2 rounded-lg border border-[#8EB69B]/30 text-xs font-mono focus:outline-none focus:border-[#8EB69B]" />
+            <input type="text" id="vision-image-url" value="20840-1748865490206.jpeg" placeholder="Enter image URL or local site-pictures path" class="flex-1 bg-[#051F20] text-[#DAF1DE] px-3 py-2 rounded-lg border border-[#8EB69B]/30 text-xs font-mono focus:outline-none focus:border-[#8EB69B]" />
             <button id="btn-run-vision" class="px-4 py-2 rounded-lg bg-gradient-to-r from-[#235347] to-[#163832] hover:from-[#163832] hover:to-[#235347] border border-[#8EB69B] text-[#DAF1DE] font-semibold text-xs transition flex items-center justify-center gap-2 shadow-md">
               <i class="fa-solid fa-bolt text-[#8EB69B]"></i>
               <span>Reconcile Scene</span>
@@ -615,14 +615,14 @@ iframeRef.contentWindow.postMessage({
 
           <div class="flex flex-wrap items-center gap-2 text-[11px]">
             <span class="text-[#8EB69B]">Quick Test Presets:</span>
-            <button type="button" class="vision-preset-btn px-2.5 py-1 rounded bg-[#051F20] hover:bg-[#235347]/40 border border-[#8EB69B]/20 text-[#DAF1DE] font-mono text-[10px]" data-url="site-pictures/Exterior Parking/20261013180000.jpg">
-              🚗 Car in Carport
+            <button type="button" class="vision-preset-btn px-2.5 py-1 rounded bg-[#051F20] hover:bg-[#235347]/40 border border-[#8EB69B]/20 text-[#DAF1DE] font-mono text-[10px]" data-url="20840-1748865490206.jpeg">
+              🚗 Vehicles in Carport (Shows 3D Car)
             </button>
-            <button type="button" class="vision-preset-btn px-2.5 py-1 rounded bg-[#051F20] hover:bg-[#235347]/40 border border-[#8EB69B]/20 text-[#DAF1DE] font-mono text-[10px]" data-url="site-pictures/Exterior front yard/20261014140000.jpg">
-              🚫 Empty Yard (No Car)
+            <button type="button" class="vision-preset-btn px-2.5 py-1 rounded bg-[#051F20] hover:bg-[#235347]/40 border border-[#8EB69B]/20 text-[#DAF1DE] font-mono text-[10px]" data-url="site-pictures/Exterior Parking/20261013180000.jpg">
+              🚫 Empty Carport (Hides 3D Car)
             </button>
             <button type="button" class="vision-preset-btn px-2.5 py-1 rounded bg-[#051F20] hover:bg-[#235347]/40 border border-[#8EB69B]/20 text-[#DAF1DE] font-mono text-[10px]" data-url="site-pictures/Exterior rear/20261014143000.jpg">
-              🏊 Rear Pool Deck
+              🏊 Rear Pool Deck (Water Detected)
             </button>
           </div>
         </div>
