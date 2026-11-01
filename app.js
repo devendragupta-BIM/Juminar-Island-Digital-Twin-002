@@ -16,7 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const container = document.getElementById('viewport-3d-wrapper');
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x051F20);
+  // Clear scene background to allow the sky dome shader to render with calibrated daylight
+  scene.background = null;
 
   const camera = new THREE.PerspectiveCamera(
     60,
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     preserveDrawingBuffer: true,
     powerPreference: 'high-performance'
   });
+  renderer.setClearColor(0x3B62A4, 1.0);
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2.0));
 
@@ -470,22 +472,38 @@ Definitions for this specific site:
     const topTxt = document.getElementById('top-progress-text');
     const landTxt = document.getElementById('log-landscape-pct');
     const landBar = document.getElementById('log-landscape-bar');
+    const overviewBar = document.getElementById('overview-progress-bar');
+    const overviewTxt = document.getElementById('overview-progress-text');
+    const overviewTitle = document.getElementById('proj-overview-title');
+    const overviewDate = document.getElementById('overview-handover-date');
 
     if (AppState.phase === 'shoring') {
       if (topBar) topBar.style.width = '62%';
       if (topTxt) topTxt.textContent = '62% (Shoring)';
       if (landTxt) landTxt.textContent = '10% (Excavation)';
       if (landBar) landBar.style.width = '10%';
+      if (overviewBar) overviewBar.style.width = '62%';
+      if (overviewTxt) overviewTxt.textContent = '62%';
+      if (overviewTitle) overviewTitle.textContent = 'Superstructure & Shoring';
+      if (overviewDate) overviewDate.textContent = 'Civil Works • Q1 2026';
     } else if (AppState.phase === 'site') {
       if (topBar) topBar.style.width = '86.4%';
       if (topTxt) topTxt.textContent = '86.4% (Oct 2026)';
       if (landTxt) landTxt.textContent = '35% (Sand Staging)';
       if (landBar) landBar.style.width = '35%';
+      if (overviewBar) overviewBar.style.width = '86.4%';
+      if (overviewTxt) overviewTxt.textContent = '86.4%';
+      if (overviewTitle) overviewTitle.textContent = '08 Oct 2026 Site State';
+      if (overviewDate) overviewDate.textContent = 'Superstructure • 08 Oct';
     } else {
       if (topBar) topBar.style.width = '100%';
       if (topTxt) topTxt.textContent = '100% (Render)';
       if (landTxt) landTxt.textContent = '100% (Render)';
       if (landBar) landBar.style.width = '100%';
+      if (overviewBar) overviewBar.style.width = '74%';
+      if (overviewTxt) overviewTxt.textContent = '74%';
+      if (overviewTitle) overviewTitle.textContent = 'Design handover';
+      if (overviewDate) overviewDate.textContent = 'Handover • 08 Oct';
     }
 
     // 2. Sync Atmosphere
@@ -494,7 +512,7 @@ Definitions for this specific site:
     } else if (lightingManager && typeof lightingManager.setEnvironmentPreset === 'function') {
       lightingManager.setEnvironmentPreset(AppState.atmosphere);
     }
-    document.querySelectorAll('.env-btn').forEach(btn => {
+    document.querySelectorAll('.env-btn, .env-pill').forEach(btn => {
       const match = btn.getAttribute('data-env') === AppState.atmosphere;
       btn.classList.toggle('active', match);
     });
@@ -1024,6 +1042,252 @@ Definitions for this specific site:
   cameraManager.selectSpatialNode(cameraManager.spatialNodes[0], false);
 
   // ----------------------------------------------------
+  // VILLA 003 — CLIENT INTELLIGENCE DASHBOARD UI HOOKS
+  // ----------------------------------------------------
+
+  // 1. Camera Carousel Navigation (< and > buttons)
+  const carouselViews = [
+    { index: '01 / 04', title: 'Courtyard', camKey: 'frontHero', element: 'living' },
+    { index: '02 / 04', title: 'Living & Poolside Lounge', camKey: 'frontEntrance', element: 'living' },
+    { index: '03 / 04', title: 'Cyan River-Vein Pool', camKey: 'rearPool', element: 'pool' },
+    { index: '04 / 04', title: 'Cantilever Carport', camKey: 'carport', element: 'pergola' }
+  ];
+  let currentCarouselIndex = 0;
+
+  function setCarouselView(index) {
+    if (index < 0) index = carouselViews.length - 1;
+    if (index >= carouselViews.length) index = 0;
+    currentCarouselIndex = index;
+    const v = carouselViews[currentCarouselIndex];
+    const counterEl = document.getElementById('current-view-counter');
+    const titleEl = document.getElementById('current-view-title');
+    if (counterEl) counterEl.textContent = `${v.index} • CURRENT VIEW`;
+    if (titleEl) titleEl.textContent = v.title;
+
+    window.JumeirahTwinAPI.setCamera(v.camKey);
+  }
+
+  const btnPrevView = document.getElementById('btn-prev-view');
+  const btnNextView = document.getElementById('btn-next-view');
+  if (btnPrevView) btnPrevView.addEventListener('click', () => setCarouselView(currentCarouselIndex - 1));
+  if (btnNextView) btnNextView.addEventListener('click', () => setCarouselView(currentCarouselIndex + 1));
+
+  // 2. 3D Floating Callout Pins & Selected Element Inspector
+  const calloutDefs = [
+    {
+      id: 'callout-pin-1',
+      pos: new THREE.Vector3(8.2, 4.2, 5.8),
+      title: 'Cantilever Overhang & Pergola',
+      desc: '13.2m post-tensioned cantilever pergola with coffer beams and 3 vertical living green-wall columns.',
+      code: 'ST-02',
+      rev: 'R08 • 1 day ago',
+      owner: 'Al Futtaim Engineering',
+      cam: 'carport'
+    },
+    {
+      id: 'callout-pin-2',
+      pos: new THREE.Vector3(1.2, 1.8, 2.0),
+      title: 'Living & Poolside Lounge',
+      desc: '6.4m double-height living room pavilion with floor-to-ceiling Schuco slimline structural glazing.',
+      code: 'GL-01',
+      rev: 'R15 • 3 days ago',
+      owner: 'Mira Studio',
+      cam: 'frontEntrance'
+    },
+    {
+      id: 'callout-pin-3',
+      pos: new THREE.Vector3(-4.5, -0.6, -12.0),
+      title: 'Pool finish',
+      desc: 'Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.',
+      code: 'FN-14',
+      rev: 'R12 • 2 days ago',
+      owner: 'Mira Studio',
+      cam: 'rearPool'
+    }
+  ];
+
+  function selectElementInfo(title, desc, code, rev, owner) {
+    const titleEl = document.getElementById('insp-title');
+    const descEl = document.getElementById('insp-desc');
+    const codeEl = document.getElementById('insp-code');
+    const refEl = document.getElementById('insp-photo-ref');
+    const ownerEl = document.getElementById('insp-owner');
+    if (titleEl) titleEl.textContent = title;
+    if (descEl) descEl.textContent = desc;
+    if (codeEl) codeEl.textContent = code;
+    if (refEl) refEl.textContent = rev;
+    if (ownerEl) ownerEl.textContent = owner;
+    showToast(`Selected: ${title}`);
+  }
+
+  calloutDefs.forEach(def => {
+    const pinEl = document.getElementById(def.id);
+    if (pinEl) {
+      pinEl.addEventListener('click', () => {
+        selectElementInfo(def.title, def.desc, def.code, def.rev, def.owner);
+        window.JumeirahTwinAPI.setCamera(def.cam);
+      });
+    }
+  });
+
+  const tempProjV = new THREE.Vector3();
+  function updateCallouts() {
+    if (!container || !camera) return;
+    const rect = container.getBoundingClientRect();
+    calloutDefs.forEach(def => {
+      const pinEl = document.getElementById(def.id);
+      if (!pinEl) return;
+      tempProjV.copy(def.pos);
+      tempProjV.project(camera);
+      if (tempProjV.z > 1.0) {
+        pinEl.style.display = 'none';
+        return;
+      }
+      pinEl.style.display = 'flex';
+      const x = (tempProjV.x * 0.5 + 0.5) * rect.width;
+      const y = (-(tempProjV.y * 0.5) + 0.5) * rect.height;
+      pinEl.style.left = `${x}px`;
+      pinEl.style.top = `${y}px`;
+    });
+  }
+
+  // 3. Left Icon Rail Tabs & Feature Drawers
+  function closeAllDrawers() {
+    document.querySelectorAll('.drawer-panel').forEach(d => d.classList.add('closed'));
+    document.querySelectorAll('.left-rail-item').forEach(b => b.classList.remove('active'));
+  }
+
+  const railExplore = document.getElementById('rail-btn-explore');
+  const railModel = document.getElementById('rail-btn-model');
+  const railLayers = document.getElementById('rail-btn-layers');
+  const railNotes = document.getElementById('rail-btn-notes');
+  const modelDrawer = document.getElementById('model-drawer');
+  const layersDrawer = document.getElementById('layers-drawer');
+  const notesDrawer = document.getElementById('notes-drawer');
+
+  if (railExplore) {
+    railExplore.addEventListener('click', () => {
+      closeAllDrawers();
+      railExplore.classList.add('active');
+    });
+  }
+
+  if (railModel && modelDrawer) {
+    railModel.addEventListener('click', () => {
+      const isClosed = modelDrawer.classList.contains('closed');
+      closeAllDrawers();
+      if (isClosed) {
+        modelDrawer.classList.remove('closed');
+        railModel.classList.add('active');
+      } else {
+        railExplore?.classList.add('active');
+      }
+    });
+  }
+
+  if (railLayers && layersDrawer) {
+    railLayers.addEventListener('click', () => {
+      const isClosed = layersDrawer.classList.contains('closed');
+      closeAllDrawers();
+      if (isClosed) {
+        layersDrawer.classList.remove('closed');
+        railLayers.classList.add('active');
+      } else {
+        railExplore?.classList.add('active');
+      }
+    });
+  }
+
+  if (railNotes && notesDrawer) {
+    railNotes.addEventListener('click', () => {
+      const isClosed = notesDrawer.classList.contains('closed');
+      closeAllDrawers();
+      if (isClosed) {
+        notesDrawer.classList.remove('closed');
+        railNotes.classList.add('active');
+      } else {
+        railExplore?.classList.add('active');
+      }
+    });
+  }
+
+  document.querySelectorAll('.drawer-close-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      closeAllDrawers();
+      railExplore?.classList.add('active');
+    });
+  });
+
+  // 4. Viewport Lighting Pills
+  document.querySelectorAll('.env-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const env = btn.getAttribute('data-env');
+      if (env) {
+        window.JumeirahTwinAPI.setAtmosphere(env);
+        document.querySelectorAll('.env-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showToast(`Atmosphere: ${env.toUpperCase()}`);
+      }
+    });
+  });
+
+  // 5. Exploded BIM Toggle in Model Drawer
+  const btnExplodeOn = document.getElementById('btn-explode-on');
+  const btnExplodeOff = document.getElementById('btn-explode-off');
+  if (btnExplodeOn) {
+    btnExplodeOn.addEventListener('click', () => {
+      window.JumeirahTwinAPI.explodeBIM(true);
+      btnExplodeOn.className = 'flex-1 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium shadow';
+      if (btnExplodeOff) btnExplodeOff.className = 'flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium';
+    });
+  }
+  if (btnExplodeOff) {
+    btnExplodeOff.addEventListener('click', () => {
+      window.JumeirahTwinAPI.explodeBIM(false);
+      btnExplodeOff.className = 'flex-1 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium shadow';
+      if (btnExplodeOn) btnExplodeOn.className = 'flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium';
+    });
+  }
+
+  // 6. Presentation Mode & Fullscreen Card
+  const btnPresent = document.getElementById('btn-present');
+  const btnExitPresent = document.getElementById('btn-exit-presentation');
+  const btnMaximizeCard = document.getElementById('btn-maximize-card');
+  const btnFullscreenTop = document.getElementById('btn-fullscreen-top');
+
+  function togglePresentationMode(force) {
+    const isPres = force !== undefined ? force : !document.body.classList.contains('presentation-mode');
+    document.body.classList.toggle('presentation-mode', isPres);
+    setTimeout(() => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    }, 60);
+    if (isPres) showToast('Executive Presentation Mode: Active');
+  }
+
+  if (btnPresent) btnPresent.addEventListener('click', () => togglePresentationMode(true));
+  if (btnExitPresent) btnExitPresent.addEventListener('click', () => togglePresentationMode(false));
+  if (btnMaximizeCard) btnMaximizeCard.addEventListener('click', () => togglePresentationMode());
+  if (btnFullscreenTop) btnFullscreenTop.addEventListener('click', () => togglePresentationMode());
+
+  // 7. Share Action
+  const btnShare = document.getElementById('btn-share');
+  const btnShareTop = document.getElementById('btn-share-top');
+  function handleShareLink() {
+    try {
+      navigator.clipboard.writeText(window.location.href);
+      showToast('Dashboard URL copied to clipboard!');
+    } catch (e) {
+      showToast('URL: ' + window.location.href);
+    }
+  }
+  if (btnShare) btnShare.addEventListener('click', handleShareLink);
+  if (btnShareTop) btnShareTop.addEventListener('click', handleShareLink);
+
+  // ----------------------------------------------------
   // 6. ANIMATION & TELEMETRY DIAGNOSTICS LOOP
   // ----------------------------------------------------
   let lastTime = performance.now();
@@ -1056,6 +1320,9 @@ Definitions for this specific site:
       frameCount = 0;
       lastTime = now;
     }
+
+    // Update 3D Floating Callouts Projection
+    updateCallouts();
 
     renderer.render(scene, camera);
   }

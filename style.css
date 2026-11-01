@@ -2429,5 +2429,114 @@ input[type=range]::-webkit-slider-thumb:hover {
   }
 }
 
+/* ==========================================================================
+   VILLA 003 — ULTRA-PREMIUM CLIENT INTELLIGENCE DASHBOARD (LUXURY THEME)
+   Matches the Executive Architectural Client Dashboard Design
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:wght@400;500;600;700&display=swap');
+
+.font-serif-luxury, .luxury-serif {
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, serif !important;
+}
+
+/* Left Icon Rail */
+.left-rail-item {
+  position: relative;
+  transition: all 0.2s ease;
+}
+.left-rail-item.active {
+  color: #FFFFFF !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+.left-rail-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  background: #C87D55;
+  border-radius: 0 3px 3px 0;
+  box-shadow: 0 0 10px rgba(200, 125, 85, 0.6);
+}
+
+/* Viewport Lighting Pills */
+.env-pill {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.env-pill.active {
+  background: rgba(255, 255, 255, 0.25) !important;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* 3D Floating Callout Badges */
+.callout-badge {
+  transform: translate(-50%, -50%);
+  user-select: none;
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35));
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+  pointer-events: auto;
+}
+.callout-badge:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  z-index: 40 !important;
+}
+
+/* Feature Drawers (Model, Layers, Notes) */
+.drawer-panel {
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+.drawer-panel.closed {
+  transform: translateX(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Fullscreen Presentation Mode */
+body.presentation-mode #top-window-bar,
+body.presentation-mode #left-icon-rail,
+body.presentation-mode #sub-header-bar,
+body.presentation-mode #inspector-panel,
+body.presentation-mode .drawer-panel {
+  display: none !important;
+}
+body.presentation-mode #main-work-area {
+  padding: 0 !important;
+  gap: 0 !important;
+}
+body.presentation-mode #viewport-3d-card {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0 !important;
+  border: none !important;
+  z-index: 9999 !important;
+}
+body.presentation-mode #btn-exit-presentation {
+  display: flex !important;
+}
+
+/* Luxury Light Scrollbars */
+.luxury-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.luxury-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+}
+.luxury-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 9999px;
+}
+.luxury-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+
 
 
