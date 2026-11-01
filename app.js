@@ -935,7 +935,8 @@ Definitions for this specific site:
     });
   }
 
-  // Populate Spatial IoT Node List in Right Dock
+  // Populate Cameras Drawer List & Spatial Telemetry
+  populateCamerasDrawerList(cameraManager);
   populateSpatialNodesList(cameraManager);
 
   // Populate Bottom Camera Carousel
@@ -1253,10 +1254,12 @@ Definitions for this specific site:
   const railExplore = document.getElementById('rail-btn-explore');
   const railModel = document.getElementById('rail-btn-model');
   const railLayers = document.getElementById('rail-btn-layers');
-  const railNotes = document.getElementById('rail-btn-notes');
+  const railCameras = document.getElementById('rail-btn-cameras');
+  const railSolar = document.getElementById('rail-btn-solar');
   const modelDrawer = document.getElementById('model-drawer');
   const layersDrawer = document.getElementById('layers-drawer');
-  const notesDrawer = document.getElementById('notes-drawer');
+  const camerasDrawer = document.getElementById('cameras-drawer');
+  const solarDrawer = document.getElementById('solar-drawer');
 
   if (railExplore) {
     railExplore.addEventListener('click', () => {
@@ -1291,16 +1294,38 @@ Definitions for this specific site:
     });
   }
 
-  if (railNotes && notesDrawer) {
-    railNotes.addEventListener('click', () => {
-      const isClosed = notesDrawer.classList.contains('closed');
+  if (railCameras && camerasDrawer) {
+    railCameras.addEventListener('click', () => {
+      const isClosed = camerasDrawer.classList.contains('closed');
       closeAllDrawers();
       if (isClosed) {
-        notesDrawer.classList.remove('closed');
-        railNotes.classList.add('active');
+        camerasDrawer.classList.remove('closed');
+        railCameras.classList.add('active');
       } else {
         railExplore?.classList.add('active');
       }
+    });
+  }
+
+  if (railSolar && solarDrawer) {
+    railSolar.addEventListener('click', () => {
+      const isClosed = solarDrawer.classList.contains('closed');
+      closeAllDrawers();
+      if (isClosed) {
+        solarDrawer.classList.remove('closed');
+        railSolar.classList.add('active');
+      } else {
+        railExplore?.classList.add('active');
+      }
+    });
+  }
+
+  // CAD Edges Toggle Button in Solar Drawer
+  const btnToggleCad = document.getElementById('btn-toggle-cad-edges');
+  if (btnToggleCad) {
+    btnToggleCad.addEventListener('click', () => {
+      const state = modelBuilder.toggleCADEdges();
+      showToast(`CAD Architecture Outlines: ${state ? 'ENABLED' : 'DISABLED'}`);
     });
   }
 
@@ -1423,6 +1448,40 @@ Definitions for this specific site:
 // ----------------------------------------------------
 // UI POPULATION & UTILITY HELPERS
 // ----------------------------------------------------
+function populateCamerasDrawerList(cameraManager) {
+  const container = document.getElementById('cameras-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const cameras = cameraManager.camerasData || (window.SITE_DATA && window.SITE_DATA.cameras) || [];
+  cameras.forEach((cam) => {
+    const item = document.createElement('div');
+    item.className = 'p-3 rounded-2xl bg-stone-50 hover:bg-stone-100 border border-stone-200/80 transition flex items-center justify-between gap-3 group cursor-pointer shadow-xs';
+    item.innerHTML = `
+      <div class="flex items-center gap-2.5 truncate">
+        <div class="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center font-mono text-[10px] font-bold shrink-0 shadow-sm">
+          ${cam.id.replace('CAM-', '')}
+        </div>
+        <div class="truncate">
+          <div class="text-xs font-semibold text-stone-900 truncate group-hover:text-[#C87D55] transition">${cam.title}</div>
+          <div class="text-[10px] text-stone-500 font-mono flex items-center gap-1.5 mt-0.5">
+            <span class="capitalize">${cam.floor || 'Exterior'}</span>
+            <span>•</span>
+            <span class="text-emerald-700 font-medium">Verified Capture</span>
+          </div>
+        </div>
+      </div>
+      <button class="px-2.5 py-1.5 rounded-lg bg-white group-hover:bg-stone-900 group-hover:text-white border border-stone-200 text-stone-800 text-[11px] font-medium transition shrink-0 shadow-xs flex items-center gap-1">
+        <i class="fa-solid fa-plane-up text-[10px] text-[#C87D55]"></i>
+        <span>Fly</span>
+      </button>
+    `;
+    item.addEventListener('click', () => {
+      cameraManager.enterInspection(cam.id, true);
+    });
+    container.appendChild(item);
+  });
+}
 function populateSpatialNodesList(cameraManager) {
   const container = document.getElementById('pins-list-container');
   if (!container) return;

@@ -79,16 +79,16 @@
           <span class="text-[9px] tracking-tight">Layers</span>
         </button>
 
-        <!-- Measure Tab (3D Laser Ruler) -->
-        <button id="btn-measure" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="3D Laser Measurement Tool">
-          <i class="fa-solid fa-ruler-combined text-base"></i>
-          <span class="text-[9px] tracking-tight">Measure</span>
+        <!-- Cameras Tab (16 Site Capture Stations & Telemetry) -->
+        <button id="rail-btn-cameras" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="Site Cameras & Capture Stations">
+          <i class="fa-solid fa-camera text-base"></i>
+          <span class="text-[9px] tracking-tight">Cameras</span>
         </button>
 
-        <!-- Notes Tab (Site Telemetry, 2D Radar & QA/QC) -->
-        <button id="rail-btn-notes" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="Site Telemetry, Radar & Notes">
-          <i class="fa-solid fa-clipboard-list text-base"></i>
-          <span class="text-[9px] tracking-tight">Notes</span>
+        <!-- Solar Tab (Daylight, Dusk, Sun Angles & Lighting Moods) -->
+        <button id="rail-btn-solar" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="Solar Study & Mood Lighting">
+          <i class="fa-solid fa-sun text-base"></i>
+          <span class="text-[9px] tracking-tight">Solar</span>
         </button>
       </div>
     </div>
@@ -453,13 +453,13 @@
         </div>
       </aside>
 
-      <!-- 3. NOTES & TELEMETRY DRAWER -->
-      <aside id="notes-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+      <!-- 3. CAMERAS & STATIONS DRAWER -->
+      <aside id="cameras-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
         <div class="space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-stone-200">
             <div class="flex items-center gap-2">
-              <i class="fa-solid fa-clipboard-list text-[#C87D55]"></i>
-              <h3 class="font-serif text-lg font-semibold text-stone-900">Site Telemetry &amp; Radar</h3>
+              <i class="fa-solid fa-camera text-[#C87D55]"></i>
+              <h3 class="font-serif text-lg font-semibold text-stone-900">Site Cameras &amp; Stations</h3>
             </div>
             <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
           </div>
@@ -478,11 +478,90 @@
             </div>
           </div>
 
-          <!-- Verified Sensor Nodes -->
+          <!-- Verified Camera Stations List -->
           <div class="space-y-2">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Verified Sensor Stations</span>
-            <div id="pins-list-container" class="space-y-1.5">
-              <!-- Dynamically populated -->
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">16 Physical Stations</span>
+              <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Active Telemetry</span>
+            </div>
+            <div id="cameras-list-container" class="space-y-2 max-h-[360px] overflow-y-auto luxury-scrollbar pr-1">
+              <!-- Dynamically populated from window.SITE_DATA.cameras -->
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 4. SOLAR STUDY & LIGHTING MOODS DRAWER -->
+      <aside id="solar-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-sun text-[#C87D55]"></i>
+              <h3 class="font-serif text-lg font-semibold text-stone-900">Solar Study &amp; Moods</h3>
+            </div>
+            <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Lighting Mood Presets -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Atmosphere &amp; Mood</span>
+            <div class="grid grid-cols-2 gap-2">
+              <button data-env="day" class="env-pill active p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-medium text-left flex items-center gap-2 bg-stone-50 transition">
+                <span>🟠</span> <span>Daylight (10 AM)</span>
+              </button>
+              <button data-env="golden" class="env-pill p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-medium text-left flex items-center gap-2 bg-stone-50 transition">
+                <span>🟧</span> <span>Golden (5:30 PM)</span>
+              </button>
+              <button data-env="dusk" class="env-pill p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-medium text-left flex items-center gap-2 bg-stone-50 transition">
+                <span>🌙</span> <span>Dusk / Blue Hour</span>
+              </button>
+              <button data-env="night" class="env-pill p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-stone-800 text-xs font-medium text-left flex items-center gap-2 bg-stone-50 transition">
+                <span>✨</span> <span>Architectural Night</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Sun Position Sliders -->
+          <div class="space-y-3 pt-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Solar Sun Dial</span>
+            
+            <div class="bg-stone-50 p-3.5 rounded-2xl border border-stone-200/80 space-y-3">
+              <!-- Azimuth -->
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-stone-600 font-medium">Sun Azimuth (Rotation)</span>
+                  <span id="val-azimuth" class="font-mono font-semibold text-stone-900">135°</span>
+                </div>
+                <input id="slider-azimuth" type="range" min="0" max="360" value="135" class="w-full accent-[#C87D55]" />
+              </div>
+
+              <!-- Elevation -->
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-stone-600 font-medium">Sun Elevation (Altitude)</span>
+                  <span id="val-elevation" class="font-mono font-semibold text-stone-900">42°</span>
+                </div>
+                <input id="slider-elevation" type="range" min="5" max="85" value="42" class="w-full accent-[#C87D55]" />
+              </div>
+
+              <!-- Exposure / Bloom -->
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-stone-600 font-medium">HDR Exposure / Bloom</span>
+                  <span id="val-bloom" class="font-mono font-semibold text-stone-900">1.00</span>
+                </div>
+                <input id="slider-bloom" type="range" min="0.4" max="2.2" step="0.05" value="1.0" class="w-full accent-[#C87D55]" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Edge Lines Toggle -->
+          <div class="pt-1">
+            <div class="flex items-center justify-between p-3 rounded-xl bg-stone-50 border border-stone-200">
+              <span class="text-xs font-medium text-stone-800">CAD Architecture Outlines</span>
+              <button id="btn-toggle-cad-edges" class="px-3 py-1 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-medium transition shadow-sm">
+                Toggle CAD
+              </button>
             </div>
           </div>
         </div>

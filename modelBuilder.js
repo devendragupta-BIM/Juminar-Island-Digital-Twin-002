@@ -879,12 +879,12 @@ class VillaModelBuilder {
       this.groups.renderOnly.add(orb);
     });
 
-    // Luxury Vehicles in Carport (grouped for Vision-Based Scene Reconciliation)
+    // Luxury Vehicles in Carport (Properly aligned inside 3 covered parking bays, clear of all walls and columns)
     this.carportCarsGroup = new THREE.Group();
     this.carportCarsGroup.name = 'carport-car-mesh'; // Primary reconciler mesh target
-    this.createLuxuryCar('gwagon', 4.8, 0.0, 5.2, 0.05, this.carportCarsGroup);
-    this.createLuxuryCar('audi', 8.2, 0.0, 6.8, -0.45, this.carportCarsGroup);
-    this.createLuxuryCar('porsche', 11.6, 0.0, 6.5, -0.25, this.carportCarsGroup);
+    this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, -0.10, this.carportCarsGroup); // Bay 1 (Well clear of entrance wall at x=4.1)
+    this.createLuxuryCar('audi', 9.2, 0.0, 7.0, -0.15, this.carportCarsGroup);   // Bay 2 (Center parking bay)
+    this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, -0.18, this.carportCarsGroup); // Bay 3 (Right bay, clear of columns at x=14.0)
     this.groups.renderOnly.add(this.carportCarsGroup);
     this.carportCarMesh = this.carportCarsGroup;
 
