@@ -881,11 +881,12 @@ class VillaModelBuilder {
 
     // Luxury Vehicles in Carport (grouped for Vision-Based Scene Reconciliation)
     this.carportCarsGroup = new THREE.Group();
-    this.carportCarsGroup.name = 'carport-luxury-cars';
+    this.carportCarsGroup.name = 'carport-car-mesh'; // Primary reconciler mesh target
     this.createLuxuryCar('gwagon', 4.8, 0.0, 5.2, 0.05, this.carportCarsGroup);
     this.createLuxuryCar('audi', 8.2, 0.0, 6.8, -0.45, this.carportCarsGroup);
     this.createLuxuryCar('porsche', 11.6, 0.0, 6.5, -0.25, this.carportCarsGroup);
     this.groups.renderOnly.add(this.carportCarsGroup);
+    this.carportCarMesh = this.carportCarsGroup;
 
     // Landscaping Palm Trees
     this.createPalmTree(11.5, 0, 15.2, 1.1, false, this.groups.renderOnly);
@@ -1065,66 +1066,16 @@ class VillaModelBuilder {
   // VISION RECONCILER: CARPORT CAR MESH (STEP 4)
   // ----------------------------------------------------
   addCarportCarMesh() {
+    // If carport luxury cars group already exists, link it directly
+    // to avoid duplicate geometry clipping/z-fighting with the Audi in bay 2.
+    if (this.carportCarsGroup) {
+      this.carportCarMesh = this.carportCarsGroup;
+      return this.carportCarsGroup;
+    }
     const carGroup = new THREE.Group();
-    carGroup.name = 'carport-car-mesh'; // Exact ID required by Vision Reconciler
-
-    // Car body
-    const bodyGeo = new THREE.BoxGeometry(4.2, 1.4, 1.9);
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: 0x2a2a2a,
-      metalness: 0.7,
-      roughness: 0.3
-    });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.y = 0.7;
-    body.castShadow = true;
-    body.receiveShadow = true;
-    carGroup.add(body);
-
-    // Car roof (slightly smaller, raised)
-    const roofGeo = new THREE.BoxGeometry(2.4, 0.9, 1.7);
-    const roof = new THREE.Mesh(roofGeo, bodyMat);
-    roof.position.set(-0.2, 1.85, 0);
-    roof.castShadow = true;
-    carGroup.add(roof);
-
-    // Windscreen tint
-    const glassGeo = new THREE.BoxGeometry(0.08, 0.7, 1.5);
-    const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x88ccff,
-      metalness: 0.1,
-      roughness: 0.05,
-      transparent: true,
-      opacity: 0.5
-    });
-    const glass = new THREE.Mesh(glassGeo, glassMat);
-    glass.position.set(0.96, 1.6, 0);
-    carGroup.add(glass);
-
-    // Four wheels
-    const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 16);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
-    const wheelPositions = [
-      [-1.45, 0.38,  1.0],
-      [-1.45, 0.38, -1.0],
-      [ 1.45, 0.38,  1.0],
-      [ 1.45, 0.38, -1.0],
-    ];
-    wheelPositions.forEach(pos => {
-      const wheel = new THREE.Mesh(wheelGeo, wheelMat);
-      wheel.rotation.x = Math.PI / 2;
-      wheel.position.set(...pos);
-      wheel.castShadow = true;
-      carGroup.add(wheel);
-    });
-
-    // POSITION: Carport bay (X=8.2, Y=0, Z=5.8)
+    carGroup.name = 'carport-car-mesh';
     carGroup.position.set(8.2, 0, 5.8);
-    carGroup.rotation.y = Math.PI / 2;   // facing into the carport bay
-
-    // Start hidden — Vision AI will show it if a car is detected
     carGroup.visible = false;
-
     this.scene.add(carGroup);
     this.carportCarMesh = carGroup;
     return carGroup;
@@ -1132,11 +1083,11 @@ class VillaModelBuilder {
 
   setCarportVehiclesVisible(visible) {
     this.carportVehiclesReconciled = visible;
-    if (this.carportCarMesh) {
-      this.carportCarMesh.visible = visible;
-    }
     if (this.carportCarsGroup) {
       this.carportCarsGroup.visible = visible;
+    }
+    if (this.carportCarMesh && this.carportCarMesh !== this.carportCarsGroup) {
+      this.carportCarMesh.visible = visible;
     }
     if (this.siteTruck) {
       this.siteTruck.visible = visible;
@@ -1171,9 +1122,15 @@ class VillaModelBuilder {
 
     // Apply Vision-reconciled state to carport vehicles regardless of phase
     if (this.carportVehiclesReconciled !== undefined) {
-      if (this.carportCarsGroup) this.carportCarsGroup.visible = this.carportVehiclesReconciled;
-      if (this.carportCarMesh) this.carportCarMesh.visible = this.carportVehiclesReconciled;
-      if (this.siteTruck) this.siteTruck.visible = this.carportVehiclesReconciled;
+      if (this.carportCarsGroup && this.siteState === 'render') {
+        this.carportCarsGroup.visible = this.carportVehiclesReconciled;
+      }
+      if (this.carportCarMesh && this.carportCarMesh !== this.carportCarsGroup && this.siteState === 'render') {
+        this.carportCarMesh.visible = this.carportVehiclesReconciled;
+      }
+      if (this.siteTruck && this.siteState === 'site') {
+        this.siteTruck.visible = this.carportVehiclesReconciled;
+      }
     }
   }
 

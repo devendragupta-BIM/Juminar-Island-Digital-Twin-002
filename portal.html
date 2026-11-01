@@ -682,11 +682,12 @@
 
     // Synchronize to Digital Twin via BroadcastChannel & Iframe postMessage
     function syncToDigitalTwin(photo, sceneState) {
-      const isCar = !!sceneState.car_in_carport;
-
       const payload = {
         type: 'NEW_SITE_PHOTO',
-        photo,
+        photo: {
+          id: photo?.id || ('override-' + Date.now()),
+          ...photo
+        },
         sceneState,
         timestamp: Date.now()
       };
@@ -698,48 +699,19 @@
         console.warn('BroadcastChannel error:', e);
       }
 
-      // 2. Direct postMessage to embedded iframe if present
+      // 2. Direct postMessage to embedded iframe if present (single clean message payload)
       if (twinIframe && twinIframe.contentWindow) {
-        twinIframe.contentWindow.postMessage({
-          type: 'TWIN_COMMAND',
-          action: 'TOGGLE_ELEMENT',
-          payload: {
-            elementId: 'carport-car-mesh',
-            visible: isCar
-          }
-        }, '*');
-
         twinIframe.contentWindow.postMessage(payload, '*');
       }
     }
 
-    // Manual Force Override Buttons
+    // Manual Force Override Buttons (triggers the verified site presets so server database & twin stay in lockstep)
     btnForceEmpty.addEventListener('click', () => {
-      const state = {
-        car_in_carport: false,
-        car_in_carport_conf: 0.99,
-        workers_present: false,
-        scaffolding_present: true,
-        pool_has_water: false,
-        summary: 'Manual override: Carport forcefully set to EMPTY by user.'
-      };
-      applyVisionResultsToUI({ caption: 'Manual Override' }, state);
-      syncToDigitalTwin({ caption: 'Manual Override' }, state);
-      showToast('Carport forcefully emptied in 3D Villa');
+      selectPreset('site-pictures/Exterior Parking/20261013180000.jpg', 'Empty Parking Bay');
     });
 
     btnForceOccupied.addEventListener('click', () => {
-      const state = {
-        car_in_carport: true,
-        car_in_carport_conf: 0.99,
-        workers_present: true,
-        scaffolding_present: true,
-        pool_has_water: false,
-        summary: 'Manual override: Carport forcefully set to OCCUPIED by user.'
-      };
-      applyVisionResultsToUI({ caption: 'Manual Override' }, state);
-      syncToDigitalTwin({ caption: 'Manual Override' }, state);
-      showToast('Carport vehicles forcefully shown in 3D Villa');
+      selectPreset('uploads/20840-1748865490206.jpeg', 'Occupied Carport Bay');
     });
 
     // History Loader
@@ -824,3 +796,4 @@
   </script>
 </body>
 </html>
+

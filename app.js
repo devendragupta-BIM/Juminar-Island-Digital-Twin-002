@@ -215,18 +215,27 @@ Definitions for this specific site:
     return JSON.parse(raw);
   }
 
+  // State tracking to prevent fluctuation, infinite echo loops, or redundant re-renders
+  let currentCarportState = null;
+
   // Step 3: Apply scene state to Digital Twin
   function applySceneState(sceneState, threshold) {
+    if (!sceneState) return;
     const t = threshold || VISION_CONFIG.confidenceThreshold;
 
     // --- CAR IN CARPORT ---
-    const carVisible = !!(sceneState.car_in_carport && sceneState.car_in_carport_conf >= t);
-    toggleSceneObject('carport-car-mesh', carVisible);
-    logToEventStream(
-      carVisible
-        ? `[VISION] Car detected in carport (${Math.round(sceneState.car_in_carport_conf * 100)}% conf) → mesh SHOWN`
-        : `[VISION] No car in carport (${Math.round(sceneState.car_in_carport_conf * 100)}% conf) → mesh HIDDEN`
-    );
+    const carVisible = !!(sceneState.car_in_carport && (sceneState.car_in_carport_conf === undefined || sceneState.car_in_carport_conf >= t));
+    
+    // Strict de-duplication: only trigger scene mesh toggles and logs if state actually changed
+    if (currentCarportState !== carVisible) {
+      currentCarportState = carVisible;
+      toggleSceneObject('carport-car-mesh', carVisible);
+      logToEventStream(
+        carVisible
+          ? `[VISION] Car detected in carport (${Math.round((sceneState.car_in_carport_conf || 0.95) * 100)}% conf) → vehicles SHOWN`
+          : `[VISION] No car in carport (${Math.round((sceneState.car_in_carport_conf || 0.95) * 100)}% conf) → carport EMPTY`
+      );
+    }
 
     // --- WORKERS ---
     const workersVisible = !!(sceneState.workers_present && sceneState.workers_present_conf >= t);
@@ -248,11 +257,8 @@ Definitions for this specific site:
     }
 
     // --- SUMMARY LOG ---
-    logToEventStream('[VISION] Scene summary: ' + (sceneState.summary || 'Analysis complete'));
-
-    // Optional Auto-Camera transition to inspect Carport if car is detected
-    if (carVisible && cameraManager) {
-      showToast('Vision Reconciler: Carport 3D State Synchronized');
+    if (sceneState.summary) {
+      logToEventStream('[VISION] Scene summary: ' + sceneState.summary);
     }
   }
 
@@ -263,9 +269,10 @@ Definitions for this specific site:
       obj.visible = visible;
     }
 
-    if (meshName === 'carport-car-mesh') {
+    if (meshName === 'carport-car-mesh' || meshName === 'carport-luxury-cars') {
+      currentCarportState = visible;
       // Synchronize all carport vehicle representations across all phases so the carport is genuinely empty when visible = false!
-      const luxuryCars = scene.getObjectByName('carport-luxury-cars');
+      const luxuryCars = scene.getObjectByName('carport-luxury-cars') || scene.getObjectByName('carport-car-mesh');
       if (luxuryCars) {
         luxuryCars.visible = visible;
       }
@@ -283,14 +290,17 @@ Definitions for this specific site:
       }
     }
 
-    // Also fire via postMessage in case this runs from a parent frame
-    try {
-      window.postMessage({
-        type: 'TWIN_COMMAND',
-        action: 'TOGGLE_ELEMENT',
-        payload: { elementId: meshName, visible }
-      }, '*');
-    } catch(e) { /* cross-origin */ }
+    // Forward ACK only to parent frame if running inside an iframe.
+    // NEVER invoke window.postMessage directly on the current window to prevent infinite message echo loops!
+    if (window.parent && window.parent !== window) {
+      try {
+        window.parent.postMessage({
+          type: 'TWIN_COMMAND_ACK',
+          action: 'TOGGLE_ELEMENT',
+          payload: { elementId: meshName, visible }
+        }, '*');
+      } catch(e) { /* cross-origin */ }
+    }
   }
 
   // Helper: write to the twin's own SDK event stream div
@@ -358,25 +368,21 @@ Definitions for this specific site:
   function handleRemoteSitePhoto(photo, sceneState, source = 'PORTAL') {
     if (!sceneState) return;
     const isCar = !!sceneState.car_in_carport;
-    const prevCarObj = scene.getObjectByName('carport-car-mesh');
-    const prevCarVisible = prevCarObj ? prevCarObj.visible : undefined;
+    const stateChanged = currentCarportState !== isCar;
 
     applySceneState(sceneState);
 
-    // Provide clear user-facing feedback in the 3D twin
-    showToast(`📸 Site Photo Synced: Carport is ${isCar ? 'OCCUPIED' : 'EMPTY'}`);
-    logToEventStream(`[${source} SYNC] Photo received: "${photo?.filename || photo?.caption || 'Site Photo'}" → Carport: ${isCar ? 'OCCUPIED (Cars Shown)' : 'EMPTY (Cars Hidden)'}`);
+    if (stateChanged) {
+      // Provide clear user-facing feedback without forcefully hijacking camera navigation
+      showToast(`📸 Site Photo Synced: Carport is ${isCar ? 'OCCUPIED' : 'EMPTY'}`);
+      logToEventStream(`[${source} SYNC] Photo received: "${photo?.filename || photo?.caption || 'Site Photo'}" → Carport: ${isCar ? 'OCCUPIED (Cars Shown)' : 'EMPTY (Cars Hidden)'}`);
+    }
     
     // Update car mesh badge in Vision AI modal if present
     const valVis = document.getElementById('val-car-mesh-vis');
     if (valVis) {
       valVis.textContent = isCar ? 'SHOWN' : 'HIDDEN';
       valVis.className = isCar ? 'text-emerald-300 font-bold' : 'text-rose-300';
-    }
-
-    // If carport visibility changed, optionally orient camera to carport station
-    if (prevCarVisible !== undefined && prevCarVisible !== isCar && cameraManager && typeof cameraManager.setCameraView === 'function') {
-      cameraManager.setCameraView('carport');
     }
   }
 
@@ -901,9 +907,9 @@ Definitions for this specific site:
 
   if (btnToggleCarportMesh) {
     btnToggleCarportMesh.addEventListener('click', () => {
-      const carMesh = scene.getObjectByName('carport-car-mesh');
-      const luxuryCars = scene.getObjectByName('carport-luxury-cars');
-      const isCurrentlyVisible = (carMesh && carMesh.visible) || (luxuryCars && luxuryCars.visible);
+      const isCurrentlyVisible = currentCarportState !== null
+        ? currentCarportState
+        : (window.modelBuilder?.carportVehiclesReconciled ?? true);
       const newVisible = !isCurrentlyVisible;
       toggleSceneObject('carport-car-mesh', newVisible);
       showToast(`Carport Vehicles: ${newVisible ? 'SHOWN' : 'HIDDEN'}`);
