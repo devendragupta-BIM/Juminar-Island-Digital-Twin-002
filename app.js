@@ -349,6 +349,83 @@ Definitions for this specific site:
   }
 
   // ----------------------------------------------------
+  // 2D. MULTI-CHANNEL LIVE SITE PHOTO SYNCHRONIZATION ENGINE
+  // Connects with the Site Photo Upload Portal (/portal)
+  // ----------------------------------------------------
+  let lastSyncedPhotoId = null;
+  const twinSyncChannel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('jumeirah_twin_sync') : null;
+
+  function handleRemoteSitePhoto(photo, sceneState, source = 'PORTAL') {
+    if (!sceneState) return;
+    const isCar = !!sceneState.car_in_carport;
+    const prevCarObj = scene.getObjectByName('carport-car-mesh');
+    const prevCarVisible = prevCarObj ? prevCarObj.visible : undefined;
+
+    applySceneState(sceneState);
+
+    // Provide clear user-facing feedback in the 3D twin
+    showToast(`📸 Site Photo Synced: Carport is ${isCar ? 'OCCUPIED' : 'EMPTY'}`);
+    logToEventStream(`[${source} SYNC] Photo received: "${photo?.filename || photo?.caption || 'Site Photo'}" → Carport: ${isCar ? 'OCCUPIED (Cars Shown)' : 'EMPTY (Cars Hidden)'}`);
+    
+    // Update car mesh badge in Vision AI modal if present
+    const valVis = document.getElementById('val-car-mesh-vis');
+    if (valVis) {
+      valVis.textContent = isCar ? 'SHOWN' : 'HIDDEN';
+      valVis.className = isCar ? 'text-emerald-300 font-bold' : 'text-rose-300';
+    }
+
+    // If carport visibility changed, optionally orient camera to carport station
+    if (prevCarVisible !== undefined && prevCarVisible !== isCar && cameraManager && typeof cameraManager.setCameraView === 'function') {
+      cameraManager.setCameraView('carport');
+    }
+  }
+
+  // Channel 1: Listen via BroadcastChannel (instant inter-tab communication in same browser)
+  if (twinSyncChannel) {
+    twinSyncChannel.onmessage = (event) => {
+      if (event.data?.type === 'NEW_SITE_PHOTO') {
+        lastSyncedPhotoId = event.data.photo?.id || event.data.timestamp;
+        handleRemoteSitePhoto(event.data.photo, event.data.sceneState, 'BROADCAST');
+      }
+    };
+  }
+
+  // Channel 2: Listen via window postMessage (for iframe preview inside /portal)
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'NEW_SITE_PHOTO') {
+      lastSyncedPhotoId = event.data.photo?.id;
+      handleRemoteSitePhoto(event.data.photo, event.data.sceneState, 'POSTMESSAGE');
+    }
+  });
+
+  // Channel 3: Background Polling of /api/site-photos/latest (cross-device/remote sync)
+  async function pollLatestSitePhoto() {
+    try {
+      const resp = await fetch('/api/site-photos/latest?t=' + Date.now());
+      if (!resp.ok) return;
+      const data = await resp.json();
+      if (data.status === 'ok' && data.photo && data.sceneState) {
+        if (!lastSyncedPhotoId) {
+          // Initial baseline sync
+          lastSyncedPhotoId = data.photo.id;
+          applySceneState(data.sceneState);
+        } else if (lastSyncedPhotoId !== data.photo.id) {
+          // New photo uploaded remotely!
+          lastSyncedPhotoId = data.photo.id;
+          handleRemoteSitePhoto(data.photo, data.sceneState, 'REMOTE CLOUD');
+        }
+      }
+    } catch (e) {
+      // Offline or network hiccup, silently retry
+    }
+  }
+
+  // Start polling every 4 seconds
+  setInterval(pollLatestSitePhoto, 4000);
+  // Initial check shortly after initialization
+  setTimeout(pollLatestSitePhoto, 1200);
+
+  // ----------------------------------------------------
   // 3. ENDOMORPHISM STATE MACHINE (End(S), o, id)
   // ----------------------------------------------------
   let AppState = {

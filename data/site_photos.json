@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-11-01T08:44:51.202Z",
+  "latestPhoto": {
+    "id": "preset-1793522691200",
+    "timestamp": "2026-11-01T08:44:51.200Z",
+    "url": "/site-pictures/Exterior Parking/20261013180000.jpg",
+    "filename": "20261013180000.jpg",
+    "caption": "Empty Parking Bay",
+    "capturedBy": "Site Inspector",
+    "source": "preset",
+    "engine": "Groq Vision AI",
+    "model": "qwen/qwen3.8-27b",
+    "sceneState": {
+      "car_in_carport": false,
+      "car_in_carport_conf": 0.98,
+      "workers_present": false,
+      "workers_present_conf": 0.95,
+      "crane_active": false,
+      "crane_active_conf": 0.99,
+      "scaffolding_present": true,
+      "scaffolding_present_conf": 0.97,
+      "pool_has_water": false,
+      "pool_has_water_conf": 0.95,
+      "summary": "No vehicles in the carport; the site is covered in dirt and debris with scaffolding erected on the rear structure."
+    }
+  },
+  "photos": [
+    {
+      "id": "preset-1793522691200",
+      "timestamp": "2026-11-01T08:44:51.200Z",
+      "url": "/site-pictures/Exterior Parking/20261013180000.jpg",
+      "filename": "20261013180000.jpg",
+      "caption": "Empty Parking Bay",
+      "capturedBy": "Site Inspector",
+      "source": "preset",
+      "engine": "Groq Vision AI",
+      "model": "qwen/qwen3.8-27b",
+      "sceneState": {
+        "car_in_carport": false,
+        "car_in_carport_conf": 0.98,
+        "workers_present": false,
+        "workers_present_conf": 0.95,
+        "crane_active": false,
+        "crane_active_conf": 0.99,
+        "scaffolding_present": true,
+        "scaffolding_present_conf": 0.97,
+        "pool_has_water": false,
+        "pool_has_water_conf": 0.95,
+        "summary": "No vehicles in the carport; the site is covered in dirt and debris with scaffolding erected on the rear structure."
+      }
+    },
+    {
+      "id": "preset-1793522672827",
+      "timestamp": "2026-11-01T08:44:32.827Z",
+      "url": "/20840-1748865490206.jpeg",
+      "filename": "20840-1748865490206.jpeg",
+      "caption": "Test Preset Upload",
+      "capturedBy": "Site Inspector",
+      "source": "preset",
+      "engine": "Groq Vision AI",
+      "model": "qwen/qwen3.8-27b",
+      "sceneState": {
+        "car_in_carport": true,
+        "car_in_carport_conf": 0.98,
+        "workers_present": false,
+        "workers_present_conf": 0.99,
+        "crane_active": false,
+        "crane_active_conf": 0.99,
+        "scaffolding_present": false,
+        "scaffolding_present_conf": 0.99,
+        "pool_has_water": false,
+        "pool_has_water_conf": 0.45,
+        "summary": "The villa appears complete with no active construction, showing finished landscaping and several vehicles parked in the carport."
+      }
+    },
+    {
+      "id": "seed-photo-carport-empty-002",
+      "timestamp": "2026-11-01T04:23:13.422Z",
+      "url": "/site-pictures/Exterior Parking/20261013180000.jpg",
+      "filename": "20261013180000.jpg",
+      "caption": "Evening inspection of front driveway & carport - all vehicles cleared.",
+      "capturedBy": "Site Engineer Tariq",
+      "source": "preset",
+      "engine": "Groq Vision AI (qwen/qwen3.8-27b)",
+      "model": "qwen/qwen3.8-27b",
+      "sceneState": {
+        "car_in_carport": false,
+        "car_in_carport_conf": 0.96,
+        "workers_present": false,
+        "workers_present_conf": 0.9,
+        "crane_active": false,
+        "crane_active_conf": 0.95,
+        "scaffolding_present": true,
+        "scaffolding_present_conf": 0.89,
+        "pool_has_water": false,
+        "pool_has_water_conf": 0.85,
+        "summary": "Front carport bay and driveway are completely clear of all vehicles; superstructure scaffolding active."
+      }
+    },
+    {
+      "id": "seed-photo-carport-occupied-001",
+      "timestamp": "2026-11-01T03:23:13.429Z",
+      "url": "/20840-1748865490206.jpeg",
+      "filename": "20840-1748865490206.jpeg",
+      "caption": "Material delivery vehicle parked under front entrance pergola.",
+      "capturedBy": "Project Logistics Team",
+      "source": "preset",
+      "engine": "Groq Vision AI (qwen/qwen3.8-27b)",
+      "model": "qwen/qwen3.8-27b",
+      "sceneState": {
+        "car_in_carport": true,
+        "car_in_carport_conf": 0.95,
+        "workers_present": true,
+        "workers_present_conf": 0.88,
+        "crane_active": false,
+        "crane_active_conf": 0.95,
+        "scaffolding_present": true,
+        "scaffolding_present_conf": 0.92,
+        "pool_has_water": false,
+        "pool_has_water_conf": 0.8,
+        "summary": "Construction vehicle parked in front yard carport area with active site workers."
+      }
+    }
+  ]
+}

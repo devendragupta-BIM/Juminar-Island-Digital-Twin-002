@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Villa 003 — Site Photo Upload & AI Intelligence Portal</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              obsidian: '#051F20',
+              emerald: '#0B2B26',
+              deep: '#163832',
+              mid: '#235347',
+              sage: '#8EB69B',
+              mint: '#DAF1DE',
+              gold: '#D4AF37'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #051F20;
+      color: #DAF1DE;
+    }
+    .spatial-glass {
+      background: rgba(11, 43, 38, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(142, 182, 155, 0.25);
+    }
+    .dropzone-active {
+      border-color: #8EB69B !important;
+      background-color: rgba(35, 83, 71, 0.4) !important;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #051F20;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #235347;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #8EB69B;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col font-sans antialiased text-[#DAF1DE] bg-[#051F20]">
+
+  <!-- Top Navigation Bar -->
+  <header class="h-16 border-b border-[#8EB69B]/20 bg-[#0B2B26]/90 backdrop-blur sticky top-0 z-40 px-4 lg:px-8 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#235347] to-[#163832] border border-[#8EB69B]/30 flex items-center justify-center shadow-lg shadow-black/40">
+        <i class="fa-solid fa-camera-retro text-[#8EB69B] text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="font-extrabold text-sm sm:text-base tracking-wide text-white">JUMEIRAH ISLANDS • VILLA 003</span>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-[#235347]/60 text-[#DAF1DE] border border-[#8EB69B]/30">Field Portal</span>
+        </div>
+        <div class="text-[11px] text-[#8EB69B] flex items-center gap-2">
+          <span>Site Photo Upload & 3D Twin Intelligence</span>
+          <span class="text-[#8EB69B]/40">•</span>
+          <span class="text-white/80">Groq Vision AI Engine</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Sync Telemetry Badges & Links -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#051F20]/80 border border-[#8EB69B]/20 text-xs font-mono">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8EB69B] opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-[#8EB69B]"></span>
+        </span>
+        <span class="text-[#8EB69B]">3D TWIN: <strong id="twin-status-badge" class="text-white">CONNECTED</strong></span>
+      </div>
+
+      <button id="btn-toggle-split" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-[#163832]/80 hover:bg-[#235347] text-[#DAF1DE] border border-[#8EB69B]/30 transition flex items-center gap-1.5">
+        <i class="fa-solid fa-columns text-[#8EB69B]"></i>
+        <span class="hidden md:inline" id="split-toggle-label">Hide 3D View</span>
+      </button>
+
+      <a href="/" target="_blank" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-[#235347] to-[#163832] hover:from-[#163832] hover:to-[#235347] text-white border border-[#8EB69B]/50 transition flex items-center gap-2 shadow-lg shadow-black/30">
+        <span>Open 3D Digital Twin</span>
+        <i class="fa-solid fa-arrow-up-right-from-square text-[#8EB69B] text-[11px]"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Notification Banner -->
+  <div id="portal-toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 -translate-y-3 transition-all duration-300 spatial-glass px-5 py-2.5 rounded-full flex items-center gap-3 text-xs font-medium text-[#DAF1DE] border border-[#8EB69B]/40 shadow-2xl">
+    <i class="fa-solid fa-sparkles text-[#8EB69B]"></i>
+    <span id="portal-toast-text">Site Photo Reconciled with 3D Villa</span>
+  </div>
+
+  <!-- Main Portal Layout -->
+  <main class="flex-1 max-w-[1700px] w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+
+    <!-- Top Status Callout -->
+    <div class="spatial-glass rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-[#8EB69B]/20">
+      <div class="flex items-start sm:items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-[#235347]/50 border border-[#8EB69B]/30 flex items-center justify-center shrink-0 text-[#8EB69B]">
+          <i class="fa-solid fa-satellite-dish text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            Site Photo Reconciler & 3D Spatial Sync
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-[#8EB69B]/20 text-[#DAF1DE] border border-[#8EB69B]/40">QWEN 3.8-27B VISION</span>
+          </h1>
+          <p class="text-xs text-[#8EB69B] mt-0.5">
+            Upload new drone, mobile, or CCTV site photos. Groq Vision AI detects vehicles, scaffolding, pool water, and workers, automatically updating the 3D Villa in real time.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 text-xs font-mono bg-[#051F20]/70 px-3.5 py-2 rounded-xl border border-[#8EB69B]/20">
+        <span class="text-[#8EB69B]">Active Model:</span>
+        <span class="text-white font-semibold">qwen/qwen3.8-27b</span>
+        <span class="text-[#8EB69B]/40">•</span>
+        <span class="text-emerald-300 flex items-center gap-1.5">
+          <i class="fa-solid fa-circle text-[8px] animate-pulse"></i> Ready
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Workspace Grid: Upload Controller + AI Analysis + Live 3D Twin Preview -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT COLUMN: Photo Upload & Presets (5 Cols) -->
+      <section class="lg:col-span-5 flex flex-col gap-5">
+
+        <!-- 1. Upload Dropzone Card -->
+        <div class="spatial-glass rounded-2xl p-5 border border-[#8EB69B]/20 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <i class="fa-solid fa-cloud-arrow-up text-[#8EB69B]"></i>
+              Upload Recent Site Photo
+            </h2>
+            <span class="text-[11px] font-mono text-[#8EB69B]">Step 1</span>
+          </div>
+
+          <!-- Drag and Drop Box -->
+          <div id="dropzone" class="border-2 border-dashed border-[#8EB69B]/30 hover:border-[#8EB69B] rounded-xl p-6 transition flex flex-col items-center justify-center text-center cursor-pointer bg-[#051F20]/60 relative group min-h-[220px]">
+            <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+            
+            <div id="dropzone-prompt" class="flex flex-col items-center gap-2.5">
+              <div class="w-12 h-12 rounded-2xl bg-[#235347]/40 border border-[#8EB69B]/30 flex items-center justify-center text-[#8EB69B] group-hover:scale-110 transition duration-300">
+                <i class="fa-solid fa-file-arrow-up text-xl"></i>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-white">Click to browse or drop site photo here</p>
+                <p class="text-[11px] text-[#8EB69B] mt-0.5">JPEG, PNG, WEBP (Auto-optimized to 1024px for fast AI)</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-mono bg-[#163832]/60 text-[#DAF1DE] border border-[#8EB69B]/20">
+                <i class="fa-solid fa-camera mr-1"></i> Mobile Camera Supported
+              </span>
+            </div>
+
+            <!-- Image Preview Box -->
+            <div id="preview-wrapper" class="hidden w-full flex flex-col items-center gap-2 z-20">
+              <div class="relative w-full max-h-56 rounded-lg overflow-hidden border border-[#8EB69B]/40 bg-black/40">
+                <img id="image-preview" src="" alt="Site Preview" class="w-full h-48 object-cover rounded-lg" />
+                <button type="button" id="btn-remove-image" class="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/70 hover:bg-rose-900/80 text-rose-300 flex items-center justify-center text-xs transition border border-rose-500/30">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="w-full flex items-center justify-between text-[11px] font-mono text-[#8EB69B] px-1">
+                <span id="preview-filename" class="truncate max-w-[200px] text-white">photo.jpg</span>
+                <span id="preview-filesize">Optimized</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Inspector Notes Field -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[11px] font-medium text-[#8EB69B] flex items-center justify-between">
+              <span>Site Capture Metadata / Note:</span>
+              <span class="text-[10px] text-white/50">Optional</span>
+            </label>
+            <input type="text" id="input-caption" placeholder="e.g. Front driveway inspected; all contractor vehicles cleared for weekend" class="w-full bg-[#051F20] text-xs font-sans text-white px-3.5 py-2.5 rounded-xl border border-[#8EB69B]/30 focus:outline-none focus:border-[#8EB69B] placeholder-white/30" />
+          </div>
+
+          <!-- Upload & Reconcile Action Button -->
+          <button id="btn-upload-reconcile" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#235347] via-[#163832] to-[#0B2B26] hover:brightness-110 text-white font-bold text-xs uppercase tracking-wider transition border border-[#8EB69B] shadow-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="fa-solid fa-bolt text-[#8EB69B]"></i>
+            <span>Upload & Run Groq Vision Reconcile</span>
+          </button>
+        </div>
+
+        <!-- 2. Quick One-Click Presets -->
+        <div class="spatial-glass rounded-2xl p-5 border border-[#8EB69B]/20 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <i class="fa-solid fa-images text-[#8EB69B]"></i>
+              Instant Test Presets (One-Click)
+            </h3>
+            <span class="text-[10px] font-mono text-[#8EB69B]">Instant Demo</span>
+          </div>
+          <p class="text-[11px] text-[#8EB69B]">
+            Click any preset below to test how the 3D Villa updates instantly when vehicles arrive or depart:
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <!-- Preset: Empty Carport (Car Mesh Hidden) -->
+            <button type="button" class="preset-card group p-3 rounded-xl bg-[#051F20]/80 hover:bg-[#235347]/50 border border-[#8EB69B]/25 hover:border-[#8EB69B] transition flex flex-col gap-1.5 text-left text-xs" data-preset="site-pictures/Exterior Parking/20261013180000.jpg" data-caption="Carport Bay Clear - Vehicles Departed">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  Empty Carport Bay
+                </span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">Hides 3D Car</span>
+              </div>
+              <p class="text-[10px] text-[#8EB69B] line-clamp-1">Evening inspection with driveway cleared</p>
+            </button>
+
+            <!-- Preset: Car in Carport (Car Mesh Shown) -->
+            <button type="button" class="preset-card group p-3 rounded-xl bg-[#051F20]/80 hover:bg-[#235347]/50 border border-[#8EB69B]/25 hover:border-[#8EB69B] transition flex flex-col gap-1.5 text-left text-xs" data-preset="20840-1748865490206.jpeg" data-caption="Vehicle Parked Under Front Entrance Pergola">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                  Vehicle in Carport
+                </span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-950/80 text-amber-300 border border-amber-500/30">Shows 3D Car</span>
+              </div>
+              <p class="text-[10px] text-[#8EB69B] line-clamp-1">Contractor truck under front pergola</p>
+            </button>
+
+            <!-- Preset: Rear Pool Deck -->
+            <button type="button" class="preset-card group p-3 rounded-xl bg-[#051F20]/80 hover:bg-[#235347]/50 border border-[#8EB69B]/25 hover:border-[#8EB69B] transition flex flex-col gap-1.5 text-left text-xs" data-preset="site-pictures/Exterior rear/20261014143000.jpg" data-caption="Rear Pool & Lagoon Waterfront Inspection">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                  Rear Pool & Lagoon
+                </span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">Water Active</span>
+              </div>
+              <p class="text-[10px] text-[#8EB69B] line-clamp-1">Rear cantilever with water filled</p>
+            </button>
+
+            <!-- Preset: Facade & Scaffolding -->
+            <button type="button" class="preset-card group p-3 rounded-xl bg-[#051F20]/80 hover:bg-[#235347]/50 border border-[#8EB69B]/25 hover:border-[#8EB69B] transition flex flex-col gap-1.5 text-left text-xs" data-preset="site-pictures/Exterior Front Main Entrance/20261014120000.jpg" data-caption="Front Facade Structural Progress">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-white flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                  Facade & Scaffolding
+                </span>
+                <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-500/30">Envelope</span>
+              </div>
+              <p class="text-[10px] text-[#8EB69B] line-clamp-1">Glazing and framing structural stage</p>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Groq AI Intelligence & Live 3D Twin Split View (7 Cols) -->
+      <section class="lg:col-span-7 flex flex-col gap-5">
+
+        <!-- 3. Groq Vision AI Analysis Output Card -->
+        <div class="spatial-glass rounded-2xl p-5 border border-[#8EB69B]/20 flex flex-col gap-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+              <h2 class="text-sm font-bold uppercase tracking-wider text-white">Groq Vision AI Scene Reconciliation</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="reconcile-engine-label" class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#235347]/50 text-[#DAF1DE] border border-[#8EB69B]/30">Groq Vision (qwen/qwen3.8-27b)</span>
+              <span id="reconcile-time-badge" class="text-[10px] font-mono text-[#8EB69B]">Ready</span>
+            </div>
+          </div>
+
+          <!-- Hero Status Banner: What happened in 3D -->
+          <div id="status-hero" class="p-4 rounded-xl bg-gradient-to-r from-[#0B2B26] to-[#163832] border border-[#8EB69B]/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div id="status-hero-icon" class="w-10 h-10 rounded-xl bg-[#235347] border border-[#8EB69B]/50 flex items-center justify-center text-lg text-emerald-300">
+                <i class="fa-solid fa-car-tunnel"></i>
+              </div>
+              <div>
+                <div class="text-[11px] font-mono uppercase text-[#8EB69B] tracking-wider">3D Digital Twin State</div>
+                <div id="status-hero-title" class="text-sm sm:text-base font-bold text-white">Carport is Empty • 3D Vehicles Hidden</div>
+              </div>
+            </div>
+
+            <!-- Manual Quick Action Toggle -->
+            <div class="flex items-center gap-2 shrink-0">
+              <button id="btn-force-empty" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#051F20] hover:bg-rose-950/60 text-rose-300 border border-rose-500/30 transition flex items-center gap-1.5" title="Force Carport Empty">
+                <i class="fa-solid fa-ban"></i>
+                <span>Empty Carport</span>
+              </button>
+              <button id="btn-force-occupied" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-[#051F20] hover:bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 transition flex items-center gap-1.5" title="Force Vehicle in Carport">
+                <i class="fa-solid fa-car"></i>
+                <span>Show Car</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- AI Natural Language Summary -->
+          <div class="bg-[#051F20]/80 p-3.5 rounded-xl border border-[#8EB69B]/20">
+            <div class="text-[10px] font-mono text-[#8EB69B] uppercase mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-quote-left text-xs"></i>
+              Groq Vision Summary:
+            </div>
+            <p id="ai-summary-text" class="text-xs text-[#DAF1DE] leading-relaxed italic">
+              "Front carport bay and driveway are completely clear of all vehicles; superstructure scaffolding active."
+            </p>
+          </div>
+
+          <!-- 4 Detection Metrics Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <!-- Metric 1: Car in Carport -->
+            <div class="bg-[#051F20]/70 p-3 rounded-xl border border-[#8EB69B]/20 flex flex-col gap-1">
+              <span class="text-[10px] text-[#8EB69B] flex items-center gap-1">
+                <i class="fa-solid fa-car-side"></i> Carport Car
+              </span>
+              <span id="metric-car-status" class="text-xs font-bold text-emerald-300">EMPTY</span>
+              <span id="metric-car-conf" class="text-[10px] font-mono text-[#8EB69B]">96% Conf</span>
+            </div>
+
+            <!-- Metric 2: Site Workers -->
+            <div class="bg-[#051F20]/70 p-3 rounded-xl border border-[#8EB69B]/20 flex flex-col gap-1">
+              <span class="text-[10px] text-[#8EB69B] flex items-center gap-1">
+                <i class="fa-solid fa-hard-hat"></i> Workers
+              </span>
+              <span id="metric-workers-status" class="text-xs font-bold text-white/70">CLEAR</span>
+              <span id="metric-workers-conf" class="text-[10px] font-mono text-[#8EB69B]">90% Conf</span>
+            </div>
+
+            <!-- Metric 3: Scaffolding -->
+            <div class="bg-[#051F20]/70 p-3 rounded-xl border border-[#8EB69B]/20 flex flex-col gap-1">
+              <span class="text-[10px] text-[#8EB69B] flex items-center gap-1">
+                <i class="fa-solid fa-trowel-bricks"></i> Scaffolding
+              </span>
+              <span id="metric-scaffold-status" class="text-xs font-bold text-amber-300">ACTIVE</span>
+              <span id="metric-scaffold-conf" class="text-[10px] font-mono text-[#8EB69B]">89% Conf</span>
+            </div>
+
+            <!-- Metric 4: Pool Water -->
+            <div class="bg-[#051F20]/70 p-3 rounded-xl border border-[#8EB69B]/20 flex flex-col gap-1">
+              <span class="text-[10px] text-[#8EB69B] flex items-center gap-1">
+                <i class="fa-solid fa-water"></i> Rear Pool
+              </span>
+              <span id="metric-pool-status" class="text-xs font-bold text-white/70">DRY SHELL</span>
+              <span id="metric-pool-conf" class="text-[10px] font-mono text-[#8EB69B]">85% Conf</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Live 3D Twin Split Screen Preview -->
+        <div id="split-twin-card" class="spatial-glass rounded-2xl p-4 border border-[#8EB69B]/20 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-cube text-[#8EB69B]"></i>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-white">Live 3D Digital Twin (Synced View)</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
+                <i class="fa-solid fa-rotate mr-1 animate-spin" style="animation-duration: 8s;"></i> Real-time Sync
+              </span>
+              <a href="/" target="_blank" class="text-[10px] font-mono text-[#8EB69B] hover:text-white underline">Full Tab</a>
+            </div>
+          </div>
+
+          <!-- Embedded Iframe of Twin -->
+          <div class="w-full h-80 sm:h-96 rounded-xl overflow-hidden border border-[#8EB69B]/30 bg-[#051F20] relative">
+            <iframe id="twin-iframe" src="/index.html?mode=site" class="w-full h-full border-0"></iframe>
+            <div class="absolute bottom-2 left-2 pointer-events-none bg-black/60 backdrop-blur px-3 py-1 rounded-lg border border-[#8EB69B]/30 text-[10px] font-mono text-[#DAF1DE]">
+              3D Viewport Synchronized via BroadcastChannel
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Recent Uploads & Activity History -->
+        <div class="spatial-glass rounded-2xl p-5 border border-[#8EB69B]/20 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2">
+              <i class="fa-solid fa-clock-rotate-left text-[#8EB69B]"></i>
+              Site Photo Feed History
+            </h3>
+            <span id="history-count" class="text-[10px] font-mono text-[#8EB69B]">Loading...</span>
+          </div>
+
+          <div id="history-container" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <!-- Dynamic history items loaded via JS -->
+            <div class="text-xs text-[#8EB69B]/60 italic p-3 text-center">Loading site history...</div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Client-side Logic -->
+  <script>
+    // BroadcastChannel for instant multi-tab communication
+    const syncChannel = new BroadcastChannel('jumeirah_twin_sync');
+
+    // DOM Elements
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('file-input');
+    const dropzonePrompt = document.getElementById('dropzone-prompt');
+    const previewWrapper = document.getElementById('preview-wrapper');
+    const imagePreview = document.getElementById('image-preview');
+    const previewFilename = document.getElementById('preview-filename');
+    const previewFilesize = document.getElementById('preview-filesize');
+    const btnRemoveImage = document.getElementById('btn-remove-image');
+    const btnUpload = document.getElementById('btn-upload-reconcile');
+    const inputCaption = document.getElementById('input-caption');
+    const statusHero = document.getElementById('status-hero');
+    const statusHeroTitle = document.getElementById('status-hero-title');
+    const statusHeroIcon = document.getElementById('status-hero-icon');
+    const aiSummaryText = document.getElementById('ai-summary-text');
+    const metricCarStatus = document.getElementById('metric-car-status');
+    const metricCarConf = document.getElementById('metric-car-conf');
+    const metricWorkersStatus = document.getElementById('metric-workers-status');
+    const metricWorkersConf = document.getElementById('metric-workers-conf');
+    const metricScaffoldStatus = document.getElementById('metric-scaffold-status');
+    const metricScaffoldConf = document.getElementById('metric-scaffold-conf');
+    const metricPoolStatus = document.getElementById('metric-pool-status');
+    const metricPoolConf = document.getElementById('metric-pool-conf');
+    const historyContainer = document.getElementById('history-container');
+    const historyCount = document.getElementById('history-count');
+    const twinIframe = document.getElementById('twin-iframe');
+    const btnToggleSplit = document.getElementById('btn-toggle-split');
+    const splitTwinCard = document.getElementById('split-twin-card');
+    const splitToggleLabel = document.getElementById('split-toggle-label');
+    const btnForceEmpty = document.getElementById('btn-force-empty');
+    const btnForceOccupied = document.getElementById('btn-force-occupied');
+    const portalToast = document.getElementById('portal-toast');
+    const portalToastText = document.getElementById('portal-toast-text');
+
+    let currentImageData = null; // { base64, mimeType, filename, size }
+    let activePresetPath = null;
+
+    // Show Toast
+    function showToast(msg) {
+      portalToastText.textContent = msg;
+      portalToast.classList.remove('opacity-0', '-translate-y-3');
+      portalToast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        portalToast.classList.remove('opacity-100', 'translate-y-0');
+        portalToast.classList.add('opacity-0', '-translate-y-3');
+      }, 3500);
+    }
+
+    // Toggle Split View
+    btnToggleSplit.addEventListener('click', () => {
+      splitTwinCard.classList.toggle('hidden');
+      const isHidden = splitTwinCard.classList.contains('hidden');
+      splitToggleLabel.textContent = isHidden ? 'Show 3D View' : 'Hide 3D View';
+    });
+
+    // Handle File Drop / Select
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) handleFile(file);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dropzone-active');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dropzone-active');
+      });
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const file = dt.files[0];
+      if (file) handleFile(file);
+    });
+
+    btnRemoveImage.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearSelectedImage();
+    });
+
+    function clearSelectedImage() {
+      currentImageData = null;
+      activePresetPath = null;
+      fileInput.value = '';
+      previewWrapper.classList.add('hidden');
+      dropzonePrompt.classList.remove('hidden');
+      imagePreview.src = '';
+    }
+
+    // Downscale to max 1024px for token efficiency and high speed
+    function handleFile(file) {
+      activePresetPath = null;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1024;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) {
+              h = Math.round((h * maxDim) / w);
+              w = maxDim;
+            } else {
+              w = Math.round((w * maxDim) / h);
+              h = maxDim;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          
+          currentImageData = {
+            base64: dataUrl.split(',')[1],
+            mimeType: 'image/jpeg',
+            filename: file.name,
+            size: Math.round(dataUrl.length * 0.75 / 1024) + ' KB'
+          };
+
+          imagePreview.src = dataUrl;
+          previewFilename.textContent = file.name;
+          previewFilesize.textContent = currentImageData.size;
+          dropzonePrompt.classList.add('hidden');
+          previewWrapper.classList.remove('hidden');
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Presets click handler
+    document.querySelectorAll('.preset-card').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const presetPath = btn.dataset.preset;
+        const caption = btn.dataset.caption;
+        selectPreset(presetPath, caption);
+      });
+    });
+
+    async function selectPreset(presetPath, caption) {
+      activePresetPath = presetPath;
+      currentImageData = null;
+      inputCaption.value = caption || '';
+
+      // Preview local image
+      imagePreview.src = '/' + presetPath.replace(/^\//, '');
+      previewFilename.textContent = presetPath.split('/').pop();
+      previewFilesize.textContent = 'Repo Asset';
+      dropzonePrompt.classList.add('hidden');
+      previewWrapper.classList.remove('hidden');
+
+      // Auto-trigger reconcile on preset selection for fast testing
+      runUploadOrReconcile();
+    }
+
+    // Run Upload or Reconcile
+    btnUpload.addEventListener('click', runUploadOrReconcile);
+
+    async function runUploadOrReconcile() {
+      if (!currentImageData && !activePresetPath) {
+        showToast('Please select or drop a site photo first.');
+        return;
+      }
+
+      btnUpload.disabled = true;
+      btnUpload.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[#8EB69B]"></i> <span>Groq Vision Analyzing...</span>';
+
+      try {
+        let payload = {};
+        if (activePresetPath) {
+          payload = {
+            presetPath: activePresetPath,
+            caption: inputCaption.value.trim() || 'Preset verification',
+            capturedBy: 'Site Portal'
+          };
+        } else {
+          payload = {
+            imageBase64: currentImageData.base64,
+            mimeType: currentImageData.mimeType,
+            filename: currentImageData.filename,
+            caption: inputCaption.value.trim(),
+            capturedBy: 'Site Inspector'
+          };
+        }
+
+        const resp = await fetch('/api/site-photos/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await resp.json();
+        if (data.status === 'ok') {
+          applyVisionResultsToUI(data.photo, data.sceneState);
+          syncToDigitalTwin(data.photo, data.sceneState);
+          showToast(`Photo Reconciled! Carport: ${data.sceneState.car_in_carport ? 'OCCUPIED' : 'EMPTY'}`);
+          loadHistory();
+        } else {
+          showToast('Error: ' + (data.message || 'Failed to process photo'));
+        }
+      } catch (err) {
+        console.error('Upload error:', err);
+        showToast('Network error during upload');
+      } finally {
+        btnUpload.disabled = false;
+        btnUpload.innerHTML = '<i class="fa-solid fa-bolt text-[#8EB69B]"></i> <span>Upload & Run Groq Vision Reconcile</span>';
+      }
+    }
+
+    // Update UI Cards
+    function applyVisionResultsToUI(photo, sceneState) {
+      if (!sceneState) return;
+
+      const isCar = !!sceneState.car_in_carport;
+      const isWorkers = !!sceneState.workers_present;
+      const isScaffold = !!sceneState.scaffolding_present;
+      const isPool = !!sceneState.pool_has_water;
+
+      // Hero banner
+      if (isCar) {
+        statusHero.className = 'p-4 rounded-xl bg-gradient-to-r from-amber-950/80 via-[#163832] to-[#0B2B26] border border-amber-500/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3';
+        statusHeroIcon.className = 'w-10 h-10 rounded-xl bg-amber-950 border border-amber-500/50 flex items-center justify-center text-lg text-amber-300';
+        statusHeroIcon.innerHTML = '<i class="fa-solid fa-car"></i>';
+        statusHeroTitle.textContent = `Carport Occupied • 3D Vehicles Shown (${Math.round((sceneState.car_in_carport_conf || 0.95)*100)}% conf)`;
+      } else {
+        statusHero.className = 'p-4 rounded-xl bg-gradient-to-r from-[#0B2B26] via-[#163832] to-[#051F20] border border-emerald-500/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3';
+        statusHeroIcon.className = 'w-10 h-10 rounded-xl bg-[#235347] border border-emerald-500/50 flex items-center justify-center text-lg text-emerald-300';
+        statusHeroIcon.innerHTML = '<i class="fa-solid fa-car-tunnel"></i>';
+        statusHeroTitle.textContent = `Carport is Empty • 3D Vehicles Hidden (${Math.round((sceneState.car_in_carport_conf || 0.95)*100)}% conf)`;
+      }
+
+      // Summary text
+      aiSummaryText.textContent = `"${sceneState.summary || 'Scene reconciled by Groq Vision AI'}"`;
+
+      // Metrics
+      metricCarStatus.textContent = isCar ? 'OCCUPIED' : 'EMPTY';
+      metricCarStatus.className = isCar ? 'text-xs font-bold text-amber-300' : 'text-xs font-bold text-emerald-300';
+      metricCarConf.textContent = Math.round((sceneState.car_in_carport_conf || 0.95) * 100) + '% Conf';
+
+      metricWorkersStatus.textContent = isWorkers ? 'PRESENT' : 'CLEAR';
+      metricWorkersStatus.className = isWorkers ? 'text-xs font-bold text-amber-300' : 'text-xs font-bold text-white/70';
+      metricWorkersConf.textContent = Math.round((sceneState.workers_present_conf || 0.85) * 100) + '% Conf';
+
+      metricScaffoldStatus.textContent = isScaffold ? 'ACTIVE' : 'CLEAR';
+      metricScaffoldStatus.className = isScaffold ? 'text-xs font-bold text-amber-300' : 'text-xs font-bold text-white/70';
+      metricScaffoldConf.textContent = Math.round((sceneState.scaffolding_present_conf || 0.88) * 100) + '% Conf';
+
+      metricPoolStatus.textContent = isPool ? 'WATER FILLED' : 'DRY SHELL';
+      metricPoolStatus.className = isPool ? 'text-xs font-bold text-cyan-300' : 'text-xs font-bold text-white/70';
+      metricPoolConf.textContent = Math.round((sceneState.pool_has_water_conf || 0.85) * 100) + '% Conf';
+
+      document.getElementById('reconcile-time-badge').textContent = new Date().toLocaleTimeString();
+    }
+
+    // Synchronize to Digital Twin via BroadcastChannel & Iframe postMessage
+    function syncToDigitalTwin(photo, sceneState) {
+      const isCar = !!sceneState.car_in_carport;
+
+      const payload = {
+        type: 'NEW_SITE_PHOTO',
+        photo,
+        sceneState,
+        timestamp: Date.now()
+      };
+
+      // 1. BroadcastChannel for any open tabs of index.html
+      try {
+        syncChannel.postMessage(payload);
+      } catch (e) {
+        console.warn('BroadcastChannel error:', e);
+      }
+
+      // 2. Direct postMessage to embedded iframe if present
+      if (twinIframe && twinIframe.contentWindow) {
+        twinIframe.contentWindow.postMessage({
+          type: 'TWIN_COMMAND',
+          action: 'TOGGLE_ELEMENT',
+          payload: {
+            elementId: 'carport-car-mesh',
+            visible: isCar
+          }
+        }, '*');
+
+        twinIframe.contentWindow.postMessage(payload, '*');
+      }
+    }
+
+    // Manual Force Override Buttons
+    btnForceEmpty.addEventListener('click', () => {
+      const state = {
+        car_in_carport: false,
+        car_in_carport_conf: 0.99,
+        workers_present: false,
+        scaffolding_present: true,
+        pool_has_water: false,
+        summary: 'Manual override: Carport forcefully set to EMPTY by user.'
+      };
+      applyVisionResultsToUI({ caption: 'Manual Override' }, state);
+      syncToDigitalTwin({ caption: 'Manual Override' }, state);
+      showToast('Carport forcefully emptied in 3D Villa');
+    });
+
+    btnForceOccupied.addEventListener('click', () => {
+      const state = {
+        car_in_carport: true,
+        car_in_carport_conf: 0.99,
+        workers_present: true,
+        scaffolding_present: true,
+        pool_has_water: false,
+        summary: 'Manual override: Carport forcefully set to OCCUPIED by user.'
+      };
+      applyVisionResultsToUI({ caption: 'Manual Override' }, state);
+      syncToDigitalTwin({ caption: 'Manual Override' }, state);
+      showToast('Carport vehicles forcefully shown in 3D Villa');
+    });
+
+    // History Loader
+    async function loadHistory() {
+      try {
+        const resp = await fetch('/api/site-photos/history?limit=15');
+        const data = await resp.json();
+        if (data.status === 'ok' && Array.isArray(data.photos)) {
+          historyCount.textContent = `${data.photos.length} Captured`;
+          renderHistory(data.photos);
+        }
+      } catch (err) {
+        console.error('Failed to load history:', err);
+      }
+    }
+
+    function renderHistory(photos) {
+      if (photos.length === 0) {
+        historyContainer.innerHTML = '<div class="text-xs text-[#8EB69B]/60 p-3 text-center">No photos uploaded yet</div>';
+        return;
+      }
+
+      historyContainer.innerHTML = photos.map(p => {
+        const isCar = !!p.sceneState?.car_in_carport;
+        const timeStr = new Date(p.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const dateStr = new Date(p.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' });
+        
+        return `
+          <div class="p-2.5 rounded-xl bg-[#051F20]/90 hover:bg-[#235347]/40 border border-[#8EB69B]/20 transition flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-3 min-w-0">
+              <img src="${p.url}" alt="${p.filename}" class="w-12 h-10 object-cover rounded-lg border border-[#8EB69B]/30 shrink-0 bg-black/40" onerror="this.src='20840-1748865490206.jpeg'" />
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-white truncate max-w-[160px]">${p.filename || 'Site Photo'}</span>
+                  <span class="text-[9px] font-mono px-1.5 py-0.5 rounded ${isCar ? 'bg-amber-950/80 text-amber-300 border border-amber-500/30' : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30'}">
+                    ${isCar ? 'Car: YES' : 'Car: NO'}
+                  </span>
+                </div>
+                <div class="text-[10px] text-[#8EB69B] truncate">${p.caption || p.sceneState?.summary || 'Reconciled photo'}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[10px] font-mono text-white/50 hidden sm:inline">${dateStr} ${timeStr}</span>
+              <button class="btn-reapply-history px-2 py-1 rounded bg-[#163832] hover:bg-[#235347] border border-[#8EB69B]/30 text-[10px] font-mono text-[#DAF1DE] transition" data-id="${p.id}">
+                Apply
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Add click handlers to re-apply
+      document.querySelectorAll('.btn-reapply-history').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.id;
+          const photo = photos.find(x => x.id === id);
+          if (photo && photo.sceneState) {
+            applyVisionResultsToUI(photo, photo.sceneState);
+            syncToDigitalTwin(photo, photo.sceneState);
+            showToast(`Re-applied photo state: Carport is ${photo.sceneState.car_in_carport ? 'OCCUPIED' : 'EMPTY'}`);
+          }
+        });
+      });
+    }
+
+    // Load initial latest photo on mount
+    async function initPortal() {
+      try {
+        const resp = await fetch('/api/site-photos/latest');
+        const data = await resp.json();
+        if (data.status === 'ok' && data.photo) {
+          applyVisionResultsToUI(data.photo, data.photo.sceneState);
+        }
+      } catch (e) {
+        console.warn('Initial photo fetch failed:', e);
+      }
+      loadHistory();
+    }
+
+    window.addEventListener('DOMContentLoaded', initPortal);
+  </script>
+</body>
+</html>

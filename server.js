@@ -18,6 +18,7 @@ const { Groq } = require('groq-sdk');
 
 const buildingDataService = require('./services/buildingDataService');
 const aiChatService = require('./services/aiChatService');
+const sitePhotoService = require('./services/sitePhotoService');
 
 const app = express();
 const PORT = process.env.PORT || 8085;
@@ -292,6 +293,92 @@ Definitions for this specific site:
 });
 
 // ----------------------------------------------------
+// 2C. SITE PHOTO PORTAL & LIVE RECONCILIATION ENDPOINTS
+// ----------------------------------------------------
+// Get the most recent uploaded site photo and its Groq vision state
+app.get('/api/site-photos/latest', (req, res) => {
+  try {
+    const latest = sitePhotoService.getLatestPhoto();
+    return res.json({
+      status: 'ok',
+      photo: latest,
+      sceneState: latest ? latest.sceneState : null
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// Get upload history
+app.get('/api/site-photos/history', (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit, 10) || 20;
+    const history = sitePhotoService.getHistory(limit);
+    return res.json({
+      status: 'ok',
+      count: history.length,
+      photos: history
+    });
+  } catch (err) {
+    return res.status(500).json({ status: 'error', message: err.message });
+  }
+});
+
+// Upload new site photo or select preset and analyze with Groq Vision AI
+app.post('/api/site-photos/upload', async (req, res) => {
+  try {
+    const { imageBase64, base64Image, mimeType, filename, caption, capturedBy, presetPath } = req.body;
+    const rawData = imageBase64 || base64Image;
+
+    // Handle preset selection
+    if (presetPath) {
+      console.log(`[API] Processing site preset: ${presetPath}`);
+      const record = await sitePhotoService.handlePreset({
+        presetPath,
+        caption,
+        capturedBy: capturedBy || 'Site Inspector'
+      });
+      return res.json({
+        status: 'ok',
+        photo: record,
+        sceneState: record.sceneState,
+        engine: record.engine
+      });
+    }
+
+    if (!rawData) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'No image data (base64) or presetPath provided.'
+      });
+    }
+
+    console.log(`[API] Processing new site photo upload: ${filename || 'unnamed.jpg'}`);
+    const record = await sitePhotoService.handleUpload({
+      base64Data: rawData,
+      mimeType: mimeType || 'image/jpeg',
+      filename: filename || 'site-photo.jpg',
+      caption: caption || '',
+      capturedBy: capturedBy || 'Site Inspector'
+    });
+
+    return res.json({
+      status: 'ok',
+      photo: record,
+      sceneState: record.sceneState,
+      engine: record.engine
+    });
+  } catch (err) {
+    console.error('[API] /api/site-photos/upload error:', err);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Failed to process site photo upload.',
+      details: err.message
+    });
+  }
+});
+
+// ----------------------------------------------------
 // 3. GROUNDED BUILDING INFORMATION QUERY ENDPOINTS
 // ----------------------------------------------------
 // Top-level project summary and verified progress
@@ -335,6 +422,11 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
   '.map': 'application/json'
 };
+
+// Dedicated route for Site Photo Upload & AI Intelligence Portal
+app.get(['/portal', '/upload', '/site-portal'], (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'portal.html'));
+});
 
 // Custom static middleware to handle URL decoding, exact MIME types, and cache-control
 app.use((req, res, next) => {
