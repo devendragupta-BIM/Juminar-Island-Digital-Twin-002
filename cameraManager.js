@@ -152,10 +152,10 @@ class CameraManager {
       fov: this.mainCamera.fov
     };
 
-    // 3D Visual Objects Group (Hidden by default to prevent green frustum cone clutter)
+    // 3D Visual Objects Group (Camera stations visible by default)
     this.cameraGroup = new THREE.Group();
     this.nodeGroup = new THREE.Group();
-    this.cameraGroup.visible = false;
+    this.cameraGroup.visible = true;
     this.nodeGroup.visible = false;
     this.scene.add(this.cameraGroup);
     this.scene.add(this.nodeGroup);
@@ -168,7 +168,7 @@ class CameraManager {
     this.walkKeys = { w: false, a: false, s: false, d: false, q: false, e: false };
     this.cinemaTourActive = false;
     this.cinemaTourAngle = 0;
-    this.pinsVisible = false;
+    this.pinsVisible = true;
 
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -297,6 +297,20 @@ class CameraManager {
       }
     });
 
+    // Update Active 3D Selection Inspector Card
+    const titleEl = document.getElementById('insp-title');
+    const descEl = document.getElementById('insp-desc');
+    const codeEl = document.getElementById('insp-code');
+    const refEl = document.getElementById('insp-photo-ref');
+    const ownerEl = document.getElementById('insp-owner');
+    const badgeEl = document.getElementById('insp-badge');
+    if (titleEl) titleEl.textContent = `${cam.id} — ${cam.title}`;
+    if (descEl) descEl.textContent = `Physical site camera capture station positioned at (${cam.position.x}, ${cam.position.y}, ${cam.position.z}). Captures verified real-world construction progress and timelapse frames.`;
+    if (codeEl) codeEl.textContent = cam.id;
+    if (refEl) refEl.textContent = cam.date || 'Oct 2026';
+    if (ownerEl) ownerEl.textContent = 'Site Photogrammetry';
+    if (badgeEl) badgeEl.innerHTML = '<i class="fa-solid fa-camera text-[10px]"></i> <span>Verified Station</span>';
+
     // Update pin highlight
     this.cameraMarkers.forEach(m => {
       const isSel = m.userData.cameraData && m.userData.cameraData.id === camId;
@@ -404,23 +418,23 @@ class CameraManager {
       root.add(head);
 
       // Emerald Titanium Camera Body (Cylinder along Z)
-      const bodyGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.32, 16);
+      const bodyGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.42, 16);
       bodyGeo.rotateX(Math.PI / 2);
       const bodyMat = new THREE.MeshStandardMaterial({
-        color: 0x1e3a34,
-        metalness: 0.45,
-        roughness: 0.35,
-        emissive: 0x064e3b,
-        emissiveIntensity: 0.4
+        color: 0x1e2428,
+        metalness: 0.8,
+        roughness: 0.25,
+        emissive: 0x0a1a16,
+        emissiveIntensity: 0.3
       });
       const body = new THREE.Mesh(bodyGeo, bodyMat);
       head.add(body);
 
       // Active Green Status Indicator LED
-      const ledGeo = new THREE.SphereGeometry(0.06, 8, 8);
+      const ledGeo = new THREE.SphereGeometry(0.08, 8, 8);
       const ledMat = new THREE.MeshBasicMaterial({ color: 0x34d399 });
       const led = new THREE.Mesh(ledGeo, ledMat);
-      led.position.set(0, 0.22, 0.05);
+      led.position.set(0, 0.24, 0.05);
       head.add(led);
 
       // Sage Green Lens Accent Ring (Facing +Z towards target)
@@ -428,66 +442,62 @@ class CameraManager {
       lensRingGeo.rotateX(Math.PI / 2);
       const lensRingMat = new THREE.MeshStandardMaterial({
         color: 0x86efac,
-        metalness: 0.8,
+        metalness: 0.85,
         roughness: 0.2
       });
       const lensRing = new THREE.Mesh(lensRingGeo, lensRingMat);
-      lensRing.position.z = 0.16;
+      lensRing.position.z = 0.22;
       head.add(lensRing);
 
       // Camera Glass Lens (Extending along local +Z towards target)
       const lensGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.10, 16);
       lensGeo.rotateX(Math.PI / 2);
       const lensMat = new THREE.MeshStandardMaterial({
-        color: 0x022c22,
+        color: 0x059669,
         roughness: 0.1,
         metalness: 0.9,
-        emissive: 0x059669,
-        emissiveIntensity: 0.25
+        emissive: 0x10b981,
+        emissiveIntensity: 0.6
       });
       const lens = new THREE.Mesh(lensGeo, lensMat);
-      lens.position.z = 0.20;
+      lens.position.z = 0.28;
       head.add(lens);
 
-      // Translucent Viewing Frustum / Cone
-      // Apex at origin (0, 0, 0), expanding along local +Z axis towards target
-      const fovRad = (cam.fov || 75) * (Math.PI / 180);
-      const coneLength = 5.2;
-      const coneRadius = Math.tan(fovRad / 2) * coneLength;
-      const coneGeo = new THREE.ConeGeometry(coneRadius, coneLength, 16, 1, true);
-      // Shift apex from +coneLength/2 to 0, base from -coneLength/2 to -coneLength
-      coneGeo.translate(0, -coneLength / 2, 0);
-      // Rotate by -90deg around X so base (0, -L, 0) rotates to (0, 0, +L) along +Z
-      coneGeo.rotateX(-Math.PI / 2);
+      // Crisp Floating Camera Station Billboard Badge ("📷 CAM-01")
+      const badgeCanvas = document.createElement('canvas');
+      badgeCanvas.width = 256;
+      badgeCanvas.height = 96;
+      const ctx = badgeCanvas.getContext('2d');
 
-      const coneMat = new THREE.MeshBasicMaterial({
-        color: 0x5eead4,
-        transparent: true,
-        opacity: 0.22,
-        side: THREE.DoubleSide,
-        depthWrite: false
+      ctx.fillStyle = 'rgba(22, 24, 26, 0.92)';
+      ctx.strokeStyle = '#C87D55';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.roundRect(8, 8, 240, 80, 24);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`📷 ${cam.id}`, 128, 48);
+
+      const badgeTex = new THREE.CanvasTexture(badgeCanvas);
+      badgeTex.minFilter = THREE.LinearFilter;
+      const badgeMat = new THREE.SpriteMaterial({
+        map: badgeTex,
+        depthTest: false,
+        transparent: true
       });
-      const cone = new THREE.Mesh(coneGeo, coneMat);
-      cone.position.set(0, 0, 0.22);
-      // CRITICAL: Disable raycasting on viewing cone so orbiting/clicking never hits the cone!
-      cone.raycast = () => {};
-      cone.userData.ignoreRaycast = true;
-      head.add(cone);
+      const badgeSprite = new THREE.Sprite(badgeMat);
+      badgeSprite.scale.set(2.4, 0.9, 1.0);
+      badgeSprite.position.set(0, 1.15, 0);
+      badgeSprite.raycast = () => {};
+      root.add(badgeSprite);
 
-      // Crisp Wireframe Frustum Edge Lines for unmistakable 3D directional visibility
-      const coneEdgeGeo = new THREE.EdgesGeometry(coneGeo, 20);
-      const coneEdgeMat = new THREE.LineBasicMaterial({
-        color: 0xa7f3d0,
-        transparent: true,
-        opacity: 0.7
-      });
-      const coneLines = new THREE.LineSegments(coneEdgeGeo, coneEdgeMat);
-      coneLines.position.set(0, 0, 0.22);
-      coneLines.raycast = () => {};
-      head.add(coneLines);
-
-      // Dedicated Hit Target for crisp tapping on the camera pin
-      const hitGeo = new THREE.SphereGeometry(0.75, 12, 12);
+      // Dedicated Hit Target for generous, responsive tapping
+      const hitGeo = new THREE.SphereGeometry(1.2, 12, 12);
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });
       const hitTarget = new THREE.Mesh(hitGeo, hitMat);
       root.add(hitTarget);
@@ -495,15 +505,14 @@ class CameraManager {
       // Ground Beacon Ring (remains flat on the ground plane, Y=0.05)
       const ringGeo = new THREE.RingGeometry(0.48, 0.76, 24);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x8EB69B,
+        color: 0xC87D55,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.55
+        opacity: 0.65
       });
       const ring = new THREE.Mesh(ringGeo, ringMat);
       ring.position.y = -cam.position.y + 0.05;
       ring.rotation.x = -Math.PI / 2;
-      // CRITICAL: Disable raycasting on ground beacon ring
       ring.raycast = () => {};
       ring.userData.ignoreRaycast = true;
       root.add(ring);

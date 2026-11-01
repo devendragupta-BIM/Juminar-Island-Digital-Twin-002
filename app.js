@@ -1088,52 +1088,18 @@ Definitions for this specific site:
   if (btnPrevView) btnPrevView.addEventListener('click', () => setCarouselView(currentCarouselIndex - 1));
   if (btnNextView) btnNextView.addEventListener('click', () => setCarouselView(currentCarouselIndex + 1));
 
-  // 2. 3D Floating Callout Pins & Selected Element Inspector
+  // 2. Selected Element Inspector
   let currentSelection = {
     title: 'Pool finish',
     desc: 'Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.',
     code: 'FN-14',
     rev: 'R12 • 2 days ago',
     owner: 'Mira Studio',
-    cam: 'rearPool',
-    pinId: 'callout-pin-3'
+    cam: 'rearPool'
   };
 
-  const calloutDefs = [
-    {
-      id: 'callout-pin-1',
-      pos: new THREE.Vector3(8.2, 4.2, 5.8),
-      title: 'Cantilever Overhang & Pergola',
-      desc: '13.2m post-tensioned cantilever pergola with coffer beams and 3 vertical living green-wall columns.',
-      code: 'ST-02',
-      rev: 'R08 • 1 day ago',
-      owner: 'Al Futtaim Engineering',
-      cam: 'carport'
-    },
-    {
-      id: 'callout-pin-2',
-      pos: new THREE.Vector3(1.2, 1.8, 2.0),
-      title: 'Living & Poolside Lounge',
-      desc: '6.4m double-height living room pavilion with floor-to-ceiling Schuco slimline structural glazing.',
-      code: 'GL-01',
-      rev: 'R15 • 3 days ago',
-      owner: 'Mira Studio',
-      cam: 'frontEntrance'
-    },
-    {
-      id: 'callout-pin-3',
-      pos: new THREE.Vector3(-4.5, -0.6, -12.0),
-      title: 'Pool finish',
-      desc: 'Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.',
-      code: 'FN-14',
-      rev: 'R12 • 2 days ago',
-      owner: 'Mira Studio',
-      cam: 'rearPool'
-    }
-  ];
-
-  function selectElementInfo(title, desc, code, rev, owner, cam = 'rearPool', pinId = null) {
-    currentSelection = { title, desc, code, rev, owner, cam, pinId };
+  function selectElementInfo(title, desc, code, rev, owner, cam = 'rearPool') {
+    currentSelection = { title, desc, code, rev, owner, cam };
     const titleEl = document.getElementById('insp-title');
     const descEl = document.getElementById('insp-desc');
     const codeEl = document.getElementById('insp-code');
@@ -1144,26 +1110,8 @@ Definitions for this specific site:
     if (codeEl) codeEl.textContent = code;
     if (refEl) refEl.textContent = rev;
     if (ownerEl) ownerEl.textContent = owner;
-
-    // Highlight active pin
-    document.querySelectorAll('.callout-badge').forEach(p => p.classList.remove('selected'));
-    if (pinId) {
-      const activePin = document.getElementById(pinId);
-      if (activePin) activePin.classList.add('selected');
-    }
     showToast(`Inspecting: ${title}`);
   }
-
-  calloutDefs.forEach(def => {
-    const pinEl = document.getElementById(def.id);
-    if (pinEl) {
-      pinEl.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectElementInfo(def.title, def.desc, def.code, def.rev, def.owner, def.cam, def.id);
-        window.JumeirahTwinAPI.setCamera(def.cam);
-      });
-    }
-  });
 
   // Action Buttons in Card 2 & Card 3
   const btnFlySelected = document.getElementById('btn-fly-selected');
@@ -1290,33 +1238,11 @@ Definitions for this specific site:
           'GL-01',
           'R15 • 3 days ago',
           'Mira Studio',
-          'frontEntrance',
-          'callout-pin-2'
+          'frontEntrance'
         );
       }
     }
   };
-
-  const tempProjV = new THREE.Vector3();
-  function updateCallouts() {
-    if (!container || !camera) return;
-    const rect = container.getBoundingClientRect();
-    calloutDefs.forEach(def => {
-      const pinEl = document.getElementById(def.id);
-      if (!pinEl) return;
-      tempProjV.copy(def.pos);
-      tempProjV.project(camera);
-      if (tempProjV.z > 1.0) {
-        pinEl.style.display = 'none';
-        return;
-      }
-      pinEl.style.display = 'flex';
-      const x = (tempProjV.x * 0.5 + 0.5) * rect.width;
-      const y = (-(tempProjV.y * 0.5) + 0.5) * rect.height;
-      pinEl.style.left = `${x}px`;
-      pinEl.style.top = `${y}px`;
-    });
-  }
 
   // 3. Left Icon Rail Tabs & Feature Drawers
   function closeAllDrawers() {
@@ -1487,9 +1413,6 @@ Definitions for this specific site:
       frameCount = 0;
       lastTime = now;
     }
-
-    // Update 3D Floating Callouts Projection
-    updateCallouts();
 
     renderer.render(scene, camera);
   }
