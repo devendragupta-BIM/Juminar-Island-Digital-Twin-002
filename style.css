@@ -2494,6 +2494,37 @@ input[type=range]::-webkit-slider-thumb:hover {
   box-shadow: 0 0 16px rgba(200, 125, 85, 0.6) !important;
 }
 
+/* Master Work Area & 3D Viewport Layout Architecture */
+#main-work-area {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.25rem !important;
+  min-height: 0 !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+#viewport-3d-card {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  position: relative !important;
+  border-radius: 2rem !important;
+  overflow: hidden !important;
+}
+
+#inspector-panel {
+  width: 380px !important;
+  min-width: 340px !important;
+  max-width: 420px !important;
+  flex: 0 0 380px !important;
+  height: 100% !important;
+  border-radius: 2rem !important;
+  overflow-y: auto !important;
+}
+
 /* Feature Drawers (Model, Layers, Notes) */
 .drawer-panel {
   transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;

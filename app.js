@@ -1029,14 +1029,29 @@ Definitions for this specific site:
     }
   });
 
-  // Handle Window Resize
-  window.addEventListener('resize', () => {
+  // Handle Window Resize & Viewport Layout Resizing
+  function syncViewportSize() {
+    if (!container || !camera || !renderer) return;
     const w = container.clientWidth;
     const h = container.clientHeight;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  });
+    if (w > 0 && h > 0) {
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h, false);
+    }
+  }
+
+  window.addEventListener('resize', syncViewportSize);
+
+  // ResizeObserver guarantees the 3D canvas is immediately synchronized whenever DOM elements settle
+  if (typeof ResizeObserver !== 'undefined' && container) {
+    const ro = new ResizeObserver(() => syncViewportSize());
+    ro.observe(container);
+  }
+
+  setTimeout(syncViewportSize, 50);
+  setTimeout(syncViewportSize, 250);
+  setTimeout(syncViewportSize, 800);
 
   // Initial State Rendering
   renderAppState();

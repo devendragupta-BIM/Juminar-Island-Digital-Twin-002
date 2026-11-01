@@ -58,20 +58,14 @@
 <body class="font-sans antialiased bg-[#F6F4EE] text-stone-900 overflow-hidden select-none h-screen flex flex-row">
 
   <!-- ==================== SLIM LEFT ICON RAIL ==================== -->
-  <nav id="left-icon-rail" class="w-16 bg-[#16181A] border-r border-white/5 flex flex-col items-center justify-between py-4 select-none flex-shrink-0 z-30">
-    <!-- Top Villa Brand Monogram (Replacing old A/2 badge) -->
-    <div class="flex flex-col items-center gap-6">
-      <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80 text-xs font-serif font-bold tracking-widest shadow-inner" title="Jumeirah Islands Plot JI-003">
-        003
-      </div>
-
-      <!-- Navigation Tool Icons -->
-      <div class="flex flex-col items-center gap-3 w-full">
-        <!-- Explore Tab (Default) -->
-        <button id="rail-btn-explore" class="left-rail-item active w-full py-2.5 flex flex-col items-center gap-1 text-white/80 hover:text-white transition group" title="Explore Project Overview">
-          <i class="fa-solid fa-table-cells-large text-base"></i>
-          <span class="text-[9px] tracking-tight">Explore</span>
-        </button>
+  <nav id="left-icon-rail" class="w-16 bg-[#16181A] border-r border-white/5 flex flex-col items-center justify-between py-5 select-none flex-shrink-0 z-30">
+    <!-- Navigation Tool Icons -->
+    <div class="flex flex-col items-center gap-3 w-full">
+      <!-- Explore Tab (Default) -->
+      <button id="rail-btn-explore" class="left-rail-item active w-full py-2.5 flex flex-col items-center gap-1 text-white/80 hover:text-white transition group" title="Explore Project Overview">
+        <i class="fa-solid fa-table-cells-large text-base"></i>
+        <span class="text-[9px] tracking-tight">Explore</span>
+      </button>
 
         <!-- Model Tab (BIM Controls & Phase Scrubber) -->
         <button id="rail-btn-model" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="BIM Model & Phase Scrubber">
@@ -142,10 +136,10 @@
     </div>
 
     <!-- Main Work Area (3D Viewport Card & Right Inspector Panel) -->
-    <div id="main-work-area" class="flex-1 flex flex-row gap-5 min-h-0 overflow-hidden relative">
+    <div id="main-work-area" class="flex-1 flex flex-row gap-5 min-h-0 min-w-0 w-full overflow-hidden relative">
 
       <!-- ==================== 3D VIEWPORT CARD ==================== -->
-      <div id="viewport-3d-card" class="flex-1 relative rounded-[32px] overflow-hidden border border-stone-200/80 shadow-xl bg-gradient-to-b from-[#4A72B2] via-[#3B62A4] to-[#2D4D85] flex flex-col justify-between">
+      <div id="viewport-3d-card" class="flex-1 min-w-0 h-full relative rounded-[32px] overflow-hidden border border-stone-200/80 shadow-xl bg-gradient-to-b from-[#4A72B2] via-[#3B62A4] to-[#2D4D85] flex flex-col justify-between">
         
         <!-- WebGL Three.js Canvas Container -->
         <div id="viewport-3d-wrapper" class="absolute inset-0 w-full h-full z-0">
@@ -269,7 +263,7 @@
       </div>
 
       <!-- ==================== RIGHT INSPECTOR PANEL (CLEAN & DYNAMIC) ==================== -->
-      <aside id="inspector-panel" class="w-84 xl:w-96 flex-shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] p-6 border border-stone-200/80 shadow-sm flex flex-col justify-between overflow-y-auto luxury-scrollbar space-y-4">
+      <aside id="inspector-panel" class="w-[380px] xl:w-[410px] min-w-[340px] max-w-[420px] flex-shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] p-6 border border-stone-200/80 shadow-sm flex flex-col justify-between overflow-y-auto luxury-scrollbar space-y-4 h-full">
         
         <!-- CARD 1: PROJECT OVERVIEW & PHASE SCRUBBER -->
         <div class="space-y-3.5 bg-stone-50/80 p-4 rounded-2xl border border-stone-200/70">
