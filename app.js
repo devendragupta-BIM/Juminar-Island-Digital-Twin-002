@@ -463,9 +463,19 @@ Definitions for this specific site:
     modelBuilder.setSiteState(AppState.phase);
     document.querySelectorAll('.phase-btn').forEach(btn => {
       const match = btn.getAttribute('data-phase') === AppState.phase;
-      btn.className = match
-        ? 'phase-btn bg-gradient-to-r from-[#235347] to-[#163832] text-[#DAF1DE] border border-[#8EB69B] shadow-lg shadow-[#051F20]/50 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5'
-        : 'phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center gap-1.5';
+      if (btn.closest('#inspector-panel')) {
+        btn.className = match
+          ? 'phase-btn active py-1.5 px-2 rounded-xl border border-stone-900 bg-stone-900 text-white text-[10px] font-medium text-center transition shadow-sm'
+          : 'phase-btn py-1.5 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-[10px] font-medium text-center transition';
+      } else if (btn.closest('#model-drawer')) {
+        btn.className = match
+          ? 'phase-btn active w-full p-2.5 rounded-xl border border-[#C87D55] bg-stone-900 text-white text-left transition flex items-center justify-between text-xs shadow-md'
+          : 'phase-btn w-full p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-left transition flex items-center justify-between text-xs text-stone-700 bg-stone-50';
+      } else {
+        btn.className = match
+          ? 'phase-btn bg-gradient-to-r from-[#235347] to-[#163832] text-[#DAF1DE] border border-[#8EB69B] shadow-lg shadow-[#051F20]/50 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5'
+          : 'phase-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#8EB69B] hover:text-[#DAF1DE] transition flex items-center gap-1.5';
+      }
     });
 
     const topBar = document.getElementById('top-progress-bar');
@@ -809,15 +819,6 @@ Definitions for this specific site:
     });
   }
 
-  // Cinema Drone Tour
-  const btnCinemaTour = document.getElementById('btn-cinema-tour');
-  if (btnCinemaTour) {
-    btnCinemaTour.addEventListener('click', () => {
-      cameraManager.toggleCinemaTour();
-      showToast(`Cinematic Tour: ${cameraManager.cinemaTourActive ? 'Active' : 'Stopped'}`);
-    });
-  }
-
   // Crystal Clear Building Preset (Resets section cuts and maximizes building contrast)
   const btnCrystalClear = document.getElementById('btn-crystal-clear');
   if (btnCrystalClear) {
@@ -1073,6 +1074,16 @@ Definitions for this specific site:
   if (btnNextView) btnNextView.addEventListener('click', () => setCarouselView(currentCarouselIndex + 1));
 
   // 2. 3D Floating Callout Pins & Selected Element Inspector
+  let currentSelection = {
+    title: 'Pool finish',
+    desc: 'Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.',
+    code: 'FN-14',
+    rev: 'R12 • 2 days ago',
+    owner: 'Mira Studio',
+    cam: 'rearPool',
+    pinId: 'callout-pin-3'
+  };
+
   const calloutDefs = [
     {
       id: 'callout-pin-1',
@@ -1106,7 +1117,8 @@ Definitions for this specific site:
     }
   ];
 
-  function selectElementInfo(title, desc, code, rev, owner) {
+  function selectElementInfo(title, desc, code, rev, owner, cam = 'rearPool', pinId = null) {
+    currentSelection = { title, desc, code, rev, owner, cam, pinId };
     const titleEl = document.getElementById('insp-title');
     const descEl = document.getElementById('insp-desc');
     const codeEl = document.getElementById('insp-code');
@@ -1117,18 +1129,158 @@ Definitions for this specific site:
     if (codeEl) codeEl.textContent = code;
     if (refEl) refEl.textContent = rev;
     if (ownerEl) ownerEl.textContent = owner;
-    showToast(`Selected: ${title}`);
+
+    // Highlight active pin
+    document.querySelectorAll('.callout-badge').forEach(p => p.classList.remove('selected'));
+    if (pinId) {
+      const activePin = document.getElementById(pinId);
+      if (activePin) activePin.classList.add('selected');
+    }
+    showToast(`Inspecting: ${title}`);
   }
 
   calloutDefs.forEach(def => {
     const pinEl = document.getElementById(def.id);
     if (pinEl) {
-      pinEl.addEventListener('click', () => {
-        selectElementInfo(def.title, def.desc, def.code, def.rev, def.owner);
+      pinEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectElementInfo(def.title, def.desc, def.code, def.rev, def.owner, def.cam, def.id);
         window.JumeirahTwinAPI.setCamera(def.cam);
       });
     }
   });
+
+  // Action Buttons in Card 2 & Card 3
+  const btnFlySelected = document.getElementById('btn-fly-selected');
+  const btnHighlightSelected = document.getElementById('btn-highlight-selected');
+  const btnCinemaTour = document.getElementById('btn-cinema-tour');
+  const btnQuickTour = document.getElementById('btn-quick-tour');
+  const btnQuickExplode = document.getElementById('btn-quick-explode');
+
+  if (btnFlySelected) {
+    btnFlySelected.addEventListener('click', () => {
+      if (currentSelection && currentSelection.cam) {
+        window.JumeirahTwinAPI.setCamera(currentSelection.cam);
+        showToast(`Flying camera to ${currentSelection.title}`);
+      }
+    });
+  }
+
+  if (btnHighlightSelected) {
+    btnHighlightSelected.addEventListener('click', () => {
+      if (currentSelection) {
+        showToast(`Focusing: ${currentSelection.title}`);
+        if (currentSelection.cam) window.JumeirahTwinAPI.setCamera(currentSelection.cam);
+      }
+    });
+  }
+
+  function toggleCinemaTourMode() {
+    const nextState = !cameraManager.cinemaTourActive;
+    cameraManager.toggleCinemaTour(nextState);
+    if (nextState) {
+      showToast('360° Architectural Drone Tour Started');
+    } else {
+      showToast('Drone Tour Paused');
+    }
+  }
+
+  if (btnCinemaTour) btnCinemaTour.addEventListener('click', toggleCinemaTourMode);
+  if (btnQuickTour) btnQuickTour.addEventListener('click', toggleCinemaTourMode);
+
+  if (btnQuickExplode) {
+    btnQuickExplode.addEventListener('click', () => {
+      const willExplode = !modelBuilder.isExploded;
+      window.JumeirahTwinAPI.explodeBIM(willExplode);
+      const span = btnQuickExplode.querySelector('span');
+      if (willExplode) {
+        btnQuickExplode.classList.add('bg-stone-900', 'text-white');
+        btnQuickExplode.classList.remove('bg-white', 'text-stone-800');
+        if (span) span.textContent = 'Collapse BIM';
+        showToast('BIM Subsystems Exploded (+6.0m Elevation)');
+      } else {
+        btnQuickExplode.classList.remove('bg-stone-900', 'text-white');
+        btnQuickExplode.classList.add('bg-white', 'text-stone-800');
+        if (span) span.textContent = 'Explode BIM';
+        showToast('BIM Subsystems Collapsed to Normal');
+      }
+    });
+  }
+
+  // Interactive 3D Villa Raycasting
+  cameraManager.onSceneClick = (raycaster, e) => {
+    const candidateGroups = [
+      modelBuilder.groups.structural,
+      modelBuilder.groups.wood,
+      modelBuilder.groups.glazing,
+      modelBuilder.groups.water,
+      modelBuilder.groups.renderOnly,
+      modelBuilder.groups.siteOnly
+    ].filter(Boolean);
+
+    const hits = raycaster.intersectObjects(candidateGroups, true);
+    if (hits.length > 0) {
+      const hit = hits[0];
+      const pt = hit.point;
+
+      if (pt.z < -3.5 && pt.x < 4.0) {
+        // Pool Zone
+        selectElementInfo(
+          'Pool finish',
+          'Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.',
+          'FN-14',
+          'R12 • 2 days ago',
+          'Mira Studio',
+          'rearPool',
+          'callout-pin-3'
+        );
+      } else if (pt.x > 3.2 && pt.z > 0.0) {
+        // Cantilever Pergola & Carport
+        selectElementInfo(
+          'Cantilever Overhang & Pergola',
+          '13.2m post-tensioned cantilever pergola with coffer beams and 3 vertical living green-wall columns.',
+          'ST-02',
+          'R08 • 1 day ago',
+          'Al Futtaim Engineering',
+          'carport',
+          'callout-pin-1'
+        );
+      } else if (pt.y >= 3.4) {
+        // Upper Master Suite & Cantilever Roof
+        selectElementInfo(
+          'Upper Master Pavilion & Terrace',
+          'Floating upper level cantilevered master bedroom suite with expansive glass balcony and bronze solar louvers.',
+          'AR-03',
+          'R09 • 4 days ago',
+          'Killa Design',
+          'frontHero',
+          null
+        );
+      } else if (pt.z > 5.0 && pt.x <= 3.0) {
+        // Front Entry & Courtyard Lawn
+        selectElementInfo(
+          'Courtyard Entry Garden',
+          'Architectural water fountain, manicured lawn with sunken perimeter LED uplights, and date palm grove.',
+          'LS-01',
+          'R04 • 5 days ago',
+          'Desert Landscape LLC',
+          'frontHero',
+          null
+        );
+      } else {
+        // Living & Poolside Lounge
+        selectElementInfo(
+          'Living & Poolside Lounge',
+          '6.4m double-height living room pavilion with floor-to-ceiling Schuco slimline structural glazing.',
+          'GL-01',
+          'R15 • 3 days ago',
+          'Mira Studio',
+          'frontEntrance',
+          'callout-pin-2'
+        );
+      }
+    }
+  };
 
   const tempProjV = new THREE.Vector3();
   function updateCallouts() {

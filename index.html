@@ -6,7 +6,7 @@
   <title>Jumeirah Islands Villa 003 — Client Intelligence Dashboard</title>
   
   <!-- SEO & Engineering Metadata -->
-  <meta name="description" content="Next-Gen Architectural 3D BIM Digital Twin & Client Intelligence Dashboard of Jumeirah Islands Villa 003 (Dubai, UAE). Features natural transformation view transitions, adjoint navigation depth, live BIM section cuts, and verified IoT telemetry." />
+  <meta name="description" content="Next-Gen Architectural 3D BIM Digital Twin & Client Intelligence Dashboard of Jumeirah Islands Villa 003 (Dubai, UAE). Features natural transformation view transitions, live BIM section cuts, and verified IoT telemetry." />
   <meta name="keywords" content="Jumeirah Islands, Digital Twin, BIM 3D, Dubai Luxury Villa, Architectural Engineering, Three.js Digital Twin, Construction Telemetry" />
   
   <!-- Favicon -->
@@ -53,557 +53,540 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
   
   <!-- Master Design System Stylesheet -->
-  <link rel="stylesheet" href="style.css?v=5.0" />
+  <link rel="stylesheet" href="style.css?v=5.1" />
 </head>
-<body class="font-sans antialiased bg-[#F6F4EE] text-stone-900 overflow-hidden select-none h-screen flex flex-col">
+<body class="font-sans antialiased bg-[#F6F4EE] text-stone-900 overflow-hidden select-none h-screen flex flex-row">
 
-  <!-- ==================== TOP WINDOW BAR ==================== -->
-  <header id="top-window-bar" class="h-10 bg-[#16181A] px-4 flex items-center justify-between text-xs text-white/80 border-b border-white/5 flex-shrink-0 z-40">
-    <div class="flex items-center gap-3">
-      <span class="font-medium text-white tracking-wide">Jumeirah Islands Villa 003 Digital Twin Dashboard</span>
-      <span class="text-white/40"><i class="fa-solid fa-cloud-check text-emerald-400"></i></span>
-      <button class="text-white/40 hover:text-white/80 transition text-[11px]" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
-      <button class="text-white/40 hover:text-white/80 transition text-[11px]" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
-    </div>
-    <div class="flex items-center gap-3">
-      <div class="bg-white/10 p-0.5 rounded-lg flex items-center text-[11px]">
-        <button id="btn-view-code" class="px-2.5 py-0.5 rounded-md text-white/60 hover:text-white transition">Code</button>
-        <button id="btn-view-preview" class="px-2.5 py-0.5 rounded-md bg-[#25282B] text-white font-medium shadow-sm">Preview</button>
-      </div>
-      <button id="btn-export-twin" class="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/90 text-xs font-medium flex items-center gap-1.5 transition">
-        <span>Export</span> <i class="fa-solid fa-chevron-down text-[9px] text-white/60"></i>
-      </button>
-      <div class="h-4 w-[1px] bg-white/10"></div>
-      <button id="btn-fullscreen-top" class="text-white/60 hover:text-white p-1" title="Maximize Card"><i class="fa-solid fa-expand"></i></button>
-      <button id="btn-share-top" class="text-white/60 hover:text-white p-1" title="Share Dashboard"><i class="fa-solid fa-share-nodes"></i></button>
-    </div>
-  </header>
-
-  <!-- ==================== MAIN WORKSPACE ==================== -->
-  <div id="main-dashboard-container" class="flex-1 flex flex-row overflow-hidden min-h-0 relative">
-
-    <!-- ==================== SLIM LEFT ICON RAIL ==================== -->
-    <nav id="left-icon-rail" class="w-16 bg-[#16181A] border-r border-white/5 flex flex-col items-center justify-between py-4 select-none flex-shrink-0 z-30">
-      <!-- Top Workspace Avatar -->
-      <div class="flex flex-col items-center gap-6">
-        <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-white/10 border border-white/15 text-white font-bold text-sm shadow-inner cursor-pointer hover:bg-white/15 transition">
-          <span>A</span>
-          <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-white text-stone-900 text-[10px] font-bold flex items-center justify-center shadow">2</span>
-        </div>
-
-        <!-- Navigation Tool Icons -->
-        <div class="flex flex-col items-center gap-3 w-full">
-          <!-- Explore Tab (Default) -->
-          <button id="rail-btn-explore" class="left-rail-item active w-full py-2.5 flex flex-col items-center gap-1 text-white/80 hover:text-white transition group" title="Explore Project Overview">
-            <i class="fa-solid fa-table-cells-large text-base"></i>
-            <span class="text-[9px] tracking-tight">Explore</span>
-          </button>
-
-          <!-- Model Tab (BIM Controls & Phase Scrubber) -->
-          <button id="rail-btn-model" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="BIM Model & Phase Scrubber">
-            <i class="fa-solid fa-cube text-base"></i>
-            <span class="text-[9px] tracking-tight">Model</span>
-          </button>
-
-          <!-- Layers Tab (Section Cuts & Floor Isolation) -->
-          <button id="rail-btn-layers" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="BIM Sections & Floor Layers">
-            <i class="fa-solid fa-layer-group text-base"></i>
-            <span class="text-[9px] tracking-tight">Layers</span>
-          </button>
-
-          <!-- Measure Tab (3D Laser Ruler) -->
-          <button id="btn-measure" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="3D Laser Measurement Tool">
-            <i class="fa-solid fa-ruler-combined text-base"></i>
-            <span class="text-[9px] tracking-tight">Measure</span>
-          </button>
-
-          <!-- Notes Tab (Site Telemetry, 2D Radar & QA/QC) -->
-          <button id="rail-btn-notes" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="Site Telemetry, Radar & Notes">
-            <i class="fa-solid fa-clipboard-list text-base"></i>
-            <span class="text-[9px] tracking-tight">Notes</span>
-          </button>
-        </div>
+  <!-- ==================== SLIM LEFT ICON RAIL ==================== -->
+  <nav id="left-icon-rail" class="w-16 bg-[#16181A] border-r border-white/5 flex flex-col items-center justify-between py-4 select-none flex-shrink-0 z-30">
+    <!-- Top Villa Brand Monogram (Replacing old A/2 badge) -->
+    <div class="flex flex-col items-center gap-6">
+      <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/80 text-xs font-serif font-bold tracking-widest shadow-inner" title="Jumeirah Islands Plot JI-003">
+        003
       </div>
 
-      <!-- Bottom: Help / Antigravity SDK Modal -->
-      <button id="btn-ide-sdk" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/60 hover:text-white transition flex items-center justify-center text-xs" title="Digital Twin SDK & Event Stream">
-        <i class="fa-solid fa-question"></i>
-      </button>
-    </nav>
+      <!-- Navigation Tool Icons -->
+      <div class="flex flex-col items-center gap-3 w-full">
+        <!-- Explore Tab (Default) -->
+        <button id="rail-btn-explore" class="left-rail-item active w-full py-2.5 flex flex-col items-center gap-1 text-white/80 hover:text-white transition group" title="Explore Project Overview">
+          <i class="fa-solid fa-table-cells-large text-base"></i>
+          <span class="text-[9px] tracking-tight">Explore</span>
+        </button>
 
-    <!-- ==================== MAIN CONTENT CANVAS AREA ==================== -->
-    <main class="flex-1 flex flex-col p-4 xl:p-6 overflow-hidden min-w-0 bg-[#F6F4EE]">
+        <!-- Model Tab (BIM Controls & Phase Scrubber) -->
+        <button id="rail-btn-model" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="BIM Model & Phase Scrubber">
+          <i class="fa-solid fa-cube text-base"></i>
+          <span class="text-[9px] tracking-tight">Model</span>
+        </button>
 
-      <!-- Sub-Header Bar (Breadcrumbs, Title & Actions) -->
-      <div id="sub-header-bar" class="flex items-center justify-between mb-4 flex-shrink-0">
-        <!-- Left: Project Breadcrumbs & Title -->
-        <div>
-          <div class="text-[10px] uppercase tracking-wider text-stone-400 font-semibold mb-0.5">
-            PROJECTS &gt; JUMEIRAH ISLANDS
-          </div>
-          <div class="flex items-center gap-3">
-            <h1 class="font-serif text-3xl xl:text-4xl font-semibold text-stone-900 tracking-tight">Villa 003</h1>
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200/80 inline-flex items-center gap-1.5 shadow-sm">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Live model</span>
-            </span>
-          </div>
+        <!-- Layers Tab (Section Cuts & Floor Isolation) -->
+        <button id="rail-btn-layers" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="BIM Sections & Floor Layers">
+          <i class="fa-solid fa-layer-group text-base"></i>
+          <span class="text-[9px] tracking-tight">Layers</span>
+        </button>
+
+        <!-- Measure Tab (3D Laser Ruler) -->
+        <button id="btn-measure" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="3D Laser Measurement Tool">
+          <i class="fa-solid fa-ruler-combined text-base"></i>
+          <span class="text-[9px] tracking-tight">Measure</span>
+        </button>
+
+        <!-- Notes Tab (Site Telemetry, 2D Radar & QA/QC) -->
+        <button id="rail-btn-notes" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-white transition group" title="Site Telemetry, Radar & Notes">
+          <i class="fa-solid fa-clipboard-list text-base"></i>
+          <span class="text-[9px] tracking-tight">Notes</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom: Help / Antigravity SDK Modal -->
+    <button id="btn-ide-sdk" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-white/60 hover:text-white transition flex items-center justify-center text-xs" title="Digital Twin SDK & Event Stream">
+      <i class="fa-solid fa-terminal"></i>
+    </button>
+  </nav>
+
+  <!-- ==================== MAIN CONTENT CANVAS AREA ==================== -->
+  <main class="flex-1 flex flex-col p-4 xl:p-6 overflow-hidden min-w-0 bg-[#F6F4EE] h-full">
+
+    <!-- Sub-Header Bar (Clean & Spacious, No Cluttered Buttons) -->
+    <div id="sub-header-bar" class="flex items-center justify-between mb-4 flex-shrink-0">
+      <!-- Left: Project Breadcrumbs & Title -->
+      <div>
+        <div class="text-[10px] uppercase tracking-wider text-stone-400 font-semibold mb-0.5">
+          PROJECTS &gt; JUMEIRAH ISLANDS
         </div>
-
-        <!-- Right: Collaborators, Portal Link & Primary Actions -->
         <div class="flex items-center gap-3">
-          <!-- Collaborator Avatar Stack -->
-          <div class="hidden sm:flex items-center -space-x-2">
-            <div class="w-8 h-8 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center text-xs font-bold border-2 border-[#F6F4EE]" title="Architect Tariq">MK</div>
-            <div class="w-8 h-8 rounded-full bg-[#2BA4B8] text-white flex items-center justify-center text-xs font-bold border-2 border-[#F6F4EE]" title="Leila (Client Lead)">LA</div>
-            <div class="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] font-bold border-2 border-[#F6F4EE]">+3</div>
-          </div>
-
-          <!-- Site Photo Upload Portal Link -->
-          <a href="/portal" target="_blank" id="btn-open-portal" class="px-3.5 py-1.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center gap-1.5 shadow-sm" title="Site Photo Upload Portal (Groq Vision Sync)">
-            <i class="fa-solid fa-cloud-arrow-up text-[#C87D55]"></i>
-            <span class="hidden md:inline">Photo Portal</span>
-          </a>
-
-          <!-- Share Button -->
-          <button id="btn-share" class="px-3.5 py-1.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center gap-1.5 shadow-sm" title="Share Twin URL">
-            <i class="fa-solid fa-share-nodes text-stone-500"></i>
-            <span>Share</span>
-          </button>
-
-          <!-- Present Mode Button -->
-          <button id="btn-present" class="px-4 py-1.5 rounded-full bg-[#16181A] hover:bg-black text-white text-xs font-medium transition flex items-center gap-2 shadow-md hover:shadow-lg" title="Immersive Fullscreen Presentation Mode">
-            <i class="fa-solid fa-play text-[10px]"></i>
-            <span>Present</span>
-          </button>
+          <h1 class="font-serif text-3xl xl:text-4xl font-semibold text-stone-900 tracking-tight">Villa 003</h1>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200/80 inline-flex items-center gap-1.5 shadow-sm">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Live model</span>
+          </span>
         </div>
       </div>
 
-      <!-- Main Work Area (3D Viewport Card & Right Inspector Panel) -->
-      <div id="main-work-area" class="flex-1 flex flex-row gap-5 min-h-0 overflow-hidden relative">
+      <!-- Right: Collaborator Avatars & Site Photo Portal -->
+      <div class="flex items-center gap-3">
+        <!-- Collaborator Avatar Stack -->
+        <div class="hidden sm:flex items-center -space-x-2">
+          <div class="w-8 h-8 rounded-full bg-stone-300 text-stone-700 flex items-center justify-center text-xs font-bold border-2 border-[#F6F4EE]" title="Architect Tariq">MK</div>
+          <div class="w-8 h-8 rounded-full bg-[#2BA4B8] text-white flex items-center justify-center text-xs font-bold border-2 border-[#F6F4EE]" title="Leila (Client Lead)">LA</div>
+          <div class="w-8 h-8 rounded-full bg-stone-900 text-white flex items-center justify-center text-[10px] font-bold border-2 border-[#F6F4EE]">+3</div>
+        </div>
 
-        <!-- ==================== 3D VIEWPORT CARD ==================== -->
-        <div id="viewport-3d-card" class="flex-1 relative rounded-[32px] overflow-hidden border border-stone-200/80 shadow-xl bg-gradient-to-b from-[#4A72B2] via-[#3B62A4] to-[#2D4D85] flex flex-col justify-between">
-          
-          <!-- WebGL Three.js Canvas Container -->
-          <div id="viewport-3d-wrapper" class="absolute inset-0 w-full h-full z-0">
-            <canvas id="twin-canvas" class="w-full h-full block"></canvas>
+        <!-- Site Photo Upload Portal Link -->
+        <a href="/portal" target="_blank" id="btn-open-portal" class="px-3.5 py-1.5 rounded-full bg-white hover:bg-stone-50 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center gap-1.5 shadow-sm" title="Site Photo Upload Portal (Groq Vision Sync)">
+          <i class="fa-solid fa-cloud-arrow-up text-[#C87D55]"></i>
+          <span class="hidden md:inline">Photo Portal</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Work Area (3D Viewport Card & Right Inspector Panel) -->
+    <div id="main-work-area" class="flex-1 flex flex-row gap-5 min-h-0 overflow-hidden relative">
+
+      <!-- ==================== 3D VIEWPORT CARD ==================== -->
+      <div id="viewport-3d-card" class="flex-1 relative rounded-[32px] overflow-hidden border border-stone-200/80 shadow-xl bg-gradient-to-b from-[#4A72B2] via-[#3B62A4] to-[#2D4D85] flex flex-col justify-between">
+        
+        <!-- WebGL Three.js Canvas Container -->
+        <div id="viewport-3d-wrapper" class="absolute inset-0 w-full h-full z-0">
+          <canvas id="twin-canvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
+        </div>
+
+        <!-- TOP FLOATING VIEWPORT OVERLAYS -->
+        <div class="relative z-10 p-5 flex items-start justify-between pointer-events-none">
+          <!-- Lighting Mode Pills Container -->
+          <div class="pointer-events-auto bg-black/60 backdrop-blur-md rounded-2xl p-1 flex items-center gap-1 border border-white/10 shadow-xl">
+            <button data-env="day" id="btn-env-day" class="env-pill active px-3 py-1.5 rounded-xl text-xs font-medium text-white flex items-center gap-1.5 transition">
+              <span>🟠</span>
+              <span>Soft daylight</span>
+            </button>
+            <button data-env="golden" id="btn-env-golden" class="env-pill px-3 py-1.5 rounded-xl text-xs font-medium text-white/70 hover:text-white flex items-center gap-1.5 transition">
+              <span>🟧</span>
+              <span>Golden hour</span>
+            </button>
+            <button data-env="dusk" id="btn-env-dusk" class="env-pill px-3 py-1.5 rounded-xl text-xs font-medium text-white/70 hover:text-white flex items-center gap-1.5 transition">
+              <span>🌙</span>
+              <span>Evening</span>
+            </button>
           </div>
 
-          <!-- TOP FLOATING VIEWPORT OVERLAYS -->
-          <div class="relative z-10 p-5 flex items-start justify-between pointer-events-none">
-            <!-- Lighting Pills Container -->
-            <div class="pointer-events-auto bg-black/60 backdrop-blur-md rounded-2xl p-1 flex items-center gap-1 border border-white/10 shadow-xl">
-              <button data-env="day" id="btn-env-day" class="env-pill active px-3 py-1.5 rounded-xl text-xs font-medium text-white flex items-center gap-1.5 transition">
-                <span>🟠</span>
-                <span>Soft daylight</span>
-              </button>
-              <button data-env="golden" id="btn-env-golden" class="env-pill px-3 py-1.5 rounded-xl text-xs font-medium text-white/70 hover:text-white flex items-center gap-1.5 transition">
-                <span>🟧</span>
-                <span>Golden hour</span>
-              </button>
-              <button data-env="dusk" id="btn-env-dusk" class="env-pill px-3 py-1.5 rounded-xl text-xs font-medium text-white/70 hover:text-white flex items-center gap-1.5 transition">
-                <span>🌙</span>
-                <span>Evening</span>
-              </button>
-            </div>
+          <!-- Top-Right Viewport Actions -->
+          <div class="pointer-events-auto flex items-center gap-2">
+            <!-- Cinematic Tour Button -->
+            <button id="btn-cinema-tour" class="px-3.5 py-1.5 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/15 text-xs font-medium flex items-center gap-2 transition shadow-xl group" title="360° Architectural Drone Flythrough">
+              <span class="w-2 h-2 rounded-full bg-[#C87D55] animate-ping"></span>
+              <i class="fa-solid fa-video text-[#C87D55] text-xs"></i>
+              <span class="hidden sm:inline">Cinematic Tour</span>
+            </button>
 
-            <!-- Top-Right Viewport Icons -->
-            <div class="pointer-events-auto flex items-center gap-2">
-              <button id="btn-toggle-edges" class="w-9 h-9 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition shadow-lg" title="Toggle Architectural CAD Outlines">
-                <i class="fa-solid fa-layer-group text-xs"></i>
-              </button>
-              <button id="btn-maximize-card" class="w-9 h-9 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition shadow-lg" title="Maximize 3D Card">
-                <i class="fa-solid fa-expand text-xs"></i>
-              </button>
-            </div>
+            <!-- CAD Wireframe Outlines Toggle -->
+            <button id="btn-toggle-edges" class="w-9 h-9 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition shadow-lg" title="Toggle Architectural CAD Outlines">
+              <i class="fa-solid fa-layer-group text-xs"></i>
+            </button>
+
+            <!-- Maximize Card Button -->
+            <button id="btn-maximize-card" class="w-9 h-9 rounded-2xl bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/10 flex items-center justify-center transition shadow-lg" title="Maximize Viewport">
+              <i class="fa-solid fa-expand text-xs"></i>
+            </button>
           </div>
+        </div>
 
-          <!-- ==================== 3D FLOATING CALLOUT BADGES ==================== -->
-          <!-- Pin 1: Cantilever Overhang & Pergola -->
-          <div id="callout-pin-1" class="callout-badge absolute z-20" style="top: 50%; left: 38%; display: none;">
-            <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-1.5 hover:bg-black transition">
+        <!-- ==================== 3D FLOATING CALLOUT BADGES (WITH PULSING BEACONS) ==================== -->
+        <!-- Pin 1: Cantilever Overhang & Pergola -->
+        <div id="callout-pin-1" class="callout-badge absolute z-20" style="top: 50%; left: 38%; display: none;">
+          <div class="flex flex-col items-center gap-1.5 group">
+            <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-2 hover:bg-black transition">
               <span>Cantilever Overhang &amp; Pergola</span>
             </div>
-          </div>
-
-          <!-- Pin 2: Living & Poolside Lounge -->
-          <div id="callout-pin-2" class="callout-badge absolute z-20" style="top: 60%; left: 42%; display: none;">
-            <div class="flex flex-col items-center gap-1">
-              <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-2 hover:bg-black transition">
-                <span>Living &amp; Poolside Lounge</span>
-              </div>
-              <div class="w-6 h-6 rounded-full bg-[#C87D55] text-white text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white/80">
-                2
-              </div>
+            <div class="relative w-6 h-6 rounded-full bg-[#C87D55] text-white text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white/90">
+              <span class="beacon-ring text-[#C87D55]"></span>
+              <span>1</span>
             </div>
           </div>
-
-          <!-- Pin 3: Cyan River-Vein Mosaic Pool -->
-          <div id="callout-pin-3" class="callout-badge absolute z-20" style="top: 66%; left: 54%; display: none;">
-            <div class="flex flex-col items-center gap-1">
-              <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-2 hover:bg-black transition">
-                <span>Cyan River-Vein Mosaic Pool</span>
-              </div>
-              <div class="w-6 h-6 rounded-full bg-[#2BA4B8] text-white text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white/80">
-                3
-              </div>
-            </div>
-          </div>
-
-          <!-- BOTTOM FLOATING VIEWPORT OVERLAYS -->
-          <div class="relative z-10 p-6 flex items-end justify-between pointer-events-none">
-            <!-- Bottom-Left: View Counter & Large Title -->
-            <div class="pointer-events-auto">
-              <div id="current-view-counter" class="text-[11px] uppercase tracking-wider text-white/70 font-mono mb-1 font-medium">
-                01 / 04 • CURRENT VIEW
-              </div>
-              <h2 id="current-view-title" class="font-serif text-3xl font-normal text-white drop-shadow-md">
-                Courtyard
-              </h2>
-            </div>
-
-            <!-- Bottom-Center: Navigation Controls Hint -->
-            <div class="hidden lg:block text-center pointer-events-none">
-              <span class="font-mono text-[10px] text-white/60 tracking-widest uppercase">
-                DRAG TO ORBIT • RIGHT-CLICK PAN • SCROLL TO ZOOM
-              </span>
-            </div>
-
-            <!-- Bottom-Right: Camera Carousel Arrows -->
-            <div class="pointer-events-auto flex items-center gap-2">
-              <button id="btn-prev-view" class="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/15 flex items-center justify-center transition shadow-xl" title="Previous View">
-                <i class="fa-solid fa-chevron-left text-xs"></i>
-              </button>
-              <button id="btn-next-view" class="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/15 flex items-center justify-center transition shadow-xl" title="Next View">
-                <i class="fa-solid fa-chevron-right text-xs"></i>
-              </button>
-            </div>
-          </div>
-
-          <!-- Floating Exit Presentation Mode Pill (Visible in presentation mode) -->
-          <button id="btn-exit-presentation" class="hidden absolute top-6 right-6 z-50 px-4 py-2 rounded-full bg-black/80 hover:bg-black text-white text-xs font-medium border border-white/20 transition shadow-2xl items-center gap-2">
-            <i class="fa-solid fa-xmark"></i>
-            <span>Exit Presentation</span>
-          </button>
         </div>
 
-        <!-- ==================== RIGHT INSPECTOR PANEL ==================== -->
-        <aside id="inspector-panel" class="w-80 xl:w-96 flex-shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] p-6 border border-stone-200/80 shadow-sm flex flex-col justify-between overflow-y-auto luxury-scrollbar">
-          
-          <div class="space-y-4">
-            <!-- 1. PROJECT OVERVIEW -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
-                <span>PROJECT OVERVIEW</span>
-                <button id="btn-overview-menu" class="text-stone-400 hover:text-stone-700 transition"><i class="fa-solid fa-ellipsis"></i></button>
-              </div>
-
-              <div>
-                <h2 id="proj-overview-title" class="font-serif text-2xl xl:text-3xl font-semibold text-stone-900 tracking-tight">Design handover</h2>
-                <p class="text-xs text-stone-500 mt-0.5">Villa 003 • Jumeirah Islands, Dubai</p>
-              </div>
-
-              <!-- Overall Completion Bar -->
-              <div class="pt-1 space-y-2">
-                <div class="flex items-baseline justify-between">
-                  <span class="text-xs font-medium text-stone-600">Overall completion</span>
-                  <span id="overview-progress-text" class="text-2xl font-medium text-stone-900">74%</span>
-                </div>
-                <div class="w-full h-2 bg-stone-200/80 rounded-full overflow-hidden p-[1px]">
-                  <div id="overview-progress-bar" class="h-full bg-[#C87D55] rounded-full transition-all duration-700" style="width: 74%;"></div>
-                </div>
-                <div class="flex items-center justify-between text-xs pt-0.5">
-                  <span class="flex items-center gap-1.5 text-stone-700 font-medium">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    <span>On track</span>
-                  </span>
-                  <span id="overview-handover-date" class="text-stone-500">Handover • 08 Oct</span>
-                </div>
-              </div>
+        <!-- Pin 2: Living & Poolside Lounge -->
+        <div id="callout-pin-2" class="callout-badge absolute z-20" style="top: 60%; left: 42%; display: none;">
+          <div class="flex flex-col items-center gap-1.5 group">
+            <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-2 hover:bg-black transition">
+              <span>Living &amp; Poolside Lounge</span>
             </div>
-
-            <div class="h-[1px] bg-stone-200/70 my-2"></div>
-
-            <!-- 2. SELECTED ELEMENT INSPECTOR -->
-            <div class="space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">SELECTED ELEMENT</span>
-                <span id="insp-badge" class="text-xs font-semibold text-emerald-600 flex items-center gap-1">
-                  <i class="fa-solid fa-check text-[10px]"></i> <span>Approved</span>
-                </span>
-              </div>
-
-              <h3 id="insp-title" class="font-serif text-xl font-semibold text-stone-900">Pool finish</h3>
-              <p id="insp-desc" class="text-xs text-stone-600 leading-relaxed">
-                Hand-laid cyan mosaic with a low-reflection finish, matched to approved site sample M-14.
-              </p>
-
-              <!-- Spec Grid Table -->
-              <div class="pt-2 space-y-2 text-xs">
-                <div class="flex items-center justify-between">
-                  <span class="text-stone-400">Package</span>
-                  <span id="insp-code" class="font-mono text-stone-800 font-semibold">FN-14</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-stone-400">Revision</span>
-                  <span id="insp-photo-ref" class="text-stone-800 font-medium">R12 • 2 days ago</span>
-                </div>
-                <div class="flex items-center justify-between">
-                  <span class="text-stone-400">Owner</span>
-                  <span id="insp-owner" class="text-stone-800 font-medium">Mira Studio</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="h-[1px] bg-stone-200/70 my-2"></div>
-
-            <!-- 3. RECENT ACTIVITY -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-[11px]">
-                <span class="font-semibold text-stone-400 uppercase tracking-wider">RECENT ACTIVITY</span>
-                <button id="btn-view-activity" class="text-stone-600 hover:text-stone-900 font-medium underline">View all</button>
-              </div>
-
-              <div class="space-y-2.5">
-                <div class="flex items-start gap-2.5">
-                  <div class="w-7 h-7 rounded-full bg-stone-200 text-stone-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">LA</div>
-                  <div>
-                    <div class="text-xs font-medium text-stone-800">Leila approved the material sample</div>
-                    <div class="text-[10px] text-stone-400">18 minutes ago</div>
-                  </div>
-                </div>
-                <div class="flex items-start gap-2.5">
-                  <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px] font-bold flex-shrink-0">AI</div>
-                  <div>
-                    <div class="text-xs font-medium text-stone-800">Groq Vision AI synced carport (empty)</div>
-                    <div class="text-[10px] text-stone-400">1 hour ago</div>
-                  </div>
-                </div>
-              </div>
+            <div class="relative w-6 h-6 rounded-full bg-[#C87D55] text-white text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white/90">
+              <span class="beacon-ring text-[#C87D55]"></span>
+              <span>2</span>
             </div>
           </div>
+        </div>
 
-          <!-- Bottom: Ask Gemini / AI Copilot Trigger Button -->
-          <div class="pt-4 flex justify-end">
-            <button id="btn-toggle-ai" class="bg-[#16181A] hover:bg-black text-white px-5 py-2.5 rounded-full text-xs font-medium flex items-center gap-2 shadow-xl hover:shadow-2xl transition transform active:scale-95 group" title="Open AI Copilot (Groq / Gemini)">
-              <i class="fa-solid fa-sparkles text-[#C87D55] group-hover:rotate-12 transition"></i>
-              <span>Ask Gemini</span>
+        <!-- Pin 3: Cyan River-Vein Mosaic Pool -->
+        <div id="callout-pin-3" class="callout-badge absolute z-20" style="top: 66%; left: 54%; display: none;">
+          <div class="flex flex-col items-center gap-1.5 group">
+            <div class="px-3 py-1 rounded-full bg-black/85 backdrop-blur-md text-white text-[11px] font-medium border border-white/15 shadow-2xl flex items-center gap-2 hover:bg-black transition">
+              <span>Cyan River-Vein Mosaic Pool</span>
+            </div>
+            <div class="relative w-6 h-6 rounded-full bg-[#2BA4B8] text-white text-xs font-bold flex items-center justify-center shadow-lg border-2 border-white/90">
+              <span class="beacon-ring text-[#2BA4B8]"></span>
+              <span>3</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM FLOATING VIEWPORT OVERLAYS -->
+        <div class="relative z-10 p-6 flex items-end justify-between pointer-events-none">
+          <!-- Bottom-Left: View Counter & Large Title -->
+          <div class="pointer-events-auto">
+            <div id="current-view-counter" class="text-[11px] uppercase tracking-wider text-white/70 font-mono mb-1 font-medium">
+              01 / 04 • CURRENT VIEW
+            </div>
+            <h2 id="current-view-title" class="font-serif text-3xl font-normal text-white drop-shadow-md">
+              Courtyard
+            </h2>
+          </div>
+
+          <!-- Bottom-Center: Navigation Controls Hint -->
+          <div class="hidden lg:block text-center pointer-events-none">
+            <span class="font-mono text-[10px] text-white/75 tracking-widest uppercase bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full border border-white/10">
+              DRAG TO ORBIT • RIGHT-CLICK PAN • CLICK VILLA TO INSPECT
+            </span>
+          </div>
+
+          <!-- Bottom-Right: Camera Carousel Arrows -->
+          <div class="pointer-events-auto flex items-center gap-2">
+            <button id="btn-prev-view" class="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/15 flex items-center justify-center transition shadow-xl" title="Previous View">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <button id="btn-next-view" class="w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/15 flex items-center justify-center transition shadow-xl" title="Next View">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
             </button>
           </div>
-        </aside>
+        </div>
 
-        <!-- ==================== FEATURE DRAWERS ==================== -->
+        <!-- Floating Exit Presentation Mode Pill (Visible in presentation mode) -->
+        <button id="btn-exit-presentation" class="hidden absolute top-6 right-6 z-50 px-4 py-2 rounded-full bg-black/80 hover:bg-black text-white text-xs font-medium border border-white/20 transition shadow-2xl items-center gap-2">
+          <i class="fa-solid fa-xmark"></i>
+          <span>Exit Presentation</span>
+        </button>
+      </div>
 
-        <!-- 1. MODEL DRAWER (Phase Scrubber & Scene Reconciliation) -->
-        <aside id="model-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between pb-2 border-b border-stone-200">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-cube text-[#C87D55]"></i>
-                <h3 class="font-serif text-lg font-semibold text-stone-900">3D BIM Model Studio</h3>
-              </div>
-              <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <!-- Chronological Phase Scrubber -->
-            <div class="space-y-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Milestone Phase Scrubber</span>
-              <div class="space-y-1.5">
-                <button data-phase="shoring" class="phase-btn w-full p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-left transition flex items-center justify-between text-xs text-stone-700 bg-stone-50">
-                  <span class="flex items-center gap-2"><i class="fa-solid fa-trowel-bricks text-[#C87D55]"></i> 1. Superstructure &amp; Shoring</span>
-                  <span class="font-mono text-[10px] text-stone-500">62%</span>
-                </button>
-                <button data-phase="site" class="phase-btn w-full p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-left transition flex items-center justify-between text-xs text-stone-700 bg-stone-50">
-                  <span class="flex items-center gap-2"><i class="fa-solid fa-helmet-safety text-[#C87D55]"></i> 2. 08 Oct 2026 Site State</span>
-                  <span class="font-mono text-[10px] text-stone-500">86.4%</span>
-                </button>
-                <button data-phase="render" class="phase-btn active w-full p-2.5 rounded-xl border border-[#C87D55] bg-stone-900 text-white text-left transition flex items-center justify-between text-xs shadow-md">
-                  <span class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-[#C87D55]"></i> 3. Master Design Handover</span>
-                  <span class="font-mono text-[10px] text-[#C87D55] font-semibold">100%</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Vision-Based Scene Reconciliation -->
-            <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-700">Vision Reconciler (Groq AI)</span>
-                <button id="btn-toggle-carport-mesh" class="px-2 py-0.5 rounded text-[10px] font-mono bg-white border border-stone-200 text-stone-700">
-                  Carport: <span id="val-car-mesh-vis" class="text-rose-600 font-bold">EMPTY</span>
-                </button>
-              </div>
-              <div class="flex gap-2">
-                <input type="text" id="vision-image-url" value="site-pictures/Exterior Parking/20261013180000.jpg" class="flex-1 bg-white text-stone-800 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-mono" placeholder="Image URL or local preset" />
-                <button id="btn-run-vision" class="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-medium flex items-center gap-1.5 shadow">
-                  <i class="fa-solid fa-bolt text-[#C87D55]"></i> Reconcile
-                </button>
-              </div>
-              <div class="flex gap-2 pt-1">
-                <button type="button" class="vision-preset-btn flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-medium" data-url="20840-1748865490206.jpeg">
-                  🚗 Occupied Preset
-                </button>
-                <button type="button" class="vision-preset-btn flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-medium" data-url="site-pictures/Exterior Parking/20261013180000.jpg">
-                  🚫 Empty Preset
-                </button>
-              </div>
-            </div>
-
-            <!-- Exploded BIM Axonometric -->
-            <div class="space-y-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Exploded BIM Axonometric</span>
-              <div class="flex gap-2">
-                <button id="btn-explode-off" class="flex-1 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium">Assembled (0%)</button>
-                <button id="btn-explode-on" class="flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium">Explode BIM (100%)</button>
-              </div>
-            </div>
-
-            <!-- Viewport Reset & Diagnostics -->
-            <button id="btn-crystal-clear" class="w-full py-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center justify-center gap-2 shadow-sm">
-              <i class="fa-solid fa-wand-sparkles text-[#C87D55]"></i> Reset Viewport &amp; Section Cuts
-            </button>
+      <!-- ==================== RIGHT INSPECTOR PANEL (CLEAN & DYNAMIC) ==================== -->
+      <aside id="inspector-panel" class="w-84 xl:w-96 flex-shrink-0 bg-white/95 backdrop-blur-md rounded-[32px] p-6 border border-stone-200/80 shadow-sm flex flex-col justify-between overflow-y-auto luxury-scrollbar space-y-4">
+        
+        <!-- CARD 1: PROJECT OVERVIEW & PHASE SCRUBBER -->
+        <div class="space-y-3.5 bg-stone-50/80 p-4 rounded-2xl border border-stone-200/70">
+          <div class="flex items-center justify-between text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+            <span>PROJECT OVERVIEW</span>
+            <span class="flex items-center gap-1.5 text-emerald-700 text-[10px] font-medium bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/70">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span id="overview-handover-date">Handover 08 Oct</span>
+            </span>
           </div>
-        </aside>
 
-        <!-- 2. LAYERS DRAWER (BIM Section Cuts & Floor Isolation) -->
-        <aside id="layers-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between pb-2 border-b border-stone-200">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-layer-group text-[#C87D55]"></i>
-                <h3 class="font-serif text-lg font-semibold text-stone-900">BIM Slicing &amp; Layers</h3>
-              </div>
-              <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <!-- Live BIM Section Cuts -->
-            <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-700">Live BIM Section Cuts</span>
-                <button id="btn-reset-clip" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white hover:bg-stone-100 border border-stone-200 text-stone-600">Reset</button>
-              </div>
-              <div class="space-y-2">
-                <div>
-                  <div class="flex justify-between text-xs text-stone-600 mb-1">
-                    <span>Horizontal Level Cut (Y)</span>
-                    <span id="val-clip-y" class="font-mono text-stone-900 font-semibold">Full (12.0m)</span>
-                  </div>
-                  <input type="range" id="slider-clip-y" min="-3.2" max="12.0" step="0.1" value="12.0" class="w-full accent-[#C87D55]" />
-                </div>
-                <div>
-                  <div class="flex justify-between text-xs text-stone-600 mb-1">
-                    <span>Longitudinal Cross-Cut (X)</span>
-                    <span id="val-clip-x" class="font-mono text-stone-900 font-semibold">Full (16.0m)</span>
-                  </div>
-                  <input type="range" id="slider-clip-x" min="-9.5" max="16.0" step="0.1" value="16.0" class="w-full accent-[#C87D55]" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Floor Level Isolation -->
-            <div class="space-y-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Floor Level Isolation</span>
-              <div class="grid grid-cols-2 gap-1.5 text-xs">
-                <button class="floor-btn active py-2 px-2.5 rounded-xl bg-stone-900 text-white font-medium" data-floor="all" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
-                <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="roof" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
-                <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="first" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
-                <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="ground" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
-                <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 col-span-2" data-floor="basement" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
-              </div>
-            </div>
+          <div>
+            <h2 id="proj-overview-title" class="font-serif text-2xl font-semibold text-stone-900 tracking-tight">Design handover</h2>
+            <p class="text-xs text-stone-500 mt-0.5">Villa 003 • Jumeirah Islands, Dubai</p>
           </div>
-        </aside>
 
-        <!-- 3. NOTES & TELEMETRY DRAWER -->
-        <aside id="notes-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between pb-2 border-b border-stone-200">
-              <div class="flex items-center gap-2">
-                <i class="fa-solid fa-clipboard-list text-[#C87D55]"></i>
-                <h3 class="font-serif text-lg font-semibold text-stone-900">Site Telemetry &amp; Radar</h3>
-              </div>
-              <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          <!-- Overall Completion Bar -->
+          <div class="space-y-1.5">
+            <div class="flex items-baseline justify-between">
+              <span class="text-xs font-medium text-stone-600">Overall completion</span>
+              <span id="overview-progress-text" class="text-2xl font-medium text-stone-900">74%</span>
             </div>
-
-            <!-- 2D Interactive Site Radar -->
-            <div class="space-y-1.5">
-              <div class="flex items-center justify-between text-xs text-stone-600">
-                <span class="font-semibold uppercase tracking-wider text-[11px] text-stone-400">Interactive Site Radar</span>
-                <span class="font-mono text-[10px] text-stone-400">Click to Teleport</span>
-              </div>
-              <div class="relative w-full h-36 rounded-2xl overflow-hidden bg-stone-900 border border-stone-800">
-                <canvas id="radar-canvas" width="300" height="144" class="w-full h-full block"></canvas>
-                <div class="absolute bottom-1.5 left-2 text-[9px] font-mono text-stone-400 pointer-events-none">
-                  N ↑ • LAKE (-Z) TOP • STREET (+Z) BOTTOM
-                </div>
-              </div>
-            </div>
-
-            <!-- Verified Sensor Nodes -->
-            <div class="space-y-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Verified Sensor Stations</span>
-              <div id="pins-list-container" class="space-y-1.5">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- 4. AI BUILDING ASSISTANT DRAWER -->
-        <aside id="ai-chat-dock" class="absolute top-0 right-0 bottom-0 w-96 max-w-full bg-white/98 backdrop-blur-md rounded-[32px] border border-stone-200 shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 translate-x-full opacity-0 pointer-events-none">
-          <!-- Header -->
-          <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center text-xs shadow-sm">
-                <i class="fa-solid fa-sparkles text-[#C87D55]"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-semibold text-stone-900 font-serif">AI Copilot</span>
-                  <span id="ai-online-status" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">GROQ 20B</span>
-                </div>
-                <div class="text-[10px] text-stone-500">Villa 003 BIM Intelligence</div>
-              </div>
-            </div>
-            <div class="flex items-center gap-1">
-              <button id="btn-clear-chat" class="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 flex items-center justify-center transition" title="Clear Chat"><i class="fa-solid fa-rotate-right text-xs"></i></button>
-              <button id="btn-close-ai" class="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 flex items-center justify-center transition" title="Close"><i class="fa-solid fa-xmark text-sm"></i></button>
+            <div class="w-full h-2.5 bg-stone-200/80 rounded-full overflow-hidden p-[1px]">
+              <div id="overview-progress-bar" class="h-full bg-gradient-to-r from-[#C87D55] to-[#B86B43] rounded-full transition-all duration-700 shadow-sm" style="width: 74%;"></div>
             </div>
           </div>
 
-          <!-- Active Element Banner -->
-          <div id="ai-active-element-banner" class="hidden px-3.5 py-2 bg-stone-100 border-b border-stone-200 flex items-center justify-between text-xs">
-            <div class="truncate">
-              <span id="ai-active-element-id" class="text-[10px] font-mono text-stone-500 block">PERGOLA-01</span>
-              <span id="ai-active-element-name" class="font-medium text-stone-900 truncate block">Cantilevered Pergola</span>
-            </div>
-            <button id="btn-ai-focus-element" class="px-2 py-1 rounded bg-stone-900 text-white text-[10px] font-mono">Focus</button>
-          </div>
-
-          <!-- Messages Container -->
-          <div id="ai-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 font-sans luxury-scrollbar text-xs">
-            <!-- Messages injected here -->
-          </div>
-
-          <!-- Suggestions Track -->
-          <div id="ai-suggestions-track" class="px-3 py-1.5 border-t border-stone-200 bg-stone-50 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-            <!-- Injected pills -->
-          </div>
-
-          <!-- Chat Input -->
-          <div class="p-3 border-t border-stone-200 bg-white">
-            <div class="relative flex items-center">
-              <input id="ai-chat-input" type="text" placeholder="Ask about materials, pool, or handover..." class="w-full bg-stone-50 text-stone-900 placeholder-stone-400 text-xs rounded-xl pl-3 pr-10 py-2.5 border border-stone-200 focus:outline-none focus:border-stone-400 transition" autocomplete="off" />
-              <button id="btn-ai-send" class="absolute right-1.5 w-7 h-7 rounded-lg bg-stone-900 hover:bg-black text-white flex items-center justify-center transition shadow-sm">
-                <i class="fa-solid fa-paper-plane text-[11px]"></i>
+          <!-- Quick Interactive Milestone Phase Switcher -->
+          <div class="pt-1">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-stone-400 block mb-1.5">Switch Site Phase</span>
+            <div class="grid grid-cols-3 gap-1.5">
+              <button data-phase="shoring" class="phase-btn py-1.5 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-[10px] font-medium text-center transition">
+                Shoring 62%
+              </button>
+              <button data-phase="site" class="phase-btn py-1.5 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-100 text-stone-700 text-[10px] font-medium text-center transition">
+                Site 86%
+              </button>
+              <button data-phase="render" class="phase-btn active py-1.5 px-2 rounded-xl border border-stone-900 bg-stone-900 text-white text-[10px] font-medium text-center transition shadow-sm">
+                Master 100%
               </button>
             </div>
           </div>
-        </aside>
+        </div>
 
-      </div>
-    </main>
-  </div>
+        <!-- CARD 2: ACTIVE 3D SELECTION INSPECTOR -->
+        <div class="space-y-3 bg-white p-4 rounded-2xl border border-stone-200/70 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">ACTIVE 3D SELECTION</span>
+            <span id="insp-badge" class="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+              <i class="fa-solid fa-check text-[10px]"></i> <span>Approved</span>
+            </span>
+          </div>
+
+          <div>
+            <h3 id="insp-title" class="font-serif text-xl font-semibold text-stone-900">Cyan River-Vein Mosaic Pool</h3>
+            <p id="insp-desc" class="text-xs text-stone-600 leading-relaxed mt-1">
+              Post-tensioned C50 white architectural concrete slab projecting over the rear pool with sheer descent waterfall weir and glowing cyan river-vein mosaic floor.
+            </p>
+          </div>
+
+          <!-- Spec Grid Table -->
+          <div class="pt-1 space-y-1.5 text-xs bg-stone-50 p-3 rounded-xl border border-stone-100">
+            <div class="flex items-center justify-between">
+              <span class="text-stone-400">Package</span>
+              <span id="insp-code" class="font-mono text-stone-800 font-semibold">FN-14</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-stone-400">Revision</span>
+              <span id="insp-photo-ref" class="text-stone-800 font-medium">R12 • 2 days ago</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-stone-400">Contractor</span>
+              <span id="insp-owner" class="text-stone-800 font-medium">Mira Studio</span>
+            </div>
+          </div>
+
+          <!-- Interactive Action Buttons -->
+          <div class="flex items-center gap-2 pt-1">
+            <button id="btn-fly-selected" class="flex-1 py-2 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-plane-up text-[#C87D55] text-xs"></i>
+              <span>Fly to Space</span>
+            </button>
+            <button id="btn-highlight-selected" class="py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-medium transition" title="Highlight in 3D">
+              <i class="fa-solid fa-wand-magic-sparkles text-stone-600"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD 3: 3D VISUAL CONTROLS & ANIMATIONS -->
+        <div class="space-y-2.5 bg-stone-50/80 p-4 rounded-2xl border border-stone-200/70">
+          <div class="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+            3D VISUAL EFFECTS &amp; CONTROLS
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button id="btn-quick-tour" class="p-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 font-medium text-left flex items-center gap-2 transition shadow-sm">
+              <i class="fa-solid fa-video text-[#C87D55]"></i>
+              <span>Drone Tour</span>
+            </button>
+            <button id="btn-quick-explode" class="p-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 font-medium text-left flex items-center gap-2 transition shadow-sm">
+              <i class="fa-solid fa-cubes text-[#C87D55]"></i>
+              <span>Explode BIM</span>
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ==================== FEATURE DRAWERS ==================== -->
+
+      <!-- 1. MODEL DRAWER (Phase Scrubber & Scene Reconciliation) -->
+      <aside id="model-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-cube text-[#C87D55]"></i>
+              <h3 class="font-serif text-lg font-semibold text-stone-900">3D BIM Model Studio</h3>
+            </div>
+            <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Chronological Phase Scrubber -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Milestone Phase Scrubber</span>
+            <div class="space-y-1.5">
+              <button data-phase="shoring" class="phase-btn w-full p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-left transition flex items-center justify-between text-xs text-stone-700 bg-stone-50">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-trowel-bricks text-[#C87D55]"></i> 1. Superstructure &amp; Shoring</span>
+                <span class="font-mono text-[10px] text-stone-500">62%</span>
+              </button>
+              <button data-phase="site" class="phase-btn w-full p-2.5 rounded-xl border border-stone-200 hover:border-stone-400 text-left transition flex items-center justify-between text-xs text-stone-700 bg-stone-50">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-helmet-safety text-[#C87D55]"></i> 2. 08 Oct 2026 Site State</span>
+                <span class="font-mono text-[10px] text-stone-500">86.4%</span>
+              </button>
+              <button data-phase="render" class="phase-btn active w-full p-2.5 rounded-xl border border-[#C87D55] bg-stone-900 text-white text-left transition flex items-center justify-between text-xs shadow-md">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles text-[#C87D55]"></i> 3. Master Design Handover</span>
+                <span class="font-mono text-[10px] text-[#C87D55] font-semibold">100%</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Vision-Based Scene Reconciliation -->
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-700">Vision Reconciler (Groq AI)</span>
+              <button id="btn-toggle-carport-mesh" class="px-2 py-0.5 rounded text-[10px] font-mono bg-white border border-stone-200 text-stone-700">
+                Carport: <span id="val-car-mesh-vis" class="text-rose-600 font-bold">EMPTY</span>
+              </button>
+            </div>
+            <div class="flex gap-2">
+              <input type="text" id="vision-image-url" value="site-pictures/Exterior Parking/20261013180000.jpg" class="flex-1 bg-white text-stone-800 px-3 py-1.5 rounded-lg border border-stone-200 text-xs font-mono" placeholder="Image URL or local preset" />
+              <button id="btn-run-vision" class="px-3 py-1.5 rounded-lg bg-stone-900 hover:bg-black text-white text-xs font-medium flex items-center gap-1.5 shadow">
+                <i class="fa-solid fa-bolt text-[#C87D55]"></i> Reconcile
+              </button>
+            </div>
+            <div class="flex gap-2 pt-1">
+              <button type="button" class="vision-preset-btn flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-medium" data-url="20840-1748865490206.jpeg">
+                🚗 Occupied Preset
+              </button>
+              <button type="button" class="vision-preset-btn flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[10px] font-medium" data-url="site-pictures/Exterior Parking/20261013180000.jpg">
+                🚫 Empty Preset
+              </button>
+            </div>
+          </div>
+
+          <!-- Exploded BIM Axonometric -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Exploded BIM Axonometric</span>
+            <div class="flex gap-2">
+              <button id="btn-explode-off" class="flex-1 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-medium">Assembled (0%)</button>
+              <button id="btn-explode-on" class="flex-1 py-1.5 rounded-lg bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium">Explode BIM (100%)</button>
+            </div>
+          </div>
+
+          <!-- Viewport Reset & Diagnostics -->
+          <button id="btn-crystal-clear" class="w-full py-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center justify-center gap-2 shadow-sm">
+            <i class="fa-solid fa-wand-sparkles text-[#C87D55]"></i> Reset Viewport &amp; Section Cuts
+          </button>
+        </div>
+      </aside>
+
+      <!-- 2. LAYERS DRAWER (BIM Section Cuts & Floor Isolation) -->
+      <aside id="layers-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-layer-group text-[#C87D55]"></i>
+              <h3 class="font-serif text-lg font-semibold text-stone-900">BIM Slicing &amp; Layers</h3>
+            </div>
+            <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Live BIM Section Cuts -->
+          <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-700">Live BIM Section Cuts</span>
+              <button id="btn-reset-clip" class="text-[10px] font-mono px-2 py-0.5 rounded bg-white hover:bg-stone-100 border border-stone-200 text-stone-600">Reset</button>
+            </div>
+            <div class="space-y-2">
+              <div>
+                <div class="flex justify-between text-xs text-stone-600 mb-1">
+                  <span>Horizontal Level Cut (Y)</span>
+                  <span id="val-clip-y" class="font-mono text-stone-900 font-semibold">Full (12.0m)</span>
+                </div>
+                <input type="range" id="slider-clip-y" min="-3.2" max="12.0" step="0.1" value="12.0" class="w-full accent-[#C87D55]" />
+              </div>
+              <div>
+                <div class="flex justify-between text-xs text-stone-600 mb-1">
+                  <span>Longitudinal Cross-Cut (X)</span>
+                  <span id="val-clip-x" class="font-mono text-stone-900 font-semibold">Full (16.0m)</span>
+                </div>
+                <input type="range" id="slider-clip-x" min="-9.5" max="16.0" step="0.1" value="16.0" class="w-full accent-[#C87D55]" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Floor Level Isolation -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Floor Level Isolation</span>
+            <div class="grid grid-cols-2 gap-1.5 text-xs">
+              <button class="floor-btn active py-2 px-2.5 rounded-xl bg-stone-900 text-white font-medium" data-floor="all" onclick="window.JumeirahTwinAPI.isolateFloor('all')">All Levels</button>
+              <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="roof" onclick="window.JumeirahTwinAPI.isolateFloor('roof')">Roof Canopy</button>
+              <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="first" onclick="window.JumeirahTwinAPI.isolateFloor('first')">First Floor (FF)</button>
+              <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50" data-floor="ground" onclick="window.JumeirahTwinAPI.isolateFloor('ground')">Ground Floor (GF)</button>
+              <button class="floor-btn py-2 px-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 col-span-2" data-floor="basement" onclick="window.JumeirahTwinAPI.isolateFloor('basement')">Lower Pool Deck (LG)</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 3. NOTES & TELEMETRY DRAWER -->
+      <aside id="notes-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-list text-[#C87D55]"></i>
+              <h3 class="font-serif text-lg font-semibold text-stone-900">Site Telemetry &amp; Radar</h3>
+            </div>
+            <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- 2D Interactive Site Radar -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-xs text-stone-600">
+              <span class="font-semibold uppercase tracking-wider text-[11px] text-stone-400">Interactive Site Radar</span>
+              <span class="font-mono text-[10px] text-stone-400">Click to Teleport</span>
+            </div>
+            <div class="relative w-full h-36 rounded-2xl overflow-hidden bg-stone-900 border border-stone-800">
+              <canvas id="radar-canvas" width="300" height="144" class="w-full h-full block"></canvas>
+              <div class="absolute bottom-1.5 left-2 text-[9px] font-mono text-stone-400 pointer-events-none">
+                N ↑ • LAKE (-Z) TOP • STREET (+Z) BOTTOM
+              </div>
+            </div>
+          </div>
+
+          <!-- Verified Sensor Nodes -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Verified Sensor Stations</span>
+            <div id="pins-list-container" class="space-y-1.5">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 4. AI BUILDING ASSISTANT DRAWER -->
+      <aside id="ai-chat-dock" class="absolute top-0 right-0 bottom-0 w-96 max-w-full bg-white/98 backdrop-blur-md rounded-[32px] border border-stone-200 shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 translate-x-full opacity-0 pointer-events-none">
+        <!-- Header -->
+        <div class="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center text-xs shadow-sm">
+              <i class="fa-solid fa-sparkles text-[#C87D55]"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-stone-900 font-serif">AI Copilot</span>
+                <span id="ai-online-status" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">GROQ 20B</span>
+              </div>
+              <div class="text-[10px] text-stone-500">Villa 003 BIM Intelligence</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button id="btn-clear-chat" class="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 flex items-center justify-center transition" title="Clear Chat"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+            <button id="btn-close-ai" class="w-7 h-7 rounded-lg text-stone-400 hover:text-stone-700 flex items-center justify-center transition" title="Close"><i class="fa-solid fa-xmark text-sm"></i></button>
+          </div>
+        </div>
+
+        <!-- Active Element Banner -->
+        <div id="ai-active-element-banner" class="hidden px-3.5 py-2 bg-stone-100 border-b border-stone-200 flex items-center justify-between text-xs">
+          <div class="truncate">
+            <span id="ai-active-element-id" class="text-[10px] font-mono text-stone-500 block">PERGOLA-01</span>
+            <span id="ai-active-element-name" class="font-medium text-stone-900 truncate block">Cantilevered Pergola</span>
+          </div>
+          <button id="btn-ai-focus-element" class="px-2 py-1 rounded bg-stone-900 text-white text-[10px] font-mono">Focus</button>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="ai-messages-container" class="flex-1 overflow-y-auto p-4 space-y-3 font-sans luxury-scrollbar text-xs">
+          <!-- Messages injected here -->
+        </div>
+
+        <!-- Suggestions Track -->
+        <div id="ai-suggestions-track" class="px-3 py-1.5 border-t border-stone-200 bg-stone-50 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <!-- Injected pills -->
+        </div>
+
+        <!-- Chat Input -->
+        <div class="p-3 border-t border-stone-200 bg-white">
+          <div class="relative flex items-center">
+            <input id="ai-chat-input" type="text" placeholder="Ask about materials, pool, or handover..." class="w-full bg-stone-50 text-stone-900 placeholder-stone-400 text-xs rounded-xl pl-3 pr-10 py-2.5 border border-stone-200 focus:outline-none focus:border-stone-400 transition" autocomplete="off" />
+            <button id="btn-ai-send" class="absolute right-1.5 w-7 h-7 rounded-lg bg-stone-900 hover:bg-black text-white flex items-center justify-center transition shadow-sm">
+              <i class="fa-solid fa-paper-plane text-[11px]"></i>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
 
   <!-- ==================== 3D MEASUREMENT HUD ==================== -->
   <div id="measure-hud" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-auto hidden flex-col items-center gap-2">
@@ -684,7 +667,7 @@ window.JumeirahTwinAPI.setEnvironment('golden');</pre>
           <div class="flex flex-col">
             <div class="font-medium text-stone-900 mb-1">Live SDK Stream:</div>
             <div id="sdkEventStream" class="flex-1 bg-stone-900 p-3 rounded-xl font-mono text-[10px] text-emerald-300 overflow-y-auto space-y-1 max-h-40">
-              <div>[SYS] JumeirahTwinAPI v5.0 initialized</div>
+              <div>[SYS] JumeirahTwinAPI v5.1 initialized</div>
               <div>[BIM] Live client intelligence online</div>
             </div>
           </div>
@@ -705,7 +688,6 @@ window.JumeirahTwinAPI.setEnvironment('golden');</pre>
     <div id="log-landscape-bar" style="width: 100%;"></div>
     <span id="env-mode-badge">DAY</span>
     <button id="btn-walk-mode"></button>
-    <button id="btn-cinema-tour"></button>
     <button id="btn-toggle-pins"></button>
     <button id="btn-vision-ai"></button>
     <button id="btn-clean-ui"></button>
@@ -720,16 +702,17 @@ window.JumeirahTwinAPI.setEnvironment('golden');</pre>
     <span id="stat-fps">60</span>
     <div id="cam-carousel-track"></div>
     <div id="walk-hud"></div>
+    <button id="btn-toggle-ai"></button>
   </div>
 
   <!-- Application Logic Modules -->
-  <script src="dashboardData.js?v=5.0"></script>
-  <script src="modelBuilder.js?v=5.0"></script>
-  <script src="lightingManager.js?v=5.0"></script>
-  <script src="cameraManager.js?v=5.0"></script>
-  <script src="measurementTool.js?v=5.0"></script>
-  <script src="minimap.js?v=5.0"></script>
-  <script src="buildingAssistant.js?v=5.0"></script>
-  <script src="app.js?v=5.0"></script>
+  <script src="dashboardData.js?v=5.1"></script>
+  <script src="modelBuilder.js?v=5.1"></script>
+  <script src="lightingManager.js?v=5.1"></script>
+  <script src="cameraManager.js?v=5.1"></script>
+  <script src="measurementTool.js?v=5.1"></script>
+  <script src="minimap.js?v=5.1"></script>
+  <script src="buildingAssistant.js?v=5.1"></script>
+  <script src="app.js?v=5.1"></script>
 </body>
 </html>

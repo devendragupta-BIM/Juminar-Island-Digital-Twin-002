@@ -152,9 +152,11 @@ class CameraManager {
       fov: this.mainCamera.fov
     };
 
-    // 3D Visual Objects Group
+    // 3D Visual Objects Group (Hidden by default to prevent green frustum cone clutter)
     this.cameraGroup = new THREE.Group();
     this.nodeGroup = new THREE.Group();
+    this.cameraGroup.visible = false;
+    this.nodeGroup.visible = false;
     this.scene.add(this.cameraGroup);
     this.scene.add(this.nodeGroup);
 
@@ -166,7 +168,7 @@ class CameraManager {
     this.walkKeys = { w: false, a: false, s: false, d: false, q: false, e: false };
     this.cinemaTourActive = false;
     this.cinemaTourAngle = 0;
-    this.pinsVisible = true;
+    this.pinsVisible = false;
 
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
@@ -328,6 +330,7 @@ class CameraManager {
     const titleEl = document.getElementById('insp-title');
     const badgeEl = document.getElementById('insp-badge');
     const descEl = document.getElementById('insp-desc');
+    const ownerEl = document.getElementById('insp-owner');
     const metricsEl = document.getElementById('insp-metrics');
 
     if (codeEl) codeEl.textContent = node.code;
@@ -335,6 +338,7 @@ class CameraManager {
     if (titleEl) titleEl.textContent = node.title;
     if (badgeEl) badgeEl.textContent = node.badge;
     if (descEl) descEl.textContent = node.desc;
+    if (ownerEl) ownerEl.textContent = node.owner || 'Mira Studio';
 
     if (metricsEl) {
       metricsEl.innerHTML = node.metrics.map(([k, v]) => `
@@ -767,12 +771,27 @@ class CameraManager {
   toggleCinemaTour(forceState) {
     this.cinemaTourActive = forceState !== undefined ? forceState : !this.cinemaTourActive;
     const btn = document.getElementById('btn-cinema-tour');
+    const quickBtn = document.getElementById('btn-quick-tour');
     if (this.cinemaTourActive) {
       if (this.walkModeActive) this.toggleWalkMode(false);
-      if (btn) btn.classList.add('bg-amber-500/30', 'border-amber-400');
+      if (btn) {
+        btn.classList.add('bg-[#C87D55]', 'text-white', 'border-transparent');
+        btn.classList.remove('bg-black/60');
+      }
+      if (quickBtn) {
+        quickBtn.classList.add('bg-stone-900', 'text-white');
+        quickBtn.classList.remove('bg-white', 'text-stone-800');
+      }
       this.controls.autoRotate = false;
     } else {
-      if (btn) btn.classList.remove('bg-amber-500/30', 'border-amber-400');
+      if (btn) {
+        btn.classList.remove('bg-[#C87D55]', 'border-transparent');
+        btn.classList.add('bg-black/60');
+      }
+      if (quickBtn) {
+        quickBtn.classList.remove('bg-stone-900', 'text-white');
+        quickBtn.classList.add('bg-white', 'text-stone-800');
+      }
     }
   }
 
@@ -823,6 +842,11 @@ class CameraManager {
           this.enterInspection(p.userData.cameraData.id, true);
           return;
         }
+      }
+
+      // Check Direct 3D Villa Geometry Click (Spatial Raycasting)
+      if (typeof this.onSceneClick === 'function') {
+        this.onSceneClick(this.raycaster, e);
       }
     });
 
