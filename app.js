@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const lightingManager = new LightingManager(scene, renderer);
   const cameraManager = new CameraManager(scene, camera, controls, renderer.domElement, lightingManager, modelBuilder);
-  const measurementTool = new MeasurementTool(scene, camera, renderer.domElement);
   const minimap = new SiteMinimap('radar-canvas', camera, controls, cameraManager);
   const buildingAssistant = new BuildingAssistant();
   buildingAssistant.init(scene, camera, controls, cameraManager, modelBuilder);
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.cameraManager = cameraManager;
   window.modelBuilder = modelBuilder;
   window.lightingManager = lightingManager;
-  window.measurementTool = measurementTool;
   window.minimap = minimap;
   window.buildingAssistant = buildingAssistant;
 
@@ -1004,7 +1002,7 @@ Definitions for this specific site:
     });
   }
 
-  // Keyboard Shortcuts (1-5 views, WASD walk, C pins, M measure, E explode, L light, H hud)
+  // Keyboard Shortcuts (1-5 views, C pins, A assistant, L light, H hud)
   window.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     const k = e.key.toLowerCase();
@@ -1015,7 +1013,6 @@ Definitions for this specific site:
     if (k === '5') window.JumeirahTwinAPI.setCamera('parkingSide');
     if (k === 'c') window.JumeirahTwinAPI.togglePins();
     if (k === 'a') window.JumeirahTwinAPI.toggleAssistant();
-    if (k === 'm') measurementTool.toggleMode();
     if (k === 'h') window.JumeirahTwinAPI.toggleCleanUI?.();
     if (k === 'l') {
       const modes = ['day', 'dusk', 'golden', 'night'];
@@ -1256,10 +1253,12 @@ Definitions for this specific site:
   const railLayers = document.getElementById('rail-btn-layers');
   const railCameras = document.getElementById('rail-btn-cameras');
   const railSolar = document.getElementById('rail-btn-solar');
+  const railIntel = document.getElementById('rail-btn-intel');
   const modelDrawer = document.getElementById('model-drawer');
   const layersDrawer = document.getElementById('layers-drawer');
   const camerasDrawer = document.getElementById('cameras-drawer');
   const solarDrawer = document.getElementById('solar-drawer');
+  const intelDrawer = document.getElementById('intel-drawer');
 
   if (railExplore) {
     railExplore.addEventListener('click', () => {
@@ -1317,6 +1316,66 @@ Definitions for this specific site:
       } else {
         railExplore?.classList.add('active');
       }
+    });
+  }
+
+  if (railIntel && intelDrawer) {
+    railIntel.addEventListener('click', () => {
+      const isClosed = intelDrawer.classList.contains('closed');
+      closeAllDrawers();
+      if (isClosed) {
+        intelDrawer.classList.remove('closed');
+        railIntel.classList.add('active');
+      } else {
+        railExplore?.classList.add('active');
+      }
+    });
+  }
+
+  // Executive Client Report Modal Handlers
+  const execReportModal = document.getElementById('executive-report-modal');
+  const btnOpenExecReport = document.getElementById('btn-open-executive-report');
+  const btnCloseExecReport = document.getElementById('btn-close-report-modal');
+  const btnCopyExecReport = document.getElementById('btn-copy-report');
+  const btnPrintExecReport = document.getElementById('btn-print-report');
+
+  if (btnOpenExecReport && execReportModal) {
+    btnOpenExecReport.addEventListener('click', () => {
+      execReportModal.classList.remove('hidden');
+      execReportModal.classList.add('flex');
+    });
+  }
+
+  if (btnCloseExecReport && execReportModal) {
+    btnCloseExecReport.addEventListener('click', () => {
+      execReportModal.classList.add('hidden');
+      execReportModal.classList.remove('flex');
+    });
+  }
+
+  if (execReportModal) {
+    execReportModal.addEventListener('click', (e) => {
+      if (e.target === execReportModal) {
+        execReportModal.classList.add('hidden');
+        execReportModal.classList.remove('flex');
+      }
+    });
+  }
+
+  if (btnCopyExecReport) {
+    btnCopyExecReport.addEventListener('click', () => {
+      const reportText = document.getElementById('executive-report-body')?.innerText || '';
+      navigator.clipboard.writeText(reportText).then(() => {
+        showToast('Executive Report Copied to Clipboard');
+      }).catch(() => {
+        showToast('Report Copied');
+      });
+    });
+  }
+
+  if (btnPrintExecReport) {
+    btnPrintExecReport.addEventListener('click', () => {
+      window.print();
     });
   }
 

@@ -90,6 +90,12 @@
           <i class="fa-solid fa-sun text-base"></i>
           <span class="text-[9px] tracking-tight">Solar</span>
         </button>
+
+        <!-- Executive Intel & QA/QC Tab (Client Investment Confidence & Audit) -->
+        <button id="rail-btn-intel" class="left-rail-item w-full py-2.5 flex flex-col items-center gap-1 text-white/50 hover:text-[#C87D55] transition group" title="Executive Intelligence & QA/QC">
+          <i class="fa-solid fa-chart-line text-base text-[#C87D55]"></i>
+          <span class="text-[9px] tracking-tight text-[#C87D55]">Intel</span>
+        </button>
       </div>
     </div>
 
@@ -567,6 +573,146 @@
         </div>
       </aside>
 
+      <!-- 5. EXECUTIVE INTELLIGENCE & QA/QC DRAWER -->
+      <aside id="intel-drawer" class="drawer-panel closed absolute top-0 right-0 bottom-0 w-88 xl:w-96 bg-white/98 backdrop-blur-md rounded-[32px] p-6 border border-stone-200 shadow-2xl z-40 flex flex-col justify-between overflow-y-auto luxury-scrollbar">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-[#C87D55]"></i>
+              <div>
+                <h3 class="font-serif text-lg font-semibold text-stone-900 leading-tight">Executive Intelligence</h3>
+                <span class="text-[10px] text-stone-400 font-mono">QA/QC &amp; Investment Health</span>
+              </div>
+            </div>
+            <button class="drawer-close-btn text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Hero: Client Investment Confidence Index -->
+          <div class="bg-gradient-to-br from-stone-900 to-[#1e1b18] text-white p-4 rounded-2xl border border-stone-800 shadow-md relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[10px] uppercase font-mono tracking-widest text-stone-300">Investment Confidence</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-full bg-[#C87D55]/30 text-[#C87D55] border border-[#C87D55]/50 text-[10px] font-mono font-bold">GRADE A</span>
+            </div>
+
+            <div class="flex items-center gap-4">
+              <!-- Radial Progress Ring -->
+              <div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                  <path class="text-stone-800" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  <path class="text-[#C87D55]" stroke-dasharray="84, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                </svg>
+                <div class="absolute text-center">
+                  <span class="text-base font-bold font-mono text-white">84</span>
+                  <span class="text-[9px] text-stone-400 block -mt-1">%</span>
+                </div>
+              </div>
+
+              <div>
+                <div class="text-xs font-semibold text-white">Handover On Schedule</div>
+                <div class="text-[11px] text-stone-400 leading-snug mt-0.5">Plot JI-003 delivery verified with zero architectural non-conformance.</div>
+                <div class="text-[10px] text-emerald-400 font-mono mt-1 flex items-center gap-1">
+                  <i class="fa-solid fa-shield-check text-[10px]"></i>
+                  <span>Guaranteed Max Price (GMP) Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Breakdown Tiles -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Milestone Progress Breakdown</span>
+            <div class="space-y-1.5 text-xs">
+              <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/80">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-stone-700 font-medium">1. Structural Superstructure</span>
+                  <span class="font-mono text-stone-900 font-bold">86.4%</span>
+                </div>
+                <div class="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-[#C87D55] rounded-full" style="width: 86.4%;"></div>
+                </div>
+              </div>
+
+              <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/80">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-stone-700 font-medium">2. MEP &amp; Smart Lighting</span>
+                  <span class="font-mono text-stone-900 font-bold">92.0%</span>
+                </div>
+                <div class="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-emerald-600 rounded-full" style="width: 92%;"></div>
+                </div>
+              </div>
+
+              <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/80">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-stone-700 font-medium">3. Architectural Joinery &amp; Glass</span>
+                  <span class="font-mono text-stone-900 font-bold">74.0%</span>
+                </div>
+                <div class="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-amber-600 rounded-full" style="width: 74%;"></div>
+                </div>
+              </div>
+
+              <div class="bg-stone-50 p-2.5 rounded-xl border border-stone-200/80">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="text-stone-700 font-medium">4. Infinity Pool &amp; Waterfalls</span>
+                  <span class="font-mono text-stone-900 font-bold">80.0%</span>
+                </div>
+                <div class="w-full h-1.5 bg-stone-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-[#2BA4B8] rounded-full" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Approved Luxury Material Specs -->
+          <div class="space-y-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-400">Approved Material Sign-Offs</span>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+              <div class="p-2 rounded-xl bg-stone-50 border border-stone-200">
+                <div class="font-semibold text-stone-900">C50 Concrete</div>
+                <div class="text-[10px] text-stone-500 font-mono">Sample M-14 • Approved</div>
+              </div>
+              <div class="p-2 rounded-xl bg-stone-50 border border-stone-200">
+                <div class="font-semibold text-stone-900">Cyan Pool Mosaic</div>
+                <div class="text-[10px] text-stone-500 font-mono">Sample M-22 • Approved</div>
+              </div>
+              <div class="p-2 rounded-xl bg-stone-50 border border-stone-200">
+                <div class="font-semibold text-stone-900">Fluted Walnut</div>
+                <div class="text-[10px] text-stone-500 font-mono">Sample M-08 • Approved</div>
+              </div>
+              <div class="p-2 rounded-xl bg-stone-50 border border-stone-200">
+                <div class="font-semibold text-stone-900">Low-E Glass Decals</div>
+                <div class="text-[10px] text-stone-500 font-mono">Sample M-19 • Approved</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-Time AI Site Intelligence -->
+          <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-stone-700">Groq AI Site Reconciler</span>
+              <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Online</span>
+            </div>
+            <p class="text-[11px] text-stone-600 leading-relaxed">
+              Real-time computer vision actively syncs uploaded construction photos with the 3D twin mesh objects (carport clearance, scaffolding, and finishes).
+            </p>
+            <a href="/portal" target="_blank" class="w-full py-2 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium flex items-center justify-center gap-1.5 transition shadow-xs">
+              <i class="fa-solid fa-cloud-arrow-up text-[#C87D55]"></i>
+              <span>Launch Site Photo Upload Portal</span>
+            </a>
+          </div>
+
+          <!-- Generate Executive Client Report Button -->
+          <button id="btn-open-executive-report" class="w-full py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-medium transition flex items-center justify-center gap-2 shadow-md">
+            <i class="fa-solid fa-file-contract text-[#C87D55]"></i>
+            <span>Generate Executive Client Report</span>
+          </button>
+        </div>
+      </aside>
+
       <!-- 4. AI BUILDING ASSISTANT DRAWER -->
       <aside id="ai-chat-dock" class="absolute top-0 right-0 bottom-0 w-96 max-w-full bg-white/98 backdrop-blur-md rounded-[32px] border border-stone-200 shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 translate-x-full opacity-0 pointer-events-none">
         <!-- Header -->
@@ -622,14 +768,62 @@
     </div>
   </main>
 
-  <!-- ==================== 3D MEASUREMENT HUD ==================== -->
-  <div id="measure-hud" class="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-auto hidden flex-col items-center gap-2">
-    <div class="bg-stone-900/90 text-white backdrop-blur-md px-5 py-2.5 rounded-full text-xs font-mono border border-white/20 flex items-center gap-4 shadow-2xl">
-      <span class="flex items-center gap-1.5"><i class="fa-solid fa-ruler text-[#C87D55]"></i> <strong>3D Measurement Mode</strong></span>
-      <span>•</span>
-      <span id="measure-output">Click two 3D vertices to measure</span>
-      <button id="measure-reset-btn" class="px-2 py-0.5 rounded bg-white/20 hover:bg-white/30 text-[10px] transition">Reset</button>
-      <button id="measure-close-btn" class="w-5 h-5 rounded-full hover:bg-white/20 flex items-center justify-center text-xs transition"><i class="fa-solid fa-xmark"></i></button>
+  <!-- ==================== EXECUTIVE CLIENT REPORT MODAL ==================== -->
+  <div id="executive-report-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full border border-stone-200 overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-stone-900 text-white flex items-center justify-center text-xs">
+            <i class="fa-solid fa-file-contract text-[#C87D55]"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-stone-900 font-serif">Executive Site Intelligence Briefing</h3>
+            <div class="text-[10px] text-stone-500 font-mono">Villa 003 • Jumeirah Islands Dubai • Verified Telemetry</div>
+          </div>
+        </div>
+        <button id="btn-close-report-modal" class="text-stone-400 hover:text-stone-700 p-1"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="p-6 overflow-y-auto space-y-4 text-xs text-stone-700 leading-relaxed font-sans luxury-scrollbar">
+        <div class="bg-stone-50 p-3.5 rounded-2xl border border-stone-200 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] uppercase font-mono text-stone-400 block font-semibold">Client Investment Confidence</span>
+            <span class="text-base font-bold text-stone-900 font-mono">84 / 100 • Grade A</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] uppercase font-mono text-stone-400 block font-semibold">Project Milestone</span>
+            <span class="text-xs font-semibold text-emerald-700">86.4% Completed • On Schedule</span>
+          </div>
+        </div>
+
+        <div id="executive-report-body" class="space-y-3 bg-white p-4 rounded-2xl border border-stone-100">
+          <p><strong>1. Executive Project Summary:</strong><br>
+          Structural superstructure, diaphragm shoring, and perimeter retaining walls for Villa 003 are 100% physically completed and verified via on-site laser telemetry. The project remains on schedule for final handover on 08 October 2026 under the Guaranteed Maximum Price (GMP) framework with zero architectural non-conformance.</p>
+
+          <p><strong>2. Structural Envelope &amp; Architectural Glazing:</strong><br>
+          Double-height main entrance atrium curtain walls, custom etched-wave security glazing, and 13.2-meter cantilever pergola framing have achieved verified QA/QC sign-off (Package GL-02 &amp; FN-14). Living green-wall columns and fluted American walnut exterior architectural cladding are installed to specification.</p>
+
+          <p><strong>3. Infinity Pool Hydraulics &amp; Subterranean Basins:</strong><br>
+          The sunken lower pool deck and 10-meter lap basin feature hand-laid cyan river-vein mosaic tiling with sheer descent waterfall weir hydraulics. Subterranean pump rooms, waterproofing membranes, and underwater LED circuits have successfully passed 72-hour hydrostatic retention testing.</p>
+
+          <p><strong>4. Handover Timeline &amp; Financial Compliance:</strong><br>
+          Total capital progress is verified at 86.4% against the milestone schedule. Contractor Mira Studio has completed all preliminary inspections. Digital Twin real-time telemetry and Groq Vision AI automated site photo reconciliations remain permanently active to guarantee absolute quality assurance through design handover.</p>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 border-t border-stone-200 bg-stone-50 flex items-center justify-between">
+        <span class="text-[10px] font-mono text-stone-400">Official Report • Villa 003 Jumeirah Islands</span>
+        <div class="flex items-center gap-2">
+          <button id="btn-print-report" class="px-3.5 py-1.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-700 text-xs font-medium transition flex items-center gap-1.5 shadow-xs">
+            <i class="fa-solid fa-print text-stone-500"></i>
+            <span>Print</span>
+          </button>
+          <button id="btn-copy-report" class="px-4 py-1.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-copy text-[#C87D55]"></i>
+            <span>Copy Briefing</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -744,7 +938,6 @@ window.JumeirahTwinAPI.setEnvironment('golden');</pre>
   <script src="modelBuilder.js?v=5.1"></script>
   <script src="lightingManager.js?v=5.1"></script>
   <script src="cameraManager.js?v=5.1"></script>
-  <script src="measurementTool.js?v=5.1"></script>
   <script src="minimap.js?v=5.1"></script>
   <script src="buildingAssistant.js?v=5.1"></script>
   <script src="app.js?v=5.1"></script>

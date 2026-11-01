@@ -424,7 +424,7 @@ const MIME_TYPES = {
 };
 
 // Dedicated route for Site Photo Upload & AI Intelligence Portal
-app.get(['/portal', '/upload', '/site-portal'], (req, res) => {
+app.get(['/portal', '/upload', '/site-portal', '/client-dashboard', '/villa003-client-dashboard.html'], (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'portal.html'));
 });
 

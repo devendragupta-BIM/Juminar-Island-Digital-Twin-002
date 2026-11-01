@@ -378,6 +378,10 @@
               <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-700">Live 3D Digital Twin (Synced View)</h3>
             </div>
             <div class="flex items-center gap-2">
+              <button id="btn-reload-iframe" class="text-[11px] font-medium px-2.5 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 transition flex items-center gap-1.5 shadow-xs" title="Reload 3D Viewport">
+                <i class="fa-solid fa-arrows-rotate text-[#C87D55]"></i>
+                <span>Reload 3D</span>
+              </button>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">
                 <i class="fa-solid fa-rotate mr-1 animate-spin text-emerald-500" style="animation-duration: 8s;"></i> Real-time Sync
               </span>
@@ -388,6 +392,20 @@
           <!-- Embedded Iframe of Twin -->
           <div class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-stone-200/80 bg-stone-900 relative shadow-inner">
             <iframe id="twin-iframe" src="/index.html?mode=site" class="w-full h-full border-0"></iframe>
+            <!-- Auto-reconnect banner / friendly retry button overlay (hidden by default) -->
+            <div id="twin-retry-overlay" class="hidden absolute inset-0 bg-stone-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-20 space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl text-[#C87D55]">
+                <i class="fa-solid fa-server"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-semibold">3D Twin Server Connecting</h4>
+                <p class="text-xs text-stone-400 mt-1 max-w-sm">Render instance is spinning up. The 3D view will automatically reconnect once active.</p>
+              </div>
+              <button id="btn-manual-retry" class="px-4 py-2 rounded-xl bg-[#C87D55] hover:bg-[#b86b43] text-white text-xs font-medium transition flex items-center gap-2 shadow-md">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span>Retry Connection</span>
+              </button>
+            </div>
             <div class="absolute bottom-2 left-2 pointer-events-none bg-stone-900/80 backdrop-blur px-3 py-1 rounded-full border border-white/10 text-[10px] font-mono text-white/90">
               3D Viewport Synchronized via BroadcastChannel
             </div>
@@ -450,11 +468,51 @@
     const splitToggleLabel = document.getElementById('split-toggle-label');
     const btnForceEmpty = document.getElementById('btn-force-empty');
     const btnForceOccupied = document.getElementById('btn-force-occupied');
+    const btnReloadIframe = document.getElementById('btn-reload-iframe');
+    const btnManualRetry = document.getElementById('btn-manual-retry');
+    const twinRetryOverlay = document.getElementById('twin-retry-overlay');
     const portalToast = document.getElementById('portal-toast');
     const portalToastText = document.getElementById('portal-toast-text');
 
     let currentImageData = null; // { base64, mimeType, filename, size }
     let activePresetPath = null;
+
+    // Reload Twin Iframe
+    function reloadTwin() {
+      if (twinIframe) {
+        if (twinRetryOverlay) twinRetryOverlay.classList.add('hidden');
+        twinIframe.src = '/index.html?mode=site&t=' + Date.now();
+        showToast('Reloading 3D Digital Twin...');
+      }
+    }
+
+    if (btnReloadIframe) btnReloadIframe.addEventListener('click', reloadTwin);
+    if (btnManualRetry) btnManualRetry.addEventListener('click', reloadTwin);
+
+    // Auto-health checker to detect Render awake status
+    async function checkHealthAndTwin() {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const connStatus = document.getElementById('twin-conn-status');
+          if (connStatus) connStatus.textContent = '3D TWIN: ONLINE';
+          if (twinRetryOverlay) twinRetryOverlay.classList.add('hidden');
+        } else {
+          showRetryBanner();
+        }
+      } catch (e) {
+        showRetryBanner();
+      }
+    }
+
+    function showRetryBanner() {
+      const connStatus = document.getElementById('twin-conn-status');
+      if (connStatus) connStatus.textContent = '3D TWIN: CONNECTING...';
+      if (twinRetryOverlay) twinRetryOverlay.classList.remove('hidden');
+      setTimeout(checkHealthAndTwin, 3000);
+    }
+
+    checkHealthAndTwin();
 
     // Show Toast
     function showToast(msg) {
