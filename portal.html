@@ -275,6 +275,19 @@
               <p class="text-[11px] text-stone-500 line-clamp-1">Glazing and framing structural stage</p>
             </button>
           </div>
+
+          <!-- NEW — Manual animation test buttons. Add below existing preset buttons -->
+          <div style="margin-top: 14px; border-top: 1px solid rgba(0,0,0,0.08); padding-top: 12px;">
+            <div style="font-size: 11px; color: #78716c; margin-bottom: 8px; letter-spacing: 0.06em; font-family: monospace; font-weight: 600;">
+              ANIMATION TEST (Manual)
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" onclick="anim_playCarEntry()"  style="flex:1; min-width: 90px; padding:8px; background:#16181A; border:1px solid #2a3550; color:#00e676; border-radius:10px; cursor:pointer; font-size:11px; font-weight:600;">🚗 Car Enters</button>
+              <button type="button" onclick="anim_playCarExit()"   style="flex:1; min-width: 90px; padding:8px; background:#16181A; border:1px solid #2a3550; color:#ffab40; border-radius:10px; cursor:pointer; font-size:11px; font-weight:600;">🚗 Car Exits</button>
+              <button type="button" onclick="anim_startWorkerPulse()" style="flex:1; min-width: 90px; padding:8px; background:#16181A; border:1px solid #2a3550; color:#00d4ff; border-radius:10px; cursor:pointer; font-size:11px; font-weight:600;">👷 Workers On</button>
+              <button type="button" onclick="anim_stopWorkerPulse()"  style="flex:1; min-width: 90px; padding:8px; background:#16181A; border:1px solid #2a3550; color:#a8a29e; border-radius:10px; cursor:pointer; font-size:11px; font-weight:600;">👷 Workers Off</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -328,6 +341,28 @@
             <p id="ai-summary-text" class="text-xs text-stone-700 leading-relaxed italic">
               "Front carport bay and driveway are completely clear of all vehicles; superstructure scaffolding active."
             </p>
+          </div>
+
+          <!-- NEW — Animation Status Strip. Add below the existing Groq Vision Summary block -->
+          <div id="animStatusStrip" style="
+            margin-top: 4px;
+            margin-bottom: 4px;
+            padding: 12px 16px;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.25);
+            border-radius: 16px;
+            font-size: 12px;
+            font-family: monospace;
+            display: none;
+          ">
+            <div style="color: #00d4ff; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.08em; display: flex; align-items: center; justify-content: space-between;">
+              <span>3D ANIMATION STATUS</span>
+              <span style="font-size: 10px; color: #64748b; font-weight: 400;">Villa 003 Live Engine</span>
+            </div>
+            <div id="animStatusCar"    style="color: #64748b; padding: 2px 0;">🚗 Car — no change detected</div>
+            <div id="animStatusWorker" style="color: #64748b; padding: 2px 0;">👷 Workers — no change detected</div>
+            <div id="animStatusPool"   style="color: #64748b; padding: 2px 0;">💧 Pool — no change detected</div>
+            <div id="animEventLog"     style="margin-top: 8px; max-height: 80px; overflow-y: auto; font-size: 11px; border-top: 1px solid rgba(0, 212, 255, 0.1); padding-top: 4px;"></div>
           </div>
 
           <!-- 4 Detection Metrics Cards -->
@@ -476,6 +511,186 @@
 
     let currentImageData = null; // { base64, mimeType, filename, size }
     let activePresetPath = null;
+
+    // ── VILLA 003 LIVE ANIMATION LAYER (Additions Only) ──
+    let anim_carState = null; // null | 'occupied' | 'empty'
+    let anim_workerState = null; // null | 'present' | 'clear'
+    let anim_poolState = null; // null | 'filled' | 'dry'
+
+    function anim_sendToTwin(action, payload) {
+      const iframe = document.getElementById('twin-iframe')
+                 || document.getElementById('twinIframe')
+                 || document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage(
+          { type: 'TWIN_ANIM', action, payload },
+          '*'
+        );
+      }
+      try {
+        if (typeof syncChannel !== 'undefined' && syncChannel) {
+          syncChannel.postMessage({ type: 'TWIN_ANIM', action, payload });
+        }
+      } catch (e) {}
+    }
+
+    function anim_log(msg) {
+      const t = new Date().toTimeString().slice(0, 8);
+      console.log(`[ANIM ${t}] ${msg}`);
+      const log = document.getElementById('animEventLog');
+      if (log) {
+        const line = document.createElement('div');
+        line.textContent = `[${t}] ${msg}`;
+        line.style.color = '#00d4ff';
+        log.appendChild(line);
+        log.scrollTop = log.scrollHeight;
+      }
+    }
+
+    function anim_updatePortalTile(state) {
+      const tiles = document.querySelectorAll('[class*="tile"], [class*="detection"], [class*="state"]');
+      tiles.forEach(tile => {
+        if (tile.textContent.includes('Carport') || tile.textContent.includes('EMPTY') || tile.textContent.includes('OCCUPIED')) {
+          const statusEl = tile.querySelector('strong, span, b') || tile;
+          if (state === 'occupied') statusEl.textContent = 'OCCUPIED';
+          if (state === 'empty')    statusEl.textContent = 'EMPTY';
+        }
+      });
+      const metricCar = document.getElementById('metric-car-status');
+      if (metricCar) {
+        metricCar.textContent = (state === 'occupied') ? 'OCCUPIED' : 'EMPTY';
+        metricCar.className = (state === 'occupied') ? 'text-xs font-bold text-amber-700' : 'text-xs font-bold text-emerald-700';
+      }
+    }
+
+    function anim_handleCarTransition(detected) {
+      const strip = document.getElementById('animStatusStrip');
+      if (strip) strip.style.display = 'block';
+
+      const newState = detected ? 'occupied' : 'empty';
+      if (anim_carState === newState) return;
+      const prev = anim_carState;
+      anim_carState = newState;
+      if (prev === null) {
+        anim_sendToTwin('ANIM_CAR_SNAP', { visible: detected });
+        const statusCar = document.getElementById('animStatusCar');
+        if (statusCar) {
+          statusCar.textContent = detected ? '🚗 Car — parked in carport' : '🚗 Car — carport empty';
+          statusCar.style.color = detected ? '#00e676' : '#64748b';
+        }
+        return;
+      }
+      if (prev === 'empty' && newState === 'occupied') anim_playCarEntry();
+      if (prev === 'occupied' && newState === 'empty')  anim_playCarExit();
+    }
+
+    function anim_playCarEntry() {
+      const strip = document.getElementById('animStatusStrip');
+      if (strip) strip.style.display = 'block';
+      const statusCar = document.getElementById('animStatusCar');
+      if (statusCar) {
+        statusCar.textContent = '🚗 Car — entering carport…';
+        statusCar.style.color = '#00e676';
+      }
+
+      anim_log('Car entry animation triggered');
+      anim_sendToTwin('SET_VIEW', 'carport');
+      setTimeout(() => {
+        anim_sendToTwin('ANIM_CAR_POSITION', { x: 0, z: 14, visible: true });
+      }, 800);
+      setTimeout(() => {
+        anim_sendToTwin('ANIM_CAR_MOVE', {
+          fromX: 0, fromZ: 14,
+          toX:   0, toZ:   0,
+          duration: 3000,
+          easing: 'easeInOutQuad'
+        });
+      }, 1000);
+      setTimeout(() => {
+        anim_updatePortalTile('occupied');
+        anim_log('Car entry complete — carport occupied');
+        if (statusCar) {
+          statusCar.textContent = '🚗 Car — parked in carport';
+          statusCar.style.color = '#00e676';
+        }
+      }, 4200);
+    }
+
+    function anim_playCarExit() {
+      const strip = document.getElementById('animStatusStrip');
+      if (strip) strip.style.display = 'block';
+      const statusCar = document.getElementById('animStatusCar');
+      if (statusCar) {
+        statusCar.textContent = '🚗 Car — leaving carport…';
+        statusCar.style.color = '#ffab40';
+      }
+
+      anim_log('Car exit animation triggered');
+      anim_sendToTwin('SET_VIEW', 'carport');
+      setTimeout(() => {
+        anim_sendToTwin('ANIM_CAR_MOVE', {
+          fromX: 0, fromZ:  0,
+          toX:   0, toZ:  14,
+          duration: 3000,
+          easing: 'easeInOutQuad'
+        });
+      }, 800);
+      setTimeout(() => {
+        anim_sendToTwin('ANIM_CAR_POSITION', { visible: false });
+        anim_updatePortalTile('empty');
+        anim_log('Car exit complete — carport empty');
+        if (statusCar) {
+          statusCar.textContent = '🚗 Car — carport empty';
+          statusCar.style.color = '#64748b';
+        }
+      }, 4000);
+    }
+
+    function anim_handleWorkerTransition(detected) {
+      const strip = document.getElementById('animStatusStrip');
+      if (strip) strip.style.display = 'block';
+
+      const newState = detected ? 'present' : 'clear';
+      if (anim_workerState === newState) return;
+      anim_workerState = newState;
+      anim_sendToTwin('ANIM_WORKER_PULSE', { active: detected });
+      anim_log(detected ? 'Worker pulse started' : 'Worker pulse stopped');
+      const statusWorker = document.getElementById('animStatusWorker');
+      if (statusWorker) {
+        statusWorker.textContent = detected ? '👷 Workers — active on site' : '👷 Workers — site cleared';
+        statusWorker.style.color = detected ? '#00d4ff' : '#64748b';
+      }
+    }
+
+    function anim_startWorkerPulse() {
+      anim_handleWorkerTransition(true);
+    }
+    function anim_stopWorkerPulse() {
+      anim_handleWorkerTransition(false);
+    }
+
+    function anim_handlePoolTransition(detected) {
+      const strip = document.getElementById('animStatusStrip');
+      if (strip) strip.style.display = 'block';
+
+      const newState = detected ? 'filled' : 'dry';
+      if (anim_poolState === newState) return;
+      anim_poolState = newState;
+      anim_sendToTwin('ANIM_POOL_FILL', { fill: detected });
+      anim_log(detected ? 'Pool fill animation triggered' : 'Pool drain animation triggered');
+      const statusPool = document.getElementById('animStatusPool');
+      if (statusPool) {
+        statusPool.textContent = detected ? '💧 Pool — filling water surface' : '💧 Pool — dry shell';
+        statusPool.style.color = detected ? '#00d4ff' : '#64748b';
+      }
+      if (detected) anim_sendToTwin('SET_VIEW', 'rearPool');
+    }
+
+    window.anim_playCarEntry = anim_playCarEntry;
+    window.anim_playCarExit = anim_playCarExit;
+    window.anim_startWorkerPulse = anim_startWorkerPulse;
+    window.anim_stopWorkerPulse = anim_stopWorkerPulse;
+    window.anim_handlePoolTransition = anim_handlePoolTransition;
 
     // Reload Twin Iframe
     function reloadTwin() {
@@ -738,6 +953,11 @@
       metricPoolConf.textContent = Math.round((sceneState.pool_has_water_conf || 0.85) * 100) + '% Conf';
 
       document.getElementById('reconcile-time-badge').textContent = new Date().toLocaleTimeString();
+
+      // ── ANIMATION LAYER HOOKS (Villa 003 Live Animation Layer) ──
+      anim_handleCarTransition(isCar);
+      anim_handleWorkerTransition(isWorkers);
+      anim_handlePoolTransition(isPool);
     }
 
     // Synchronize to Digital Twin via BroadcastChannel & Iframe postMessage

@@ -392,6 +392,8 @@ Definitions for this specific site:
       if (event.data?.type === 'NEW_SITE_PHOTO') {
         lastSyncedPhotoId = event.data.photo?.id || event.data.timestamp;
         handleRemoteSitePhoto(event.data.photo, event.data.sceneState, 'BROADCAST');
+      } else if (event.data?.type === 'TWIN_ANIM') {
+        handleTwinAnim(event.data.action, event.data.payload);
       }
     };
   }
@@ -652,10 +654,152 @@ Definitions for this specific site:
     getState: () => ({ ...AppState })
   };
 
+  // ── TWIN ANIMATION LAYER HANDLER (Villa 003 Live Animation Layer) ──
+  function handleTwinAnim(action, payload) {
+    if (!action) return;
+
+    if (action === 'SET_VIEW' || action === 'SET_CAMERA' || action === 'SET_CAMERA_VIEW') {
+      if (window.JumeirahTwinAPI?.setCameraView) {
+        window.JumeirahTwinAPI.setCameraView(payload);
+      }
+      return;
+    }
+
+    if (action === 'ANIM_CAR_SNAP') {
+      const mesh = scene.getObjectByName('carport-car-mesh');
+      if (mesh) {
+        mesh.visible = payload.visible;
+        if (payload.visible) {
+          mesh.position.set(0, 0, 0);
+          mesh.rotation.y = 0;
+        }
+      }
+      if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
+        window.modelBuilder.setCarportVehiclesVisible(payload.visible);
+      }
+    }
+
+    if (action === 'ANIM_CAR_POSITION') {
+      const mesh = scene.getObjectByName('carport-car-mesh');
+      if (!mesh) return;
+      if (payload.visible !== undefined) {
+        mesh.visible = payload.visible;
+        if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
+          window.modelBuilder.setCarportVehiclesVisible(payload.visible);
+        }
+      }
+      if (payload.x !== undefined) mesh.position.x = payload.x;
+      if (payload.z !== undefined) mesh.position.z = payload.z;
+    }
+
+    if (action === 'ANIM_CAR_MOVE') {
+      const mesh = scene.getObjectByName('carport-car-mesh');
+      if (!mesh) return;
+      mesh.visible = true;
+      if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
+        window.modelBuilder.setCarportVehiclesVisible(true);
+      }
+      const fromX = payload.fromX !== undefined ? payload.fromX : 0;
+      const fromZ = payload.fromZ !== undefined ? payload.fromZ : 14;
+      const toX = payload.toX !== undefined ? payload.toX : 0;
+      const toZ = payload.toZ !== undefined ? payload.toZ : 0;
+      const dur = payload.duration || 3000;
+
+      mesh.position.set(fromX, mesh.position.y || 0, fromZ);
+      const start = performance.now();
+      const dx = toX - fromX;
+      const dz = toZ - fromZ;
+      function step(now) {
+        const t = Math.min((now - start) / dur, 1);
+        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOutQuad
+        mesh.position.x = fromX + dx * e;
+        mesh.position.z = fromZ + dz * e;
+        mesh.rotation.y = dz < 0 ? 0 : Math.PI;
+        if (t < 1) {
+          requestAnimationFrame(step);
+        } else {
+          if (dz < 0) mesh.rotation.y = 0;
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    if (action === 'ANIM_WORKER_PULSE') {
+      const workerGroup = scene.getObjectByName('worker-group-mesh');
+      if (!workerGroup) return;
+
+      if (!payload.active) {
+        if (window._anim_workerRafId) {
+          cancelAnimationFrame(window._anim_workerRafId);
+          window._anim_workerRafId = null;
+        }
+        let fadeStart = performance.now();
+        workerGroup.traverse(c => { if (c.material) c.material.transparent = true; });
+        function fadeOut(now) {
+          const t = Math.min((now - fadeStart) / 1000, 1);
+          workerGroup.traverse(c => { if (c.material) c.material.opacity = 1 - t; });
+          if (t < 1) requestAnimationFrame(fadeOut);
+          else workerGroup.visible = false;
+        }
+        requestAnimationFrame(fadeOut);
+        return;
+      }
+
+      workerGroup.visible = true;
+      workerGroup.traverse(c => {
+        if (c.material) { c.material.transparent = false; c.material.opacity = 1; }
+      });
+      const baseY = workerGroup.position.y;
+      function pulseLoop(now) {
+        workerGroup.position.y = baseY + Math.sin(now * 0.002) * 0.08;
+        workerGroup.position.x += Math.sin(now * 0.0007) * 0.001;
+        window._anim_workerRafId = requestAnimationFrame(pulseLoop);
+      }
+      window._anim_workerRafId = requestAnimationFrame(pulseLoop);
+    }
+
+    if (action === 'ANIM_POOL_FILL') {
+      const poolMesh = scene.getObjectByName('pool-water-surface');
+      if (!poolMesh) return;
+
+      const emptyY  = poolMesh.userData.emptyY  ?? (poolMesh.userData.emptyY  = poolMesh.position.y - 1.2);
+      const filledY = poolMesh.userData.filledY ?? (poolMesh.userData.filledY = poolMesh.position.y);
+
+      poolMesh.visible = true;
+      const fromY    = payload.fill ? emptyY  : filledY;
+      const toY      = payload.fill ? filledY : emptyY;
+      const duration = 4000;
+      const start    = performance.now();
+
+      function fillLoop(now) {
+        const t  = Math.min((now - start) / duration, 1);
+        const e  = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOutQuad
+        poolMesh.position.y = fromY + (toY - fromY) * e;
+        if (payload.fill) {
+          poolMesh.scale.x = 1 + Math.sin(now * 0.005) * 0.004;
+          poolMesh.scale.z = 1 + Math.cos(now * 0.004) * 0.004;
+        }
+        if (t < 1) {
+          requestAnimationFrame(fillLoop);
+        } else {
+          if (!payload.fill) poolMesh.visible = false;
+          poolMesh.scale.set(1, 1, 1);
+        }
+      }
+      requestAnimationFrame(fillLoop);
+    }
+  }
+
   // Parent iframe message bridge & TWIN_COMMAND dispatcher
   window.addEventListener('message', (event) => {
     if (!event.data || typeof event.data !== 'object') return;
     const data = event.data;
+
+    // Handle Live Animation Layer commands (type: 'TWIN_ANIM')
+    if (data.type === 'TWIN_ANIM') {
+      handleTwinAnim(data.action, data.payload);
+      return;
+    }
 
     let action = data.action;
     let payload = data.payload;

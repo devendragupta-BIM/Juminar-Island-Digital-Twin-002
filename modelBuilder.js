@@ -516,6 +516,7 @@ class VillaModelBuilder {
     // Additional Vision Reconciler scene telemetry target groups
     const workerGroup = new THREE.Group();
     workerGroup.name = 'worker-group-mesh';
+    this.buildWorkerFigures(workerGroup);
     this.scene.add(workerGroup);
 
     const craneGroup = new THREE.Group();
@@ -813,6 +814,7 @@ class VillaModelBuilder {
     const poolSurface = new THREE.Mesh(new THREE.PlaneGeometry(7.56, 9.96, 32, 32), this.mats.poolWater);
     poolSurface.rotation.x = -Math.PI / 2;
     poolSurface.position.set(-5.5, -3.32, -10.2);
+    poolSurface.name = 'pool-water-surface';
     this.groups.water.add(poolSurface);
 
     // 5. Underwater Cyan LED Pool Lighting (16W glow)
@@ -885,7 +887,7 @@ class VillaModelBuilder {
     this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, -0.10, this.carportCarsGroup); // Bay 1 (Well clear of entrance wall at x=4.1)
     this.createLuxuryCar('audi', 9.2, 0.0, 7.0, -0.15, this.carportCarsGroup);   // Bay 2 (Center parking bay)
     this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, -0.18, this.carportCarsGroup); // Bay 3 (Right bay, clear of columns at x=14.0)
-    this.groups.renderOnly.add(this.carportCarsGroup);
+    this.scene.add(this.carportCarsGroup); // Attached directly to scene for animated entry/exit across all states
     this.carportCarMesh = this.carportCarsGroup;
 
     // Landscaping Palm Trees
@@ -1060,6 +1062,55 @@ class VillaModelBuilder {
     });
     this.groups.siteOnly.add(truck);
     return truck;
+  }
+
+  buildWorkerFigures(parentGroup) {
+    const workerConfigs = [
+      { x: 3.2, z: 8.5, rot: 0.4 },
+      { x: 5.8, z: 6.2, rot: -0.6 },
+      { x: -1.2, z: 7.0, rot: 1.2 }
+    ];
+    const helmetMat = new THREE.MeshStandardMaterial({ color: 0xffd000, roughness: 0.3 });
+    const vestMat = new THREE.MeshStandardMaterial({ color: 0xff5500, roughness: 0.5 });
+    const pantsMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+    const skinMat = new THREE.MeshStandardMaterial({ color: 0xd4a373, roughness: 0.7 });
+
+    workerConfigs.forEach(cfg => {
+      const w = new THREE.Group();
+      w.position.set(cfg.x, 0, cfg.z);
+      w.rotation.y = cfg.rot;
+
+      // Boots & Legs
+      const legs = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.85, 0.22), pantsMat);
+      legs.position.y = 0.425;
+      w.add(legs);
+
+      // Torso with Safety Vest
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.65, 0.26), vestMat);
+      torso.position.y = 1.15;
+      w.add(torso);
+
+      // Reflective stripe on vest
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.1, 0.28), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 }));
+      stripe.position.y = 1.15;
+      w.add(stripe);
+
+      // Head
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 12), skinMat);
+      head.position.y = 1.62;
+      w.add(head);
+
+      // Hard Hat
+      const hat = new THREE.Mesh(new THREE.SphereGeometry(0.16, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2), helmetMat);
+      hat.position.y = 1.68;
+      w.add(hat);
+      const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 16), helmetMat);
+      hatBrim.position.y = 1.68;
+      w.add(hatBrim);
+
+      parentGroup.add(w);
+    });
+    parentGroup.visible = false;
   }
 
   // ----------------------------------------------------
