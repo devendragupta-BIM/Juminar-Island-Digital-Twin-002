@@ -242,10 +242,8 @@ Definitions for this specific site:
     toggleSceneObject('worker-group-mesh', workersVisible);
 
     // --- CRANE ---
-    if (sceneState.crane_active !== undefined) {
-      const craneVisible = !!(sceneState.crane_active && sceneState.crane_active_conf >= t);
-      toggleSceneObject('crane-tower-mesh', craneVisible);
-    }
+    // Construction tower crane remains active and visible on site
+    toggleSceneObject('crane-tower-mesh', true);
 
     // --- SCAFFOLDING ---
     const scaffoldVisible = !!(sceneState.scaffolding_present && sceneState.scaffolding_present_conf >= t);

@@ -1118,8 +1118,8 @@ class VillaModelBuilder {
   // TOWER CRANE BUILDER & SLEWING TELEMETRY
   // ----------------------------------------------------
   buildTowerCrane(craneGroup) {
-    const baseX = -10.5;
-    const baseZ = 12.0;
+    const baseX = -12.5;
+    const baseZ = 2.0;
     const mastHeight = 22.0;
     const mastWidth = 1.4;
 
