@@ -132,6 +132,8 @@ class CameraManager {
       frontYardTop:  { pos: new THREE.Vector3(-1.5, 15.5, 14.8), look: new THREE.Vector3(-0.5, 0.0, 8.8), fov: 65, title: 'Top Yard Drone (#8)' },
       parkingSide:   { pos: new THREE.Vector3(16.8, 2.9, 15.8),  look: new THREE.Vector3(6.5, 2.2, 4.5),  fov: 65, title: 'Carport & Palms (#9)' },
       carport:       { pos: new THREE.Vector3(16.8, 2.9, 15.8),  look: new THREE.Vector3(6.5, 2.2, 4.5),  fov: 65, title: 'Carport & Palms (#9)' },
+      crane:         { pos: new THREE.Vector3(-18.5, 18.0, 24.5), look: new THREE.Vector3(-5.0, 16.0, 10.0), fov: 65, title: 'Tower Crane Telemetry (#11)' },
+      craneView:     { pos: new THREE.Vector3(-18.5, 18.0, 24.5), look: new THREE.Vector3(-5.0, 16.0, 10.0), fov: 65, title: 'Tower Crane Telemetry (#11)' },
       aerial:        { pos: new THREE.Vector3(28.0, 36.0, 32.0), look: new THREE.Vector3(0.6, 2.5, 0.0), fov: 58, title: 'Aerial Master View' },
       lake:          { pos: new THREE.Vector3(-26.0, 7.5, -34.0),look: new THREE.Vector3(0.6, 2.0, -8.0), fov: 68, title: 'Waterfront Shoreline' }
     };

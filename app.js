@@ -242,8 +242,10 @@ Definitions for this specific site:
     toggleSceneObject('worker-group-mesh', workersVisible);
 
     // --- CRANE ---
-    const craneVisible = !!(sceneState.crane_active && sceneState.crane_active_conf >= t);
-    toggleSceneObject('crane-tower-mesh', craneVisible);
+    if (sceneState.crane_active !== undefined) {
+      const craneVisible = !!(sceneState.crane_active && sceneState.crane_active_conf >= t);
+      toggleSceneObject('crane-tower-mesh', craneVisible);
+    }
 
     // --- SCAFFOLDING ---
     const scaffoldVisible = !!(sceneState.scaffolding_present && sceneState.scaffolding_present_conf >= t);
@@ -651,12 +653,55 @@ Definitions for this specific site:
     toggleElement: (elementId, visible) => {
       toggleSceneObject(elementId, visible);
     },
+    setCraneSlew: (angleDeg, duration = 1000) => {
+      handleTwinAnim('ANIM_CRANE_SLEW', { angle: angleDeg, duration });
+    },
+    setCraneTrolley: (ratio) => {
+      handleTwinAnim('ANIM_CRANE_SLEW', { trolley: ratio, duration: 0 });
+    },
     getState: () => ({ ...AppState })
   };
 
   // ── TWIN ANIMATION LAYER HANDLER (Villa 003 Live Animation Layer) ──
   function handleTwinAnim(action, payload) {
     if (!action) return;
+
+    if (action === 'ANIM_CRANE_SLEW' || action === 'SET_CRANE_SLEW' || action === 'SET_CRANE_TELEMETRY') {
+      const craneGroup = scene.getObjectByName('crane-tower-mesh');
+      if (craneGroup) craneGroup.visible = true;
+
+      const angle = payload?.angle !== undefined ? payload.angle : (payload?.degrees !== undefined ? payload.degrees : (typeof payload === 'number' ? payload : 0));
+      const trolley = payload?.trolley !== undefined ? payload.trolley : null;
+      const dur = payload?.duration !== undefined ? payload.duration : 1000;
+
+      const slewingGroup = scene.getObjectByName('crane-slewing-group');
+      const trolleyGroup = scene.getObjectByName('crane-trolley-group');
+
+      if (trolleyGroup && trolley !== null) {
+        const r = Math.max(0, Math.min(1, trolley));
+        trolleyGroup.position.x = 2.0 + r * 20.0;
+      }
+
+      if (slewingGroup) {
+        const targetRad = THREE.MathUtils.degToRad(angle);
+        const startRad = slewingGroup.rotation.y;
+        const start = performance.now();
+
+        function stepSlew(now) {
+          const t = Math.min((now - start) / Math.max(dur, 1), 1);
+          const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOutQuad
+          slewingGroup.rotation.y = startRad + (targetRad - startRad) * e;
+          if (t < 1) requestAnimationFrame(stepSlew);
+          else slewingGroup.rotation.y = targetRad;
+        }
+        if (dur > 0) {
+          requestAnimationFrame(stepSlew);
+        } else {
+          slewingGroup.rotation.y = targetRad;
+        }
+      }
+      return;
+    }
 
     if (action === 'SET_VIEW' || action === 'SET_CAMERA' || action === 'SET_CAMERA_VIEW') {
       if (window.JumeirahTwinAPI?.setCameraView) {
@@ -842,6 +887,8 @@ Definitions for this specific site:
       const meshName = payload?.elementId || payload?.meshName || payload;
       const visible = !!payload?.visible;
       toggleSceneObject(meshName, visible);
+    } else if (actionUpper === 'SET_CRANE_SLEW' || actionUpper === 'SET_CRANE_TELEMETRY' || actionLower === 'setcraneslew') {
+      handleTwinAnim('ANIM_CRANE_SLEW', payload);
     } else if (actionUpper === 'RUN_VISION_RECONCILE' || actionLower === 'runvisionreconcile') {
       runVisionReconciliation(payload?.imageUrl || payload);
     } else if (actionUpper === 'GET_STATE' || actionLower === 'getstate') {

@@ -521,6 +521,7 @@ class VillaModelBuilder {
 
     const craneGroup = new THREE.Group();
     craneGroup.name = 'crane-tower-mesh';
+    this.buildTowerCrane(craneGroup);
     this.scene.add(craneGroup);
 
     // Set initial phase
@@ -1111,6 +1112,214 @@ class VillaModelBuilder {
       parentGroup.add(w);
     });
     parentGroup.visible = false;
+  }
+
+  // ----------------------------------------------------
+  // TOWER CRANE BUILDER & SLEWING TELEMETRY
+  // ----------------------------------------------------
+  buildTowerCrane(craneGroup) {
+    const baseX = -10.5;
+    const baseZ = 12.0;
+    const mastHeight = 22.0;
+    const mastWidth = 1.4;
+
+    const craneYellow = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.35, metalness: 0.25 });
+    const craneDark = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.8 });
+    const concreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85 });
+
+    const baseGroup = new THREE.Group();
+    baseGroup.position.set(baseX, 0, baseZ);
+    craneGroup.add(baseGroup);
+
+    // 1. Concrete Foundation Pad
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.6, 4.0), concreteMat);
+    pad.position.y = 0.2;
+    baseGroup.add(pad);
+
+    // 2. Vertical Lattice Mast (4 corner vertical chords + cross braces)
+    const chordGeo = new THREE.BoxGeometry(0.12, mastHeight, 0.12);
+    const halfW = mastWidth / 2;
+    [[-halfW, -halfW], [halfW, -halfW], [-halfW, halfW], [halfW, halfW]].forEach(([cx, cz]) => {
+      const chord = new THREE.Mesh(chordGeo, craneYellow);
+      chord.position.set(cx, mastHeight / 2, cz);
+      baseGroup.add(chord);
+    });
+
+    // Horizontal & diagonal lattice battens every 2.0m
+    const numSections = Math.floor(mastHeight / 2.0);
+    for (let i = 1; i <= numSections; i++) {
+      const y = i * 2.0;
+      // 4 horizontal ring struts
+      const hStrutX = new THREE.Mesh(new THREE.BoxGeometry(mastWidth, 0.08, 0.08), craneYellow);
+      hStrutX.position.set(0, y, -halfW);
+      baseGroup.add(hStrutX);
+      const hStrutX2 = new THREE.Mesh(new THREE.BoxGeometry(mastWidth, 0.08, 0.08), craneYellow);
+      hStrutX2.position.set(0, y, halfW);
+      baseGroup.add(hStrutX2);
+      const hStrutZ = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, mastWidth), craneYellow);
+      hStrutZ.position.set(-halfW, y, 0);
+      baseGroup.add(hStrutZ);
+      const hStrutZ2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, mastWidth), craneYellow);
+      hStrutZ2.position.set(halfW, y, 0);
+      baseGroup.add(hStrutZ2);
+
+      // Diagonal cross-brace on outer sides
+      const diagLen = Math.sqrt(mastWidth * mastWidth + 4.0);
+      const diagAng = Math.atan2(2.0, mastWidth);
+      const diag1 = new THREE.Mesh(new THREE.BoxGeometry(diagLen, 0.06, 0.06), craneDark);
+      diag1.position.set(0, y - 1.0, -halfW);
+      diag1.rotation.z = (i % 2 === 0 ? 1 : -1) * diagAng;
+      baseGroup.add(diag1);
+      const diag2 = new THREE.Mesh(new THREE.BoxGeometry(diagLen, 0.06, 0.06), craneDark);
+      diag2.position.set(0, y - 1.0, halfW);
+      diag2.rotation.z = (i % 2 === 0 ? -1 : 1) * diagAng;
+      baseGroup.add(diag2);
+    }
+
+    // 3. Slewing Turntable Group (Rotates around Y-axis!)
+    const slewingGroup = new THREE.Group();
+    slewingGroup.name = 'crane-slewing-group';
+    slewingGroup.position.set(0, mastHeight, 0);
+    baseGroup.add(slewingGroup);
+    this.craneSlewingGroup = slewingGroup;
+
+    // Turntable ring bearing
+    const bearingGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.4, 16);
+    const bearingMesh = new THREE.Mesh(bearingGeo, craneDark);
+    bearingMesh.position.y = 0.2;
+    slewingGroup.add(bearingMesh);
+
+    // Operator Glass Cabin
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.0, 1.4), this.mats.curtainGlass);
+    cabin.position.set(0.6, 1.2, 1.1);
+    slewingGroup.add(cabin);
+    const cabinFrame = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.1, 1.45), craneDark);
+    cabinFrame.position.set(0.6, 0.2, 1.1);
+    slewingGroup.add(cabinFrame);
+    const cabinRoof = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.1, 1.5), craneYellow);
+    cabinRoof.position.set(0.6, 2.25, 1.1);
+    slewingGroup.add(cabinRoof);
+
+    // Apex A-Frame Peak (Tower top)
+    const apexHeight = 5.0;
+    const apex = new THREE.Mesh(new THREE.ConeGeometry(1.2, apexHeight, 4), craneYellow);
+    apex.position.set(0, apexHeight / 2 + 0.4, 0);
+    apex.rotation.y = Math.PI / 4;
+    slewingGroup.add(apex);
+
+    // 4. Horizontal Working Jib / Boom (extends forward along +X by 24m)
+    const jibLength = 24.0;
+    const jibGroup = new THREE.Group();
+    jibGroup.name = 'crane-jib-group';
+    jibGroup.position.set(0, 0.6, 0);
+    slewingGroup.add(jibGroup);
+
+    // Top and bottom chords of triangular truss jib
+    const topChord = new THREE.Mesh(new THREE.BoxGeometry(jibLength, 0.1, 0.1), craneYellow);
+    topChord.position.set(jibLength / 2, 1.4, 0);
+    jibGroup.add(topChord);
+
+    const botChord1 = new THREE.Mesh(new THREE.BoxGeometry(jibLength, 0.1, 0.1), craneYellow);
+    botChord1.position.set(jibLength / 2, 0, -0.6);
+    jibGroup.add(botChord1);
+
+    const botChord2 = new THREE.Mesh(new THREE.BoxGeometry(jibLength, 0.1, 0.1), craneYellow);
+    botChord2.position.set(jibLength / 2, 0, 0.6);
+    jibGroup.add(botChord2);
+
+    // Jib lattice web trusses every 2.4m
+    for (let j = 0; j < jibLength; j += 2.4) {
+      const strut1 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.5, 0.06), craneDark);
+      strut1.position.set(j + 1.2, 0.7, -0.3);
+      strut1.rotation.z = 0.25;
+      jibGroup.add(strut1);
+
+      const strut2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.5, 0.06), craneDark);
+      strut2.position.set(j + 1.2, 0.7, 0.3);
+      strut2.rotation.z = -0.25;
+      jibGroup.add(strut2);
+    }
+
+    // Pendants / Cable ties from apex to mid-jib and tip
+    const cableMat = new THREE.MeshBasicMaterial({ color: 0x334155 });
+    const pendant1 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 14, 8), cableMat);
+    pendant1.position.set(6.0, 3.2, 0);
+    pendant1.rotation.z = -Math.atan2(12.0, apexHeight);
+    slewingGroup.add(pendant1);
+
+    const pendant2 = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 20, 8), cableMat);
+    pendant2.position.set(12.0, 2.8, 0);
+    pendant2.rotation.z = -Math.atan2(20.0, apexHeight);
+    slewingGroup.add(pendant2);
+
+    // 5. Rear Counter-Jib (extends backwards along -X by 9.0m)
+    const cJibLength = 9.0;
+    const cJib = new THREE.Mesh(new THREE.BoxGeometry(cJibLength, 1.0, 1.4), craneYellow);
+    cJib.position.set(-cJibLength / 2, 0.6, 0);
+    slewingGroup.add(cJib);
+
+    // Concrete Counterweights at tail
+    for (let c = 0; c < 3; c++) {
+      const cweight = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.4, 0.4), concreteMat);
+      cweight.position.set(-cJibLength + 1.2, 1.4, -0.4 + c * 0.4);
+      slewingGroup.add(cweight);
+    }
+
+    // Rear pendant tie
+    const rearPendant = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 10, 8), cableMat);
+    rearPendant.position.set(-4.5, 3.0, 0);
+    rearPendant.rotation.z = Math.atan2(cJibLength - 1.0, apexHeight);
+    slewingGroup.add(rearPendant);
+
+    // 6. Trolley & Hoist Cable (rides along jib +X)
+    const trolleyGroup = new THREE.Group();
+    trolleyGroup.name = 'crane-trolley-group';
+    trolleyGroup.position.set(12.0, -0.15, 0); // initial mid-jib position
+    jibGroup.add(trolleyGroup);
+    this.craneTrolleyGroup = trolleyGroup;
+
+    // Trolley Body
+    const trolleyBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.25, 1.3), craneDark);
+    trolleyGroup.add(trolleyBody);
+
+    // Hoist Cable hanging down
+    const cableLen = 14.0;
+    const cableMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, cableLen, 6), cableMat);
+    cableMesh.position.y = -cableLen / 2;
+    trolleyGroup.add(cableMesh);
+
+    // Hook Block & Hook at the bottom
+    const hookBlock = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.7, 0.5), craneYellow);
+    hookBlock.position.y = -cableLen;
+    trolleyGroup.add(hookBlock);
+
+    const hookCurve = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.06, 8, 16, Math.PI * 1.5), craneDark);
+    hookCurve.position.set(0, -cableLen - 0.45, 0);
+    hookCurve.rotation.z = -Math.PI / 2;
+    trolleyGroup.add(hookCurve);
+
+    // Flashing Red Aviation Beacon at Apex
+    const beaconLight = new THREE.PointLight(0xff0000, 2.5, 30.0);
+    beaconLight.position.set(0, apexHeight + 0.6, 0);
+    slewingGroup.add(beaconLight);
+    const beaconSphere = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+    beaconSphere.position.set(0, apexHeight + 0.6, 0);
+    slewingGroup.add(beaconSphere);
+
+    craneGroup.visible = true;
+  }
+
+  setCraneAngle(deg) {
+    if (this.craneSlewingGroup) {
+      this.craneSlewingGroup.rotation.y = THREE.MathUtils.degToRad(deg);
+    }
+  }
+
+  setCraneTrolley(ratio) {
+    if (this.craneTrolleyGroup) {
+      const r = Math.max(0, Math.min(1, ratio));
+      this.craneTrolleyGroup.position.x = 2.0 + r * 20.0;
+    }
   }
 
   // ----------------------------------------------------

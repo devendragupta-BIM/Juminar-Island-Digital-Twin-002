@@ -289,7 +289,115 @@
             </div>
           </div>
         </div>
-      </section>
+
+        <!-- 2B. Tower Crane Telemetry & Slew Control (Manual / AI Equipment Detector Ready) -->
+        <div class="luxury-card rounded-[28px] p-5 flex flex-col gap-3 shadow-sm border border-stone-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm font-bold">
+                <i class="fa-solid fa-hammer"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-900">Tower Crane Telemetry</h3>
+                <span class="text-[10px] text-stone-500 font-mono">Manual &amp; Equipment Detector Ready</span>
+              </div>
+            </div>
+            <button type="button" onclick="anim_sendToTwin('SET_VIEW', 'crane')" class="px-2.5 py-1 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-mono flex items-center gap-1 transition" title="Focus Camera on Tower Crane">
+              <i class="fa-solid fa-eye text-amber-600"></i>
+              <span>Focus 3D</span>
+            </button>
+          </div>
+
+          <!-- Crane Slew Angle Slider & Display -->
+          <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-stone-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-compass text-amber-500"></i>
+                <span>Boom Slew Angle (Left / Right)</span>
+              </span>
+              <span id="val-crane-angle" class="font-mono font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">0°</span>
+            </div>
+            <input type="range" id="slider-crane-angle" min="-180" max="180" step="5" value="0" class="w-full accent-amber-500 cursor-pointer" />
+            <div class="flex items-center justify-between text-[10px] font-mono text-stone-400">
+              <span>-180° (Left)</span>
+              <span>0° (Center)</span>
+              <span>+180° (Right)</span>
+            </div>
+
+            <!-- Quick Directional Buttons -->
+            <div class="grid grid-cols-4 gap-1.5 pt-1">
+              <button type="button" onclick="anim_setCraneSlew(-45)" class="py-1.5 px-2 rounded-lg bg-white hover:bg-stone-200 text-stone-800 border border-stone-200 text-[10px] font-medium text-center transition">
+                ⟲ -45° Left
+              </button>
+              <button type="button" onclick="anim_setCraneSlew(0)" class="py-1.5 px-2 rounded-lg bg-stone-900 text-white text-[10px] font-medium text-center transition shadow-xs">
+                Center 0°
+              </button>
+              <button type="button" onclick="anim_setCraneSlew(45)" class="py-1.5 px-2 rounded-lg bg-white hover:bg-stone-200 text-stone-800 border border-stone-200 text-[10px] font-medium text-center transition">
+                ⟳ +45° Right
+              </button>
+              <button type="button" onclick="anim_setCraneSlew(135)" class="py-1.5 px-2 rounded-lg bg-white hover:bg-stone-200 text-stone-800 border border-stone-200 text-[10px] font-medium text-center transition">
+                Rear 135°
+              </button>
+            </div>
+          </div>
+
+          <!-- Trolley Position Slider -->
+          <div class="p-3 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-medium text-stone-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-arrows-left-right text-[#2BA4B8]"></i>
+                <span>Jib Trolley Extension</span>
+              </span>
+              <span id="val-crane-trolley" class="font-mono text-stone-600 bg-white px-2 py-0.5 rounded border border-stone-200 text-[11px]">50%</span>
+            </div>
+            <input type="range" id="slider-crane-trolley" min="0" max="100" step="5" value="50" class="w-full accent-[#2BA4B8] cursor-pointer" />
+          </div>
+
+          <div class="text-[10px] text-stone-500 font-mono bg-stone-50/60 p-2.5 rounded-xl border border-stone-100 flex items-center gap-1.5">
+            <i class="fa-solid fa-microchip text-emerald-600"></i>
+            <span>Automation API ready: External detector posts <code>ANIM_CRANE_SLEW</code></span>
+          </div>
+        </div>
+
+        <!-- 2C. Driveway Video & Live 3D Sync (Side-by-Side Test Player) -->
+        <div class="luxury-card rounded-[28px] p-5 flex flex-col gap-3 shadow-sm border border-stone-200">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-700 flex items-center justify-center text-sm">
+                <i class="fa-solid fa-video"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-semibold uppercase tracking-wider text-stone-900">Driveway CCTV Video Sync</h3>
+                <span class="text-[10px] text-stone-500 font-mono">Test Video &amp; 3D Animation Sync</span>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Synced</span>
+          </div>
+
+          <!-- Video Player Container -->
+          <div class="rounded-2xl overflow-hidden border border-stone-200 bg-black relative">
+            <video id="cctv-video" src="/site-driveway-demo.mp4" controls playsinline muted class="w-full aspect-video object-cover block"></video>
+            <div class="absolute top-2 left-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[9px] font-mono text-white flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+              <span>LIVE CAM-09 DRIVEWAY</span>
+            </div>
+          </div>
+
+          <!-- Video Sync Action Buttons -->
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="anim_syncVideoCarEntry()" class="py-2 px-3 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-play text-emerald-400"></i>
+              <span>Play &amp; Sync Entry</span>
+            </button>
+            <button type="button" onclick="anim_syncVideoCarExit()" class="py-2 px-3 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-xs font-medium transition flex items-center justify-center gap-1.5 shadow-sm">
+              <i class="fa-solid fa-backward text-amber-500"></i>
+              <span>Play &amp; Sync Exit</span>
+            </button>
+          </div>
+          <div class="text-[10px] text-stone-400 font-mono text-center">
+            Clicking sync triggers video playback while 3D Digital Twin drives vehicle in real time.
+          </div>
+        </div>
 
       <!-- RIGHT COLUMN: Groq AI Intelligence & Live 3D Twin Split View (7 Cols) -->
       <section class="lg:col-span-7 flex flex-col gap-5">
@@ -691,6 +799,77 @@
     window.anim_startWorkerPulse = anim_startWorkerPulse;
     window.anim_stopWorkerPulse = anim_stopWorkerPulse;
     window.anim_handlePoolTransition = anim_handlePoolTransition;
+
+    // ── TOWER CRANE TELEMETRY & SLEW CONTROLS (Manual / Equipment Detector AI) ──
+    const sliderCraneAngle = document.getElementById('slider-crane-angle');
+    const valCraneAngle = document.getElementById('val-crane-angle');
+    const sliderCraneTrolley = document.getElementById('slider-crane-trolley');
+    const valCraneTrolley = document.getElementById('val-crane-trolley');
+    const cctvVideo = document.getElementById('cctv-video');
+
+    function anim_setCraneSlew(deg, duration = 1800) {
+      if (sliderCraneAngle) sliderCraneAngle.value = deg;
+      if (valCraneAngle) {
+        valCraneAngle.textContent = (deg > 0 ? '+' : '') + deg + '°';
+      }
+      anim_log(`Tower crane boom slewing to ${deg}°`);
+      anim_sendToTwin('ANIM_CRANE_SLEW', { angle: deg, duration, easing: 'easeInOutQuad' });
+    }
+
+    function anim_setCraneTrolley(percent) {
+      if (sliderCraneTrolley) sliderCraneTrolley.value = percent;
+      if (valCraneTrolley) {
+        valCraneTrolley.textContent = percent + '%';
+      }
+      anim_log(`Tower crane trolley extension: ${percent}%`);
+      anim_sendToTwin('ANIM_CRANE_SLEW', { trolley: percent / 100, duration: 0 });
+    }
+
+    if (sliderCraneAngle) {
+      sliderCraneAngle.addEventListener('input', (e) => {
+        const deg = parseInt(e.target.value, 10);
+        if (valCraneAngle) {
+          valCraneAngle.textContent = (deg > 0 ? '+' : '') + deg + '°';
+        }
+        anim_sendToTwin('ANIM_CRANE_SLEW', { angle: deg, duration: 300 });
+      });
+    }
+
+    if (sliderCraneTrolley) {
+      sliderCraneTrolley.addEventListener('input', (e) => {
+        const pct = parseInt(e.target.value, 10);
+        if (valCraneTrolley) {
+          valCraneTrolley.textContent = pct + '%';
+        }
+        anim_sendToTwin('ANIM_CRANE_SLEW', { trolley: pct / 100, duration: 0 });
+      });
+    }
+
+    // ── CCTV VIDEO SYNC (Vehicle Entering / Leaving Driveway) ──
+    function anim_syncVideoCarEntry() {
+      if (cctvVideo) {
+        cctvVideo.currentTime = 0;
+        cctvVideo.play().catch(() => {});
+      }
+      anim_log('CCTV Video Sync: Vehicle entering driveway footage triggered');
+      anim_playCarEntry();
+      showToast('CCTV Video Playing → 3D Car Entry Synchronized');
+    }
+
+    function anim_syncVideoCarExit() {
+      if (cctvVideo) {
+        cctvVideo.currentTime = 0;
+        cctvVideo.play().catch(() => {});
+      }
+      anim_log('CCTV Video Sync: Vehicle exiting driveway footage triggered');
+      anim_playCarExit();
+      showToast('CCTV Video Playing → 3D Car Exit Synchronized');
+    }
+
+    window.anim_setCraneSlew = anim_setCraneSlew;
+    window.anim_setCraneTrolley = anim_setCraneTrolley;
+    window.anim_syncVideoCarEntry = anim_syncVideoCarEntry;
+    window.anim_syncVideoCarExit = anim_syncVideoCarExit;
 
     // Reload Twin Iframe
     function reloadTwin() {
