@@ -1146,23 +1146,8 @@ Definitions for this specific site:
     });
   }
 
-  // Timelapse playback and scrubber bindings
-  const btnTimelapsePlay = document.getElementById('btn-timelapse-play');
-  if (btnTimelapsePlay) {
-    btnTimelapsePlay.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      cameraManager.toggleTimelapse();
-    });
-  }
-
-  const timelapseScrubber = document.getElementById('timelapse-scrubber');
-  if (timelapseScrubber) {
-    timelapseScrubber.addEventListener('input', (e) => {
-      const idx = parseInt(e.target.value, 10);
-      cameraManager.updateModalFrame(idx);
-    });
-  }
+  // Timelapse playback and scrubber bindings are managed by CameraManager.initEventListeners()
+  // to avoid double-firing event handlers.
 
   // Solar Study Sliders in Left Dock
   const sliderAzimuth = document.getElementById('slider-azimuth');

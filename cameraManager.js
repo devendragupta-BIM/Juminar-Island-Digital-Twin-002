@@ -628,8 +628,12 @@ class CameraManager {
       'CAM-18': '20840-1748865490206.jpeg',
       'CAM-19': '20840-1748865493553.jpeg'
     };
-    const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
-    const currentImg = encodeURI(rawSrc);
+    const rawFallback = stationFallbacks[cam.id] || (cam.filename || '20840-1748865490206.jpeg');
+    const cleanFallback = rawFallback.startsWith('/') ? rawFallback : ('/' + rawFallback);
+    const defaultFallback = encodeURI(cleanFallback);
+
+    const cleanSrc = rawSrc.startsWith('/') ? rawSrc : ('/' + rawSrc);
+    const currentImg = encodeURI(cleanSrc);
 
     const imgEl = document.getElementById('modal-site-image');
     const splitImg = document.getElementById('modal-split-image');
@@ -681,11 +685,14 @@ class CameraManager {
       'CAM-18': '20840-1748865490206.jpeg',
       'CAM-19': '20840-1748865493553.jpeg'
     };
-    const defaultFallback = stationFallbacks[cam.id] || (cam.filename ? encodeURI(cam.filename) : '20840-1748865490206.jpeg');
+    const rawFallback = stationFallbacks[cam.id] || (cam.filename || '20840-1748865490206.jpeg');
+    const cleanFallback = rawFallback.startsWith('/') ? rawFallback : ('/' + rawFallback);
+    const defaultFallback = encodeURI(cleanFallback);
 
     frames.forEach((f, idx) => {
       const rawSrc = (typeof f === 'string') ? f : (f?.filename || cam.filename);
-      const encodedSrc = encodeURI(rawSrc);
+      const cleanSrc = rawSrc.startsWith('/') ? rawSrc : ('/' + rawSrc);
+      const encodedSrc = encodeURI(cleanSrc);
       const thumb = document.createElement('div');
       thumb.className = `tl-thumb ${idx === this.currentFrameIndex ? 'active' : ''}`;
       thumb.innerHTML = `<img src="${encodedSrc}" alt="Frame ${idx + 1}" loading="lazy" onerror="this.src='${defaultFallback}'" />`;
@@ -700,6 +707,13 @@ class CameraManager {
   }
 
   toggleTimelapse() {
+    // Debounce to prevent double-firing if click listeners overlap
+    const now = performance.now();
+    if (this._lastToggleTime && (now - this._lastToggleTime < 250)) {
+      return;
+    }
+    this._lastToggleTime = now;
+
     if (this.isPlayingTimelapse) {
       this.stopTimelapse();
     } else {
@@ -715,7 +729,7 @@ class CameraManager {
 
     this.isPlayingTimelapse = true;
     const btn = document.getElementById('btn-timelapse-play');
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-pause"></i> <span>Pause</span>';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-pause text-amber-500"></i> <span>Pause Timelapse</span>';
 
     const interval = Math.floor(450 / (this.timelapseSpeed || 1));
     const frames = (this.activeCamData.timelapseFrames && this.activeCamData.timelapseFrames.length > 0)
@@ -724,11 +738,13 @@ class CameraManager {
 
     if (this.timelapseTimer) {
       clearInterval(this.timelapseTimer);
+      this.timelapseTimer = null;
     }
 
     this.timelapseTimer = setInterval(() => {
       if (!this.isPlayingTimelapse) {
         clearInterval(this.timelapseTimer);
+        this.timelapseTimer = null;
         return;
       }
       this.currentFrameIndex = (this.currentFrameIndex + 1) % frames.length;
@@ -752,7 +768,7 @@ class CameraManager {
       this.timelapseTimer = null;
     }
     const btn = document.getElementById('btn-timelapse-play');
-    if (btn) btn.innerHTML = '<i class="fa-solid fa-play"></i> <span>Play Timelapse</span>';
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-play text-[#C87D55]"></i> <span>Play Timelapse</span>';
   }
 
   // ----------------------------------------------------
