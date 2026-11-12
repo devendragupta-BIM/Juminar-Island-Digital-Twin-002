@@ -364,7 +364,7 @@
           </div>
         </div>
 
-        <!-- 2C. Driveway Video & Live 3D Sync (Side-by-Side Test Player & Video Uploader) -->
+        <!-- 2C. Driveway Video & Live 3D Sync (Upload Video & 3D Motion Sync) -->
         <div id="card-video-sync" class="luxury-card rounded-[28px] p-5 flex flex-col gap-3.5 shadow-sm border border-stone-200">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -377,38 +377,47 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" onclick="document.getElementById('video-file-input').click()" class="px-2.5 py-1 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10px] font-mono flex items-center gap-1.5 transition shadow-xs" title="Upload Custom CCTV or Site Video">
+              <button type="button" onclick="document.getElementById('video-file-input').click()" class="px-2.5 py-1 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-800 border border-cyan-200 text-[10px] font-mono flex items-center gap-1.5 transition shadow-xs" title="Upload CCTV or Smartphone Video">
                 <i class="fa-solid fa-cloud-arrow-up text-cyan-600"></i>
-                <span>Upload Video</span>
+                <span id="btn-upload-label">Upload Video</span>
               </button>
               <input type="file" id="video-file-input" accept="video/mp4,video/webm,video/quicktime,video/*" class="hidden" />
-              <span id="badge-video-status" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">Ready</span>
+              <span id="badge-video-status" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-200 font-medium">Upload Ready</span>
             </div>
           </div>
 
-          <!-- Video Dropzone / Quick Select info -->
-          <div id="video-drop-hint" class="text-[11px] text-stone-600 bg-stone-50 p-2.5 rounded-xl border border-stone-200/80 flex items-center justify-between">
-            <span class="flex items-center gap-1.5 truncate">
-              <i class="fa-solid fa-film text-cyan-600"></i>
-              <span id="label-active-video" class="truncate font-medium">site-driveway-demo.mp4 (Car In &amp; Out Timelapse)</span>
-            </span>
-            <button type="button" id="btn-reset-demo-video" onclick="anim_loadDemoVideo()" class="text-[10px] text-stone-400 hover:text-stone-700 underline shrink-0 font-mono">Reset Sample</button>
+          <!-- Video Dropzone (Shown when no custom video is loaded) -->
+          <div id="video-upload-dropzone" onclick="document.getElementById('video-file-input').click()" class="border-2 border-dashed border-stone-300 hover:border-cyan-500 rounded-2xl p-5 transition flex flex-col items-center justify-center text-center cursor-pointer bg-stone-50/80 hover:bg-cyan-50/30 min-h-[160px] group relative">
+            <div class="w-12 h-12 rounded-2xl bg-white border border-stone-200 flex items-center justify-center text-cyan-600 group-hover:scale-110 transition duration-300 shadow-xs mb-2">
+              <i class="fa-solid fa-film text-lg"></i>
+            </div>
+            <p class="text-xs font-semibold text-stone-800">Click to upload or drop site / vehicle video here</p>
+            <p class="text-[11px] text-stone-500 mt-1 max-w-xs">Supports MP4, MOV, or WebM. Plays video and animates car motion on 3D Digital Twin.</p>
+            <div class="flex items-center gap-2 mt-2.5">
+              <span class="px-3 py-1 rounded-full text-[10px] font-mono bg-white text-stone-700 border border-stone-200 shadow-xs flex items-center gap-1">
+                <i class="fa-solid fa-folder-open text-cyan-600"></i> Browse Video
+              </span>
+            </div>
           </div>
 
-          <!-- Video Player Container -->
-          <div class="rounded-2xl overflow-hidden border border-stone-200 bg-black relative">
-            <video id="cctv-video" src="/site-driveway-demo.mp4" controls playsinline muted class="w-full aspect-video object-cover block"></video>
-            <div class="absolute top-2 left-2 bg-black/70 backdrop-blur px-2 py-0.5 rounded text-[9px] font-mono text-white flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-              <span id="cctv-badge-text">LIVE CAM-04 DRIVEWAY TIMELAPSE</span>
+          <!-- Video Player Container (Revealed when a video file is loaded) -->
+          <div id="video-player-container" class="hidden rounded-2xl overflow-hidden border border-stone-200 bg-black relative">
+            <video id="cctv-video" controls playsinline class="w-full aspect-video object-cover block"></video>
+            <div class="absolute top-2 left-2 bg-black/75 backdrop-blur px-2.5 py-0.5 rounded-lg text-[9px] font-mono text-white flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="cctv-badge-text">LIVE VIDEO SYNC</span>
             </div>
+            <button type="button" onclick="document.getElementById('video-file-input').click()" class="absolute top-2 right-2 bg-black/75 hover:bg-black backdrop-blur px-2 py-0.5 rounded-lg text-[10px] font-mono text-white/90 hover:text-white flex items-center gap-1 transition border border-white/20">
+              <i class="fa-solid fa-arrow-rotate-right text-xs"></i>
+              <span>Change Video</span>
+            </button>
           </div>
 
           <!-- Video Sync Action Buttons -->
           <div class="space-y-2">
             <button type="button" onclick="anim_syncVideoCarInOut()" class="w-full py-2.5 px-3 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-semibold transition flex items-center justify-center gap-2 shadow-sm">
               <i class="fa-solid fa-play text-emerald-400"></i>
-              <span>Play Full Timelapse (Car In &amp; Out 3D Sync)</span>
+              <span>Play &amp; Sync Full Animation (Car In &amp; Out)</span>
             </button>
             <div class="grid grid-cols-2 gap-2">
               <button type="button" onclick="anim_syncVideoCarEntry()" class="py-2 px-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 shadow-xs">
@@ -416,13 +425,13 @@
                 <span>Sync Entry (In)</span>
               </button>
               <button type="button" onclick="anim_syncVideoCarExit()" class="py-2 px-2.5 rounded-xl bg-white hover:bg-stone-100 border border-stone-200 text-stone-800 text-[11px] font-semibold transition flex items-center justify-center gap-1.5 shadow-xs">
-                <i class="fa-solid fa-backward text-amber-500"></i>
+                <i class="fa-solid fa-car text-amber-500"></i>
                 <span>Sync Exit (Out)</span>
               </button>
             </div>
           </div>
           <div class="text-[10px] text-stone-400 font-mono text-center">
-            Default test footage synthesizes CAM-04 site timelapse: car enters, parks in carport, and reverses out. Upload your own video anytime!
+            Upload any vehicle video. When played, the 3D model only animates the car in and out without revolving the view.
           </div>
         </div>
       </section>
@@ -560,9 +569,9 @@
             </div>
           </div>
 
-          <!-- Embedded Iframe of Twin -->
-          <div class="w-full h-80 sm:h-96 rounded-2xl overflow-hidden border border-stone-200/80 bg-stone-900 relative shadow-inner">
-            <iframe id="twin-iframe" src="/index.html?mode=site" class="w-full h-full border-0"></iframe>
+          <!-- Embedded Iframe of Twin (Clean 3D Model View) -->
+          <div class="w-full h-80 sm:h-[420px] rounded-2xl overflow-hidden border border-stone-200/80 bg-stone-900 relative shadow-inner">
+            <iframe id="twin-iframe" src="/index.html?embed=portal&clean=true" class="w-full h-full border-0"></iframe>
             <!-- Auto-reconnect banner / friendly retry button overlay (hidden by default) -->
             <div id="twin-retry-overlay" class="hidden absolute inset-0 bg-stone-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-20 space-y-3">
               <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl text-[#C87D55]">
@@ -729,19 +738,17 @@
         statusCar.style.color = '#00e676';
       }
 
-      anim_log('Car entry animation triggered');
-      anim_sendToTwin('SET_VIEW', 'carport');
-      setTimeout(() => {
-        anim_sendToTwin('ANIM_CAR_POSITION', { x: 0, z: 14, visible: true });
-      }, 800);
+      anim_log('Car entry animation triggered (camera steady, no model revolving)');
+      // Camera stays fixed where the user set it - do NOT revolve the model
+      anim_sendToTwin('ANIM_CAR_POSITION', { x: 0, z: 14, visible: true });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_MOVE', {
           fromX: 0, fromZ: 14,
           toX:   0, toZ:   0,
-          duration: 3000,
+          duration: 2800,
           easing: 'easeInOutQuad'
         });
-      }, 1000);
+      }, 50);
       setTimeout(() => {
         anim_updatePortalTile('occupied');
         anim_log('Car entry complete — carport occupied');
@@ -749,7 +756,7 @@
           statusCar.textContent = '🚗 Car — parked in carport';
           statusCar.style.color = '#00e676';
         }
-      }, 4200);
+      }, 2900);
     }
 
     function anim_playCarExit() {
@@ -761,16 +768,14 @@
         statusCar.style.color = '#ffab40';
       }
 
-      anim_log('Car exit animation triggered');
-      anim_sendToTwin('SET_VIEW', 'carport');
-      setTimeout(() => {
-        anim_sendToTwin('ANIM_CAR_MOVE', {
-          fromX: 0, fromZ:  0,
-          toX:   0, toZ:  14,
-          duration: 3000,
-          easing: 'easeInOutQuad'
-        });
-      }, 800);
+      anim_log('Car exit animation triggered (camera steady, no model revolving)');
+      // Camera stays fixed where the user set it - do NOT revolve the model
+      anim_sendToTwin('ANIM_CAR_MOVE', {
+        fromX: 0, fromZ:  0,
+        toX:   0, toZ:  14,
+        duration: 2800,
+        easing: 'easeInOutQuad'
+      });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_POSITION', { visible: false });
         anim_updatePortalTile('empty');
@@ -779,7 +784,7 @@
           statusCar.textContent = '🚗 Car — carport empty';
           statusCar.style.color = '#64748b';
         }
-      }, 4000);
+      }, 2850);
     }
 
     function anim_handleWorkerTransition(detected) {
@@ -881,24 +886,22 @@
         clearTimeout(anim_videoSyncTimer);
         anim_videoSyncTimer = null;
       }
-      if (cctvVideo) {
+      const cctvVideo = document.getElementById('cctv-video');
+      if (cctvVideo && cctvVideo.src) {
         cctvVideo.currentTime = 0;
         cctvVideo.play().catch(() => {});
       }
-      anim_log('CCTV Video Sync: Full In & Out Timelapse started');
-      showToast('CCTV Video Playing → Synchronizing Full Car Entry & Exit');
+      anim_log('Video Sync: Car In & Out full sequence running (steady camera)');
+      showToast('Video Sync: Car entering driveway and reversing out');
 
-      // Phase 1: Car starts entering along driveway (approx 1.2s into timelapse)
-      setTimeout(() => {
-        anim_playCarEntry();
-        anim_log('Timelapse Phase 1: Car entering driveway to carport');
-      }, 1200);
+      // 1. Car enters along driveway
+      anim_playCarEntry();
 
-      // Phase 2: Car starts reversing out along driveway (approx 5.8s into timelapse)
+      // 2. Pause in carport, then car exits
       anim_videoSyncTimer = setTimeout(() => {
         anim_playCarExit();
-        anim_log('Timelapse Phase 2: Car reversing out of driveway to site exit');
-      }, 5800);
+        anim_log('Video Sync: Car reversing out of carport');
+      }, 4000);
     }
 
     function anim_syncVideoCarEntry() {
@@ -906,13 +909,14 @@
         clearTimeout(anim_videoSyncTimer);
         anim_videoSyncTimer = null;
       }
-      if (cctvVideo) {
+      const cctvVideo = document.getElementById('cctv-video');
+      if (cctvVideo && cctvVideo.src) {
         cctvVideo.currentTime = 0;
         cctvVideo.play().catch(() => {});
       }
-      anim_log('CCTV Video Sync: Vehicle entering driveway footage triggered');
+      anim_log('Video Sync: Car Entry animation triggered (steady camera)');
       anim_playCarEntry();
-      showToast('CCTV Video Playing → 3D Car Entry Synchronized');
+      showToast('Car Entry animation running on 3D Model');
     }
 
     function anim_syncVideoCarExit() {
@@ -920,18 +924,14 @@
         clearTimeout(anim_videoSyncTimer);
         anim_videoSyncTimer = null;
       }
-      if (cctvVideo) {
-        // If 10s demo video, seek directly to reversing out segment (5.8s)
-        if (cctvVideo.duration && cctvVideo.duration >= 9) {
-          cctvVideo.currentTime = 5.8;
-        } else {
-          cctvVideo.currentTime = 0;
-        }
+      const cctvVideo = document.getElementById('cctv-video');
+      if (cctvVideo && cctvVideo.src) {
+        cctvVideo.currentTime = 0;
         cctvVideo.play().catch(() => {});
       }
-      anim_log('CCTV Video Sync: Vehicle exiting driveway footage triggered');
+      anim_log('Video Sync: Car Exit animation triggered (steady camera)');
       anim_playCarExit();
-      showToast('CCTV Video Playing → 3D Car Exit Synchronized');
+      showToast('Car Exit animation running on 3D Model');
     }
 
     // ── CUSTOM VIDEO UPLOAD & MOTION SYNC HANDLER ──
@@ -941,28 +941,33 @@
         const videoUrl = URL.createObjectURL(file);
         const cctvVideo = document.getElementById('cctv-video');
         const cctvBadgeText = document.getElementById('cctv-badge-text');
-        const labelActiveVideo = document.getElementById('label-active-video');
+        const dropzone = document.getElementById('video-upload-dropzone');
+        const playerContainer = document.getElementById('video-player-container');
         const badgeVideoStatus = document.getElementById('badge-video-status');
         const cardVideoSync = document.getElementById('card-video-sync');
 
         if (cctvVideo) {
           cctvVideo.src = videoUrl;
           cctvVideo.load();
+          // Auto sync when user plays video with native player controls
+          cctvVideo.onplay = () => {
+            anim_syncVideoCarInOut();
+          };
         }
+        if (dropzone) dropzone.classList.add('hidden');
+        if (playerContainer) playerContainer.classList.remove('hidden');
+
         if (cctvBadgeText) {
-          cctvBadgeText.textContent = 'UPLOAD: ' + file.name.slice(0, 20);
-        }
-        if (labelActiveVideo) {
-          const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
-          labelActiveVideo.textContent = `${file.name} (${sizeMb} MB) — Ready to Sync`;
+          cctvBadgeText.textContent = 'USER VIDEO: ' + file.name.slice(0, 22);
         }
         if (badgeVideoStatus) {
-          badgeVideoStatus.textContent = 'Custom Video Active';
+          const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+          badgeVideoStatus.textContent = `${file.name.slice(0, 14)} (${sizeMb}MB)`;
           badgeVideoStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 font-medium';
         }
 
-        anim_log(`Custom CCTV video loaded: ${file.name} (${Math.round(file.size / 1024)} KB)`);
-        showToast(`Video loaded: ${file.name}. Click 'Play Full Timelapse' or 'Sync Entry' to animate 3D Villa!`);
+        anim_log(`User video uploaded: ${file.name} (${Math.round(file.size / 1024)} KB)`);
+        showToast(`Video loaded: ${file.name}. Play the video or click Sync to animate 3D Villa!`);
 
         // Smooth scroll / highlight the video sync card
         if (cardVideoSync) {
@@ -974,25 +979,6 @@
         console.error('Failed to load video file:', err);
         showToast('Error loading video: ' + err.message);
       }
-    }
-
-    function anim_loadDemoVideo() {
-      const cctvVideo = document.getElementById('cctv-video');
-      const cctvBadgeText = document.getElementById('cctv-badge-text');
-      const labelActiveVideo = document.getElementById('label-active-video');
-      const badgeVideoStatus = document.getElementById('badge-video-status');
-
-      if (cctvVideo) {
-        cctvVideo.src = '/site-driveway-demo.mp4';
-        cctvVideo.load();
-      }
-      if (cctvBadgeText) cctvBadgeText.textContent = 'LIVE CAM-04 DRIVEWAY';
-      if (labelActiveVideo) labelActiveVideo.textContent = 'site-driveway-demo.mp4 (Car In & Out Timelapse)';
-      if (badgeVideoStatus) {
-        badgeVideoStatus.textContent = 'Default Sample';
-        badgeVideoStatus.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium';
-      }
-      showToast('Reset to default in-and-out car timelapse footage.');
     }
 
     const videoFileInput = document.getElementById('video-file-input');
@@ -1009,13 +995,12 @@
     window.anim_syncVideoCarEntry = anim_syncVideoCarEntry;
     window.anim_syncVideoCarExit = anim_syncVideoCarExit;
     window.anim_handleUploadedVideo = anim_handleUploadedVideo;
-    window.anim_loadDemoVideo = anim_loadDemoVideo;
 
     // Reload Twin Iframe
     function reloadTwin() {
       if (twinIframe) {
         if (twinRetryOverlay) twinRetryOverlay.classList.add('hidden');
-        twinIframe.src = '/index.html?mode=site&t=' + Date.now();
+        twinIframe.src = '/index.html?embed=portal&clean=true&t=' + Date.now();
         showToast('Reloading 3D Digital Twin...');
       }
     }

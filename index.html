@@ -54,6 +54,85 @@
   
   <!-- Master Design System Stylesheet -->
   <link rel="stylesheet" href="style.css?v=5.1" />
+
+  <!-- Clean Embedded View Mode: Displays ONLY the pure 3D Model when embedded in Portal -->
+  <style>
+    html.embedded-clean-view,
+    body.embedded-clean-view {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      background: #16181A !important;
+      width: 100vw !important;
+      height: 100vh !important;
+    }
+    html.embedded-clean-view #left-icon-rail,
+    html.embedded-clean-view #sub-header-bar,
+    html.embedded-clean-view #inspector-panel,
+    html.embedded-clean-view #walk-hud,
+    html.embedded-clean-view #camera-modal,
+    html.embedded-clean-view #ide-modal,
+    html.embedded-clean-view #executive-modal,
+    html.embedded-clean-view #ai-dock,
+    html.embedded-clean-view #portal-toast,
+    html.embedded-clean-view .toast-container,
+    html.embedded-clean-view #btn-exit-presentation,
+    html.embedded-clean-view #viewport-3d-card > div:not(#viewport-3d-wrapper),
+    html.embedded-clean-view #viewport-3d-card > button {
+      display: none !important;
+    }
+    html.embedded-clean-view main {
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: 100vw !important;
+      max-height: 100vh !important;
+      border: none !important;
+      background: transparent !important;
+    }
+    html.embedded-clean-view #main-work-area {
+      padding: 0 !important;
+      margin: 0 !important;
+      gap: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    html.embedded-clean-view #viewport-3d-card {
+      border: none !important;
+      border-radius: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      box-shadow: none !important;
+    }
+    html.embedded-clean-view #viewport-3d-wrapper,
+    html.embedded-clean-view #twin-canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
+  <script>
+    (function() {
+      // Synchronous embed detection before DOM rendering to eliminate any UI flashing
+      try {
+        const isEmbed = (window.self !== window.top) ||
+                        window.location.search.includes('embed') ||
+                        window.location.search.includes('mode=site') ||
+                        window.location.search.includes('clean=true');
+        if (isEmbed) {
+          document.documentElement.classList.add('embedded-clean-view');
+          window.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('embedded-clean-view');
+            setTimeout(function() {
+              window.dispatchEvent(new Event('resize'));
+            }, 100);
+          });
+        }
+      } catch (e) {
+        document.documentElement.classList.add('embedded-clean-view');
+      }
+    })();
+  </script>
 </head>
 <body class="font-sans antialiased bg-[#F6F4EE] text-stone-900 overflow-hidden select-none h-screen flex flex-row">
 
