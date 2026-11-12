@@ -734,29 +734,30 @@
       if (strip) strip.style.display = 'block';
       const statusCar = document.getElementById('animStatusCar');
       if (statusCar) {
-        statusCar.textContent = '🚗 Car — entering carport…';
+        statusCar.textContent = '🚗 Car — driving along driveway into carport…';
         statusCar.style.color = '#00e676';
       }
 
-      anim_log('Car entry animation triggered (camera steady, no model revolving)');
+      anim_log('Car entry animation along driveway (X: 8.2, Z: 20.0 -> 6.5)');
       // Camera stays fixed where the user set it - do NOT revolve the model
-      anim_sendToTwin('ANIM_CAR_POSITION', { x: 0, z: 14, visible: true });
+      // Start at street entrance on paved driveway
+      anim_sendToTwin('ANIM_CAR_POSITION', { x: 8.2, y: 0.0, z: 20.0, rotY: Math.PI, visible: true });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_MOVE', {
-          fromX: 0, fromZ: 14,
-          toX:   0, toZ:   0,
-          duration: 2800,
+          fromX: 8.2, fromZ: 20.0,
+          toX:   8.2, toZ:   6.5,
+          duration: 3200,
           easing: 'easeInOutQuad'
         });
       }, 50);
       setTimeout(() => {
         anim_updatePortalTile('occupied');
-        anim_log('Car entry complete — carport occupied');
+        anim_log('Car entry complete — parked safely in carport under pergola');
         if (statusCar) {
           statusCar.textContent = '🚗 Car — parked in carport';
           statusCar.style.color = '#00e676';
         }
-      }, 2900);
+      }, 3300);
     }
 
     function anim_playCarExit() {
@@ -764,27 +765,28 @@
       if (strip) strip.style.display = 'block';
       const statusCar = document.getElementById('animStatusCar');
       if (statusCar) {
-        statusCar.textContent = '🚗 Car — leaving carport…';
+        statusCar.textContent = '🚗 Car — reversing out along driveway…';
         statusCar.style.color = '#ffab40';
       }
 
-      anim_log('Car exit animation triggered (camera steady, no model revolving)');
+      anim_log('Car exit animation along driveway (X: 8.2, Z: 6.5 -> 20.0)');
       // Camera stays fixed where the user set it - do NOT revolve the model
+      // Move backwards along paved driveway from carport to street gate
       anim_sendToTwin('ANIM_CAR_MOVE', {
-        fromX: 0, fromZ:  0,
-        toX:   0, toZ:  14,
-        duration: 2800,
+        fromX: 8.2, fromZ:  6.5,
+        toX:   8.2, toZ:  20.0,
+        duration: 3200,
         easing: 'easeInOutQuad'
       });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_POSITION', { visible: false });
         anim_updatePortalTile('empty');
-        anim_log('Car exit complete — carport empty');
+        anim_log('Car exit complete — carport and driveway clear');
         if (statusCar) {
           statusCar.textContent = '🚗 Car — carport empty';
           statusCar.style.color = '#64748b';
         }
-      }, 2850);
+      }, 3250);
     }
 
     function anim_handleWorkerTransition(detected) {

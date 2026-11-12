@@ -713,13 +713,15 @@ Definitions for this specific site:
       if (mesh) {
         mesh.visible = payload.visible;
         if (payload.visible) {
-          mesh.position.set(0, 0, 0);
-          mesh.rotation.y = 0;
+          // Snap squarely inside covered carport bay 2 along driveway
+          mesh.position.set(8.2, 0, 6.5);
+          mesh.rotation.y = Math.PI;
         }
       }
       if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
         window.modelBuilder.setCarportVehiclesVisible(payload.visible);
       }
+      return;
     }
 
     if (action === 'ANIM_CAR_POSITION') {
@@ -732,7 +734,9 @@ Definitions for this specific site:
         }
       }
       if (payload.x !== undefined) mesh.position.x = payload.x;
+      if (payload.y !== undefined) mesh.position.y = payload.y;
       if (payload.z !== undefined) mesh.position.z = payload.z;
+      if (payload.rotY !== undefined) mesh.rotation.y = payload.rotY;
     }
 
     if (action === 'ANIM_CAR_MOVE') {
@@ -742,26 +746,56 @@ Definitions for this specific site:
       if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
         window.modelBuilder.setCarportVehiclesVisible(true);
       }
-      const fromX = payload.fromX !== undefined ? payload.fromX : 0;
-      const fromZ = payload.fromZ !== undefined ? payload.fromZ : 14;
-      const toX = payload.toX !== undefined ? payload.toX : 0;
-      const toZ = payload.toZ !== undefined ? payload.toZ : 0;
-      const dur = payload.duration || 3000;
+      // Paved driveway runs along X = 8.2 (Gate: Z=20.0, Carport: Z=6.5)
+      const fromX = payload.fromX !== undefined ? payload.fromX : 8.2;
+      const fromZ = payload.fromZ !== undefined ? payload.fromZ : 20.0;
+      const toX = payload.toX !== undefined ? payload.toX : 8.2;
+      const toZ = payload.toZ !== undefined ? payload.toZ : 6.5;
+      const dur = payload.duration || 3200;
 
-      mesh.position.set(fromX, mesh.position.y || 0, fromZ);
+      mesh.position.set(fromX, 0, fromZ);
+      mesh.rotation.y = Math.PI; // Heading forward down driveway into carport
+
       const start = performance.now();
       const dx = toX - fromX;
       const dz = toZ - fromZ;
+      let lastZ = fromZ;
+
       function step(now) {
-        const t = Math.min((now - start) / dur, 1);
-        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // easeInOutQuad
-        mesh.position.x = fromX + dx * e;
-        mesh.position.z = fromZ + dz * e;
-        mesh.rotation.y = dz < 0 ? 0 : Math.PI;
+        const elapsed = now - start;
+        const t = Math.min(elapsed / dur, 1);
+        const e = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // smooth easeInOutQuad
+
+        const curX = fromX + dx * e;
+        const curZ = fromZ + dz * e;
+        mesh.position.x = curX;
+        mesh.position.z = curZ;
+
+        // Realistic wheel spin calculation based on distance rolled
+        const deltaZ = curZ - lastZ;
+        lastZ = curZ;
+        if (mesh.userData && mesh.userData.wheels) {
+          const angleDelta = deltaZ / 0.38;
+          mesh.userData.wheels.forEach(w => {
+            w.rotation.x += angleDelta;
+          });
+        }
+
+        mesh.rotation.y = Math.PI;
+
         if (t < 1) {
           requestAnimationFrame(step);
         } else {
-          if (dz < 0) mesh.rotation.y = 0;
+          mesh.position.x = toX;
+          mesh.position.z = toZ;
+          mesh.rotation.y = Math.PI;
+          if (toZ >= 18.0) {
+            // Once vehicle has exited past the front gate, hide it cleanly
+            mesh.visible = false;
+            if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
+              window.modelBuilder.setCarportVehiclesVisible(false);
+            }
+          }
         }
       }
       requestAnimationFrame(step);

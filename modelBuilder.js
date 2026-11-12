@@ -882,14 +882,13 @@ class VillaModelBuilder {
       this.groups.renderOnly.add(orb);
     });
 
-    // Luxury Vehicles in Carport (Properly aligned inside 3 covered parking bays, clear of all walls and columns)
+    // Luxury Vehicles in Carport (Master Render Phase 3)
     this.carportCarsGroup = new THREE.Group();
-    this.carportCarsGroup.name = 'carport-car-mesh'; // Primary reconciler mesh target
-    this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, -0.10, this.carportCarsGroup); // Bay 1 (Well clear of entrance wall at x=4.1)
-    this.createLuxuryCar('audi', 9.2, 0.0, 7.0, -0.15, this.carportCarsGroup);   // Bay 2 (Center parking bay)
-    this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, -0.18, this.carportCarsGroup); // Bay 3 (Right bay, clear of columns at x=14.0)
-    this.scene.add(this.carportCarsGroup); // Attached directly to scene for animated entry/exit across all states
-    this.carportCarMesh = this.carportCarsGroup;
+    this.carportCarsGroup.name = 'master-carport-cars';
+    this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, Math.PI, this.carportCarsGroup); // Bay 1
+    this.createLuxuryCar('audi', 9.2, 0.0, 7.0, Math.PI, this.carportCarsGroup);   // Bay 2
+    this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, Math.PI, this.carportCarsGroup); // Bay 3
+    this.groups.renderOnly.add(this.carportCarsGroup);
 
     // Landscaping Palm Trees
     this.createPalmTree(11.5, 0, 15.2, 1.1, false, this.groups.renderOnly);
@@ -999,44 +998,251 @@ class VillaModelBuilder {
     targetGroup.add(palm);
   }
 
-  createLuxuryCar(type, x, y, z, rotY, targetGroup = null) {
+  buildUltraRealisticCar(opts = {}) {
     const car = new THREE.Group();
-    car.position.set(x, y, z);
-    car.rotation.y = rotY;
-    const wheelGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.24, 16);
-    wheelGeo.rotateZ(Math.PI / 2);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.5 });
+    const isSUV = opts.type === 'suv';
+    const isSport = opts.type === 'sport';
 
-    if (type === 'gwagon') {
-      const bodyMat = new THREE.MeshPhysicalMaterial({ color: 0xf4f6f8, roughness: 0.12, metalness: 0.2, clearcoat: 1.0 });
-      this.addBox(1.95, 0.85, 4.5, 0, 0.65, 0, bodyMat, car);
-      this.addBox(1.82, 0.78, 2.85, 0, 1.42, -0.35, bodyMat, car);
-      this.addBox(1.75, 0.65, 2.75, 0, 1.42, -0.35, this.mats.curtainGlass, car);
-      const spare = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.25, 20), bodyMat);
-      spare.rotation.x = Math.PI / 2;
-      spare.position.set(0, 0.95, -2.35);
-      car.add(spare);
-    } else {
-      const isAudi = type === 'audi';
-      const paintMat = new THREE.MeshPhysicalMaterial({
-        color: isAudi ? 0x9aa2ab : 0x1c2026,
-        roughness: 0.1,
-        metalness: 0.8,
-        clearcoat: 1.0
-      });
-      this.addBox(1.92, 0.62, 4.65, 0, 0.52, 0, paintMat, car);
-      this.addBox(1.68, 0.52, 2.4, 0, 1.02, -0.15, paintMat, car);
-      this.addBox(1.62, 0.45, 2.3, 0, 1.02, -0.15, this.mats.curtainGlass, car);
-      this.addBox(1.75, 0.06, 0.08, 0, 0.72, -2.33, new THREE.MeshStandardMaterial({ color: 0xff2222, emissive: 0xff0000, emissiveIntensity: 3.0 }), car);
-    }
+    // Dimensions (Standard luxury proportions)
+    const carLength = isSport ? 4.75 : isSUV ? 4.95 : 4.85;
+    const carWidth  = isSport ? 2.02 : isSUV ? 2.08 : 1.98;
+    const carHeight = isSport ? 1.34 : isSUV ? 1.72 : 1.44;
+    const wheelRadius = 0.38;
+    const wheelTrack = (carWidth / 2) - 0.08;
+    const wheelbase = (carLength / 2) - 0.95;
 
-    [[-0.95, 0.34, 1.45], [0.95, 0.34, 1.45], [-0.95, 0.34, -1.45], [0.95, 0.34, -1.45]].forEach(([wx, wy, wz]) => {
-      const w = new THREE.Mesh(wheelGeo, wheelMat);
-      w.position.set(wx, wy, wz);
-      car.add(w);
+    // Automotive Finishes
+    const bodyPaint = new THREE.MeshPhysicalMaterial({
+      color: opts.paintColor || 0x181a1f, // Metallic Obsidian
+      metalness: opts.metalness !== undefined ? opts.metalness : 0.88,
+      roughness: opts.roughness !== undefined ? opts.roughness : 0.12,
+      clearcoat: opts.clearcoat !== undefined ? opts.clearcoat : 1.0,
+      clearcoatRoughness: 0.03,
+      reflectivity: 0.95
     });
 
-    const destGroup = targetGroup || this.carportCarsGroup || this.groups.renderOnly;
+    const carbonMat = new THREE.MeshStandardMaterial({
+      color: 0x141618,
+      roughness: 0.7,
+      metalness: 0.3
+    });
+
+    const chromeMat = new THREE.MeshStandardMaterial({
+      color: 0xf8fafc,
+      metalness: 0.96,
+      roughness: 0.08
+    });
+
+    const glassMat = new THREE.MeshPhysicalMaterial({
+      color: 0x0f172a,
+      metalness: 0.15,
+      roughness: 0.02,
+      transmission: 0.45,
+      transparent: true,
+      opacity: 0.88
+    });
+
+    const headlightMat = new THREE.MeshStandardMaterial({
+      color: 0xf0fdf4,
+      emissive: 0x93c5fd,
+      emissiveIntensity: 2.8,
+      roughness: 0.1
+    });
+
+    const taillightMat = new THREE.MeshStandardMaterial({
+      color: 0xef4444,
+      emissive: 0xff1020,
+      emissiveIntensity: 3.5,
+      roughness: 0.2
+    });
+
+    const reverseLightMat = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
+      emissive: 0xffffff,
+      emissiveIntensity: 3.0,
+      roughness: 0.1
+    });
+
+    const rubberMat = new THREE.MeshStandardMaterial({
+      color: 0x17181a,
+      roughness: 0.85
+    });
+
+    const brakeCaliperMat = new THREE.MeshStandardMaterial({
+      color: 0xdc2626, // Brembo Red
+      roughness: 0.35,
+      metalness: 0.5
+    });
+
+    const brakeDiscMat = new THREE.MeshStandardMaterial({
+      color: 0x94a3b8,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+
+    // 1. Soft Contact Shadow Plane underneath the car
+    const shadowGeo = new THREE.PlaneGeometry(carWidth + 0.4, carLength + 0.5);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.58,
+      depthWrite: false
+    });
+    const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = 0.02;
+    car.add(shadow);
+
+    // 2. Lower Chassis Base & Carbon Side Skirts / Diffuser
+    this.addBox(carWidth - 0.06, 0.14, carLength - 0.1, 0, 0.22, 0, carbonMat, car);
+    // Front chin splitter
+    this.addBox(carWidth - 0.1, 0.05, 0.22, 0, 0.16, carLength / 2 + 0.06, carbonMat, car);
+    // Rear diffuser with vertical aero fins
+    this.addBox(carWidth - 0.12, 0.16, 0.32, 0, 0.24, -carLength / 2 - 0.06, carbonMat, car);
+    [-0.45, 0.0, 0.45].forEach(fx => {
+      this.addBox(0.04, 0.14, 0.28, fx, 0.23, -carLength / 2 - 0.06, carbonMat, car);
+    });
+    // Quad Chrome Exhaust Tips
+    [-0.68, -0.54, 0.54, 0.68].forEach(ex => {
+      const tip = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.20, 16), chromeMat);
+      tip.rotation.x = Math.PI / 2;
+      tip.position.set(ex, 0.25, -carLength / 2 - 0.14);
+      car.add(tip);
+    });
+
+    // 3. Main Sculpted Body (Lower Beltline)
+    const lowerBodyH = isSport ? 0.44 : isSUV ? 0.64 : 0.52;
+    this.addBox(carWidth, lowerBodyH, carLength, 0, 0.24 + lowerBodyH / 2, 0, bodyPaint, car);
+
+    // Tapered Front Hood
+    this.addBox(carWidth - 0.14, 0.12, 1.45, 0, 0.24 + lowerBodyH + 0.04, 1.35, bodyPaint, car);
+    // Front Grille (Gloss Black Honeycomb / Horizontal Louvers)
+    this.addBox(1.22, 0.26, 0.08, 0, 0.48, carLength / 2 + 0.02, carbonMat, car);
+    this.addBox(1.18, 0.03, 0.09, 0, 0.54, carLength / 2 + 0.02, chromeMat, car);
+    this.addBox(1.18, 0.03, 0.09, 0, 0.44, carLength / 2 + 0.02, chromeMat, car);
+
+    // Front Matrix LED Headlights (Sharp Modern Styling)
+    [-0.78, 0.78].forEach(hx => {
+      this.addBox(0.36, 0.10, 0.14, hx, 0.62, carLength / 2 - 0.02, headlightMat, car);
+      this.addBox(0.38, 0.03, 0.15, hx, 0.68, carLength / 2 - 0.02, chromeMat, car);
+    });
+
+    // 4. Greenhouse / Cabin & Pillars
+    const cabH = isSport ? 0.46 : isSUV ? 0.68 : 0.54;
+    const cabW = carWidth - 0.26;
+    const cabL = carLength * (isSport ? 0.52 : isSUV ? 0.62 : 0.56);
+    const cabY = 0.24 + lowerBodyH + cabH / 2;
+    const cabZ = -0.15;
+
+    // Roof Panel
+    this.addBox(cabW - 0.08, 0.05, cabL - 0.1, 0, 0.24 + lowerBodyH + cabH, cabZ, bodyPaint, car);
+    // Panoramic Sunroof (tinted glass inset)
+    this.addBox(cabW - 0.26, 0.02, cabL * 0.65, 0, 0.24 + lowerBodyH + cabH + 0.02, cabZ - 0.08, glassMat, car);
+
+    // Glass Cabin Core (Windshield, Side Windows, Rear Hatch)
+    this.addBox(cabW, cabH - 0.04, cabL, 0, cabY, cabZ, glassMat, car);
+
+    // A-Pillars, B-Pillars, C-Pillars (Sleek Gloss Black / Paint)
+    this.addBox(0.07, cabH, 0.12, -cabW / 2 + 0.03, cabY, cabZ, carbonMat, car);
+    this.addBox(0.07, cabH, 0.12,  cabW / 2 - 0.03, cabY, cabZ, carbonMat, car);
+    this.addBox(0.06, cabH, 0.14, -cabW / 2 + 0.03, cabY, cabZ + cabL / 2 - 0.1, carbonMat, car);
+    this.addBox(0.06, cabH, 0.14,  cabW / 2 - 0.03, cabY, cabZ + cabL / 2 - 0.1, carbonMat, car);
+    this.addBox(0.12, cabH, 0.22, -cabW / 2 + 0.06, cabY, cabZ - cabL / 2 + 0.15, bodyPaint, car);
+    this.addBox(0.12, cabH, 0.22,  cabW / 2 - 0.06, cabY, cabZ - cabL / 2 + 0.15, bodyPaint, car);
+
+    // 5. Rear Full-Width OLED Lightbar & Taillights
+    this.addBox(carWidth - 0.24, 0.07, 0.08, 0, 0.70, -carLength / 2 + 0.02, taillightMat, car);
+    [-0.72, 0.72].forEach(rx => {
+      this.addBox(0.24, 0.14, 0.09, rx, 0.70, -carLength / 2 + 0.02, taillightMat, car);
+      this.addBox(0.10, 0.05, 0.09, rx * 0.7, 0.64, -carLength / 2 + 0.02, reverseLightMat, car);
+    });
+
+    // 6. Dubai Vehicle License Plates
+    const plateMat = new THREE.MeshStandardMaterial({ color: 0xfaf8f5, roughness: 0.3 });
+    this.addBox(0.52, 0.12, 0.03, 0, 0.36, carLength / 2 + 0.04, plateMat, car);
+    this.addBox(0.52, 0.12, 0.03, 0, 0.50, -carLength / 2 - 0.02, plateMat, car);
+
+    // 7. Aerodynamic Side Mirrors
+    [-carWidth / 2 - 0.08, carWidth / 2 + 0.08].forEach((mx, idx) => {
+      this.addBox(0.10, 0.04, 0.05, mx * 0.95, 0.24 + lowerBodyH + 0.12, cabZ + cabL / 2 - 0.25, carbonMat, car);
+      this.addBox(0.18, 0.10, 0.12, mx, 0.24 + lowerBodyH + 0.15, cabZ + cabL / 2 - 0.28, bodyPaint, car);
+      this.addBox(0.02, 0.08, 0.10, mx + (idx === 0 ? 0.08 : -0.08), 0.24 + lowerBodyH + 0.15, cabZ + cabL / 2 - 0.28, chromeMat, car);
+    });
+
+    // 8. 4 Realistic Alloy Wheels with Brembo Calipers & Rotors
+    const wheels = [];
+    const wheelPositions = [
+      [-wheelTrack, wheelRadius,  wheelbase], // Front Left
+      [ wheelTrack, wheelRadius,  wheelbase], // Front Right
+      [-wheelTrack, wheelRadius, -wheelbase], // Rear Left
+      [ wheelTrack, wheelRadius, -wheelbase]  // Rear Right
+    ];
+
+    wheelPositions.forEach(([wx, wy, wz]) => {
+      const wheelGroup = new THREE.Group();
+      wheelGroup.position.set(wx, wy, wz);
+
+      // Tire Outer Rubber (Tread profile)
+      const tireGeo = new THREE.CylinderGeometry(wheelRadius, wheelRadius, 0.24, 24);
+      tireGeo.rotateZ(Math.PI / 2);
+      const tireMesh = new THREE.Mesh(tireGeo, rubberMat);
+      wheelGroup.add(tireMesh);
+
+      // Inner Wheel Barrel (Dark)
+      const barrelGeo = new THREE.CylinderGeometry(wheelRadius * 0.78, wheelRadius * 0.78, 0.23, 20);
+      barrelGeo.rotateZ(Math.PI / 2);
+      const barrelMesh = new THREE.Mesh(barrelGeo, carbonMat);
+      wheelGroup.add(barrelMesh);
+
+      // Diamond-Cut Polished Alloy Rim Spokes
+      const rimFaceGeo = new THREE.CylinderGeometry(wheelRadius * 0.76, wheelRadius * 0.76, 0.04, 10);
+      rimFaceGeo.rotateZ(Math.PI / 2);
+      const rimMesh = new THREE.Mesh(rimFaceGeo, chromeMat);
+      rimMesh.position.x = wx > 0 ? 0.11 : -0.11;
+      wheelGroup.add(rimMesh);
+
+      // Center Hub Cap (Chrome)
+      const hubGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12);
+      hubGeo.rotateZ(Math.PI / 2);
+      const hubMesh = new THREE.Mesh(hubGeo, chromeMat);
+      hubMesh.position.x = wx > 0 ? 0.12 : -0.12;
+      wheelGroup.add(hubMesh);
+
+      // Ventilated Brake Disc Inside Wheel
+      const discGeo = new THREE.CylinderGeometry(wheelRadius * 0.65, wheelRadius * 0.65, 0.03, 18);
+      discGeo.rotateZ(Math.PI / 2);
+      const discMesh = new THREE.Mesh(discGeo, brakeDiscMat);
+      discMesh.position.x = wx > 0 ? 0.04 : -0.04;
+      wheelGroup.add(discMesh);
+
+      // Brembo Red Brake Caliper
+      const caliper = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.16, 0.12), brakeCaliperMat);
+      caliper.position.set(wx > 0 ? 0.04 : -0.04, 0.14, 0.06);
+      wheelGroup.add(caliper);
+
+      car.add(wheelGroup);
+      wheels.push(wheelGroup);
+    });
+
+    car.userData.wheels = wheels;
+    return car;
+  }
+
+  createLuxuryCar(type, x, y, z, rotY, targetGroup = null) {
+    const isGwagon = type === 'gwagon';
+    const isPorsche = type === 'porsche';
+    const car = this.buildUltraRealisticCar({
+      type: isGwagon ? 'suv' : isPorsche ? 'sport' : 'sedan',
+      paintColor: isGwagon ? 0xf8fafc : isPorsche ? 0x991b1b : 0x1f2937,
+      metalness: isGwagon ? 0.25 : 0.88,
+      roughness: isGwagon ? 0.2 : 0.12,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03
+    });
+    car.position.set(x, y, z);
+    car.rotation.y = rotY !== undefined ? rotY : Math.PI;
+
+    const destGroup = targetGroup || this.groups.renderOnly;
     destGroup.add(car);
     return car;
   }
@@ -1326,31 +1532,38 @@ class VillaModelBuilder {
   // VISION RECONCILER: CARPORT CAR MESH (STEP 4)
   // ----------------------------------------------------
   addCarportCarMesh() {
-    // If carport luxury cars group already exists, link it directly
-    // to avoid duplicate geometry clipping/z-fighting with the Audi in bay 2.
-    if (this.carportCarsGroup) {
-      this.carportCarMesh = this.carportCarsGroup;
-      return this.carportCarsGroup;
-    }
-    const carGroup = new THREE.Group();
-    carGroup.name = 'carport-car-mesh';
-    carGroup.position.set(8.2, 0, 5.8);
-    carGroup.visible = false;
-    this.scene.add(carGroup);
-    this.carportCarMesh = carGroup;
-    return carGroup;
+    if (this.carportCarMesh) return this.carportCarMesh;
+
+    // Create a standalone ultra-realistic luxury vehicle for real-time motion and Vision AI sync
+    const car = this.buildUltraRealisticCar({
+      type: 'suv',
+      paintColor: 0x181a1f, // Metallic Deep Obsidian Black
+      metalness: 0.90,
+      roughness: 0.12,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.03
+    });
+    car.name = 'carport-car-mesh';
+    // Center of covered carport bay 2:
+    car.position.set(8.2, 0.0, 6.5);
+    car.rotation.y = Math.PI; // Heading forward into the carport
+    car.visible = false;
+    this.scene.add(car);
+    this.carportCarMesh = car;
+    return car;
   }
 
   setCarportVehiclesVisible(visible) {
     this.carportVehiclesReconciled = visible;
-    if (this.carportCarsGroup) {
-      this.carportCarsGroup.visible = visible;
-    }
-    if (this.carportCarMesh && this.carportCarMesh !== this.carportCarsGroup) {
+    if (this.carportCarMesh) {
       this.carportCarMesh.visible = visible;
     }
+    // If carport luxury car is visible, hide the site truck so they never overlap
     if (this.siteTruck) {
-      this.siteTruck.visible = visible;
+      this.siteTruck.visible = !visible && (this.siteState === 'site');
+    }
+    if (this.carportCarsGroup && this.siteState === 'render') {
+      this.carportCarsGroup.visible = visible;
     }
   }
 
@@ -1382,14 +1595,14 @@ class VillaModelBuilder {
 
     // Apply Vision-reconciled state to carport vehicles regardless of phase
     if (this.carportVehiclesReconciled !== undefined) {
-      if (this.carportCarsGroup && this.siteState === 'render') {
-        this.carportCarsGroup.visible = this.carportVehiclesReconciled;
-      }
-      if (this.carportCarMesh && this.carportCarMesh !== this.carportCarsGroup && this.siteState === 'render') {
+      if (this.carportCarMesh) {
         this.carportCarMesh.visible = this.carportVehiclesReconciled;
       }
       if (this.siteTruck && this.siteState === 'site') {
-        this.siteTruck.visible = this.carportVehiclesReconciled;
+        this.siteTruck.visible = !this.carportVehiclesReconciled;
+      }
+      if (this.carportCarsGroup && this.siteState === 'render') {
+        this.carportCarsGroup.visible = this.carportVehiclesReconciled;
       }
     }
   }
