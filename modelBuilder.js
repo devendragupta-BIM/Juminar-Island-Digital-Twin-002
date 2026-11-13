@@ -883,10 +883,12 @@ class VillaModelBuilder {
     });
 
     // Luxury Vehicles in Carport (Master Render Phase 3)
+    // Bay 1: Mercedes-AMG G63 (White SUV, x=6.4, z=6.8)
+    // Bay 2: Active Dynamic Bay (handled exclusively by this.carportCarMesh at x=9.2, z=6.5)
+    // Bay 3: Porsche 911 Turbo S (Carmine Red Coupe, x=12.0, z=7.2)
     this.carportCarsGroup = new THREE.Group();
     this.carportCarsGroup.name = 'master-carport-cars';
     this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, Math.PI, this.carportCarsGroup); // Bay 1
-    this.createLuxuryCar('audi', 9.2, 0.0, 7.0, Math.PI, this.carportCarsGroup);   // Bay 2
     this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, Math.PI, this.carportCarsGroup); // Bay 3
     this.groups.renderOnly.add(this.carportCarsGroup);
 
@@ -1162,6 +1164,20 @@ class VillaModelBuilder {
     this.addBox(0.52, 0.12, 0.03, 0, 0.36, carLength / 2 + 0.04, plateMat, car);
     this.addBox(0.52, 0.12, 0.03, 0, 0.50, -carLength / 2 - 0.02, plateMat, car);
 
+    // Rear Mounted Spare Tire Cover (Mercedes-AMG G63 signature)
+    if (opts.hasSpareTire) {
+      const spareGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.18, 24);
+      spareGeo.rotateZ(Math.PI / 2);
+      const spareMesh = new THREE.Mesh(spareGeo, bodyPaint);
+      spareMesh.position.set(0, 0.78, -carLength / 2 - 0.14);
+      car.add(spareMesh);
+      const spareRingGeo = new THREE.CylinderGeometry(0.39, 0.39, 0.04, 24);
+      spareRingGeo.rotateZ(Math.PI / 2);
+      const spareRing = new THREE.Mesh(spareRingGeo, chromeMat);
+      spareRing.position.set(0, 0.78, -carLength / 2 - 0.14);
+      car.add(spareRing);
+    }
+
     // 7. Aerodynamic Side Mirrors
     [-carWidth / 2 - 0.08, carWidth / 2 + 0.08].forEach((mx, idx) => {
       this.addBox(0.10, 0.04, 0.05, mx * 0.95, 0.24 + lowerBodyH + 0.12, cabZ + cabL / 2 - 0.25, carbonMat, car);
@@ -1237,7 +1253,8 @@ class VillaModelBuilder {
       metalness: isGwagon ? 0.25 : 0.88,
       roughness: isGwagon ? 0.2 : 0.12,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.03
+      clearcoatRoughness: 0.03,
+      hasSpareTire: isGwagon
     });
     car.position.set(x, y, z);
     car.rotation.y = rotY !== undefined ? rotY : Math.PI;
@@ -1536,16 +1553,16 @@ class VillaModelBuilder {
 
     // Create a standalone ultra-realistic luxury vehicle for real-time motion and Vision AI sync
     const car = this.buildUltraRealisticCar({
-      type: 'suv',
-      paintColor: 0x181a1f, // Metallic Deep Obsidian Black
+      type: 'sedan',
+      paintColor: 0x181a1f, // Metallic Deep Obsidian Black with Diamond Clearcoat
       metalness: 0.90,
       roughness: 0.12,
       clearcoat: 1.0,
       clearcoatRoughness: 0.03
     });
     car.name = 'carport-car-mesh';
-    // Center of covered carport bay 2:
-    car.position.set(8.2, 0.0, 6.5);
+    // Squarely inside covered carport Bay 2 under pergola roof:
+    car.position.set(9.2, 0.0, 6.5);
     car.rotation.y = Math.PI; // Heading forward into the carport
     car.visible = false;
     this.scene.add(car);
@@ -1557,13 +1574,18 @@ class VillaModelBuilder {
     this.carportVehiclesReconciled = visible;
     if (this.carportCarMesh) {
       this.carportCarMesh.visible = visible;
+      if (visible && this.carportCarMesh.position.z > 18.0) {
+        // If snapped to visible while positioned at street gate, reset to Bay 2
+        this.carportCarMesh.position.set(9.2, 0.0, 6.5);
+        this.carportCarMesh.rotation.y = Math.PI;
+      }
     }
     // If carport luxury car is visible, hide the site truck so they never overlap
     if (this.siteTruck) {
       this.siteTruck.visible = !visible && (this.siteState === 'site');
     }
-    if (this.carportCarsGroup && this.siteState === 'render') {
-      this.carportCarsGroup.visible = visible;
+    if (this.carportCarsGroup) {
+      this.carportCarsGroup.visible = (this.siteState === 'render');
     }
   }
 
@@ -1601,9 +1623,9 @@ class VillaModelBuilder {
       if (this.siteTruck && this.siteState === 'site') {
         this.siteTruck.visible = !this.carportVehiclesReconciled;
       }
-      if (this.carportCarsGroup && this.siteState === 'render') {
-        this.carportCarsGroup.visible = this.carportVehiclesReconciled;
-      }
+    }
+    if (this.carportCarsGroup) {
+      this.carportCarsGroup.visible = (this.siteState === 'render');
     }
   }
 

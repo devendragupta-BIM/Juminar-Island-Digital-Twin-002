@@ -271,21 +271,15 @@ Definitions for this specific site:
 
     if (meshName === 'carport-car-mesh' || meshName === 'carport-luxury-cars') {
       currentCarportState = visible;
-      // Synchronize all carport vehicle representations across all phases so the carport is genuinely empty when visible = false!
-      const luxuryCars = scene.getObjectByName('carport-luxury-cars') || scene.getObjectByName('carport-car-mesh');
-      if (luxuryCars) {
-        luxuryCars.visible = visible;
-      }
-      const siteTruck = scene.getObjectByName('site-truck-mesh');
-      if (siteTruck) {
-        siteTruck.visible = visible;
-      }
       if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
         window.modelBuilder.setCarportVehiclesVisible(visible);
+      } else {
+        const mesh = scene.getObjectByName('carport-car-mesh');
+        if (mesh) mesh.visible = visible;
       }
       const valVis = document.getElementById('val-car-mesh-vis');
       if (valVis) {
-        valVis.textContent = visible ? 'SHOWN' : 'HIDDEN';
+        valVis.textContent = visible ? 'OCCUPIED' : 'EMPTY';
         valVis.className = visible ? 'text-emerald-300 font-bold' : 'text-rose-300';
       }
     }
@@ -713,8 +707,8 @@ Definitions for this specific site:
       if (mesh) {
         mesh.visible = payload.visible;
         if (payload.visible) {
-          // Snap squarely inside covered carport bay 2 along driveway
-          mesh.position.set(8.2, 0, 6.5);
+          // Snap squarely inside covered carport Bay 2 along driveway
+          mesh.position.set(9.2, 0, 6.5);
           mesh.rotation.y = Math.PI;
         }
       }
@@ -737,19 +731,27 @@ Definitions for this specific site:
       if (payload.y !== undefined) mesh.position.y = payload.y;
       if (payload.z !== undefined) mesh.position.z = payload.z;
       if (payload.rotY !== undefined) mesh.rotation.y = payload.rotY;
+      return;
     }
 
     if (action === 'ANIM_CAR_MOVE') {
       const mesh = scene.getObjectByName('carport-car-mesh');
       if (!mesh) return;
+
+      // Cancel any ongoing car animation to avoid conflicting step loops
+      if (window._anim_carRafId) {
+        cancelAnimationFrame(window._anim_carRafId);
+        window._anim_carRafId = null;
+      }
+
       mesh.visible = true;
       if (window.modelBuilder && typeof window.modelBuilder.setCarportVehiclesVisible === 'function') {
         window.modelBuilder.setCarportVehiclesVisible(true);
       }
-      // Paved driveway runs along X = 8.2 (Gate: Z=20.0, Carport: Z=6.5)
-      const fromX = payload.fromX !== undefined ? payload.fromX : 8.2;
-      const fromZ = payload.fromZ !== undefined ? payload.fromZ : 20.0;
-      const toX = payload.toX !== undefined ? payload.toX : 8.2;
+      // Paved driveway runs along X = 9.2 (Street Gate: Z=22.0, Carport Bay 2: Z=6.5)
+      const fromX = payload.fromX !== undefined ? payload.fromX : 9.2;
+      const fromZ = payload.fromZ !== undefined ? payload.fromZ : 22.0;
+      const toX = payload.toX !== undefined ? payload.toX : 9.2;
       const toZ = payload.toZ !== undefined ? payload.toZ : 6.5;
       const dur = payload.duration || 3200;
 
@@ -784,8 +786,9 @@ Definitions for this specific site:
         mesh.rotation.y = Math.PI;
 
         if (t < 1) {
-          requestAnimationFrame(step);
+          window._anim_carRafId = requestAnimationFrame(step);
         } else {
+          window._anim_carRafId = null;
           mesh.position.x = toX;
           mesh.position.z = toZ;
           mesh.rotation.y = Math.PI;
@@ -798,7 +801,9 @@ Definitions for this specific site:
           }
         }
       }
-      requestAnimationFrame(step);
+      window._anim_carRafId = requestAnimationFrame(step);
+      return;
+    }
     }
 
     if (action === 'ANIM_WORKER_PULSE') {

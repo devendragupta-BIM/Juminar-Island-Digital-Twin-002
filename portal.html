@@ -571,7 +571,7 @@
 
           <!-- Embedded Iframe of Twin (Clean 3D Model View) -->
           <div class="w-full h-80 sm:h-[420px] rounded-2xl overflow-hidden border border-stone-200/80 bg-stone-900 relative shadow-inner">
-            <iframe id="twin-iframe" src="/index.html?embed=portal&clean=true" class="w-full h-full border-0"></iframe>
+            <iframe id="twin-iframe" src="/index.html?embed=portal&clean=true&v=6.0" class="w-full h-full border-0"></iframe>
             <!-- Auto-reconnect banner / friendly retry button overlay (hidden by default) -->
             <div id="twin-retry-overlay" class="hidden absolute inset-0 bg-stone-900/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center text-white z-20 space-y-3">
               <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl text-[#C87D55]">
@@ -734,27 +734,27 @@
       if (strip) strip.style.display = 'block';
       const statusCar = document.getElementById('animStatusCar');
       if (statusCar) {
-        statusCar.textContent = '🚗 Car — driving along driveway into carport…';
+        statusCar.textContent = '🚗 Car — driving along driveway into Bay 2…';
         statusCar.style.color = '#00e676';
       }
 
-      anim_log('Car entry animation along driveway (X: 8.2, Z: 20.0 -> 6.5)');
+      anim_log('Car entry animation along driveway (X: 9.2, Z: 22.0 -> 6.5)');
       // Camera stays fixed where the user set it - do NOT revolve the model
-      // Start at street entrance on paved driveway
-      anim_sendToTwin('ANIM_CAR_POSITION', { x: 8.2, y: 0.0, z: 20.0, rotY: Math.PI, visible: true });
+      // Start at street entrance on paved driveway (x=9.2, z=22.0)
+      anim_sendToTwin('ANIM_CAR_POSITION', { x: 9.2, y: 0.0, z: 22.0, rotY: Math.PI, visible: true });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_MOVE', {
-          fromX: 8.2, fromZ: 20.0,
-          toX:   8.2, toZ:   6.5,
+          fromX: 9.2, fromZ: 22.0,
+          toX:   9.2, toZ:   6.5,
           duration: 3200,
           easing: 'easeInOutQuad'
         });
       }, 50);
       setTimeout(() => {
         anim_updatePortalTile('occupied');
-        anim_log('Car entry complete — parked safely in carport under pergola');
+        anim_log('Car entry complete — parked safely in carport Bay 2 under pergola');
         if (statusCar) {
-          statusCar.textContent = '🚗 Car — parked in carport';
+          statusCar.textContent = '🚗 Car — parked in carport Bay 2';
           statusCar.style.color = '#00e676';
         }
       }, 3300);
@@ -765,25 +765,25 @@
       if (strip) strip.style.display = 'block';
       const statusCar = document.getElementById('animStatusCar');
       if (statusCar) {
-        statusCar.textContent = '🚗 Car — reversing out along driveway…';
+        statusCar.textContent = '🚗 Car — reversing out along driveway to street…';
         statusCar.style.color = '#ffab40';
       }
 
-      anim_log('Car exit animation along driveway (X: 8.2, Z: 6.5 -> 20.0)');
+      anim_log('Car exit animation along driveway (X: 9.2, Z: 6.5 -> 22.0)');
       // Camera stays fixed where the user set it - do NOT revolve the model
-      // Move backwards along paved driveway from carport to street gate
+      // Move backwards along paved driveway from Bay 2 to street gate
       anim_sendToTwin('ANIM_CAR_MOVE', {
-        fromX: 8.2, fromZ:  6.5,
-        toX:   8.2, toZ:  20.0,
+        fromX: 9.2, fromZ:  6.5,
+        toX:   9.2, toZ:  22.0,
         duration: 3200,
         easing: 'easeInOutQuad'
       });
       setTimeout(() => {
         anim_sendToTwin('ANIM_CAR_POSITION', { visible: false });
         anim_updatePortalTile('empty');
-        anim_log('Car exit complete — carport and driveway clear');
+        anim_log('Car exit complete — carport Bay 2 and driveway clear');
         if (statusCar) {
-          statusCar.textContent = '🚗 Car — carport empty';
+          statusCar.textContent = '🚗 Car — carport Bay 2 empty';
           statusCar.style.color = '#64748b';
         }
       }, 3250);
