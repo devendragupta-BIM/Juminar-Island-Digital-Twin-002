@@ -882,14 +882,11 @@ class VillaModelBuilder {
       this.groups.renderOnly.add(orb);
     });
 
-    // Luxury Vehicles in Carport (Master Render Phase 3)
-    // Bay 1: Mercedes-AMG G63 (White SUV, x=6.4, z=6.8)
-    // Bay 2: Active Dynamic Bay (handled exclusively by this.carportCarMesh at x=9.2, z=6.5)
-    // Bay 3: Porsche 911 Turbo S (Carmine Red Coupe, x=12.0, z=7.2)
+    // Single Luxury Vehicle in Carport (Master Render Phase 3)
+    // Removed static Bay 1 (G-Wagon) and Bay 3 (Porsche) so only ONE single car exists on site,
+    // managed dynamically by this.carportCarMesh in Bay 2 (x=9.2, z=6.5).
     this.carportCarsGroup = new THREE.Group();
     this.carportCarsGroup.name = 'master-carport-cars';
-    this.createLuxuryCar('gwagon', 6.4, 0.0, 6.8, Math.PI, this.carportCarsGroup); // Bay 1
-    this.createLuxuryCar('porsche', 12.0, 0.0, 7.2, Math.PI, this.carportCarsGroup); // Bay 3
     this.groups.renderOnly.add(this.carportCarsGroup);
 
     // Landscaping Palm Trees
@@ -1564,7 +1561,7 @@ class VillaModelBuilder {
     // Squarely inside covered carport Bay 2 under pergola roof:
     car.position.set(9.2, 0.0, 6.5);
     car.rotation.y = Math.PI; // Heading forward into the carport
-    car.visible = false;
+    car.visible = true; // Default visible as the single luxury vehicle on site
     this.scene.add(car);
     this.carportCarMesh = car;
     return car;
