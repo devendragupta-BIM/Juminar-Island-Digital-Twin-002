@@ -804,7 +804,6 @@ Definitions for this specific site:
       window._anim_carRafId = requestAnimationFrame(step);
       return;
     }
-    }
 
     if (action === 'ANIM_WORKER_PULSE') {
       const workerGroup = scene.getObjectByName('worker-group-mesh');
